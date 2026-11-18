@@ -7,6 +7,8 @@ import { requireDashAuth, requireRole, AuthRequest } from '../auth';
 import { WorkflowError } from '../../../documents/workflow';
 import { science, Scope } from '../../../sciencedata/service';
 import { PROVIDER_IDS, ProviderId } from '../../../sciencedata/types';
+import { alphaFold } from '../../../sciencedata/alphafold-service';
+import { AFOperation } from '../../../sciencedata/alphafold';
 import { logger } from '../../../logger';
 import { safeErrorSummary } from '../../../security/redact';
 
@@ -21,6 +23,20 @@ const scopeOf = (req: AuthRequest): Scope => ({ kind: 'user', id: req.user!.id }
 const provider = (v: unknown): ProviderId => { if (!PROVIDER_IDS.includes(v as ProviderId)) throw new WorkflowError(400, 'bad_provider', `provider must be one of ${PROVIDER_IDS.join(', ')}.`); return v as ProviderId; };
 
 router.use(requireDashAuth, requireRole('admin', 'operator', 'clinician'));
+
+// Cancel provider I/O when the response socket disappears. Normal completed requests do not abort.
+function cancellation(req: AuthRequest, res: Response): AbortSignal {
+  const controller = new AbortController(); req.once('aborted', () => controller.abort());
+  res.once('close', () => { if (!res.writableEnded) controller.abort(); }); return controller.signal;
+}
+router.post('/alphafold/lookup', wrap(async (req,res) => { res.json(await alphaFold().lookup(scopeOf(req),req.user!.id,req.body?.operation as AFOperation,req.body?.value,req.body?.refresh === true,cancellation(req,res))); }));
+router.get('/alphafold/lookups/:id', wrap(async (req,res) => { res.json(await alphaFold().getLookup(scopeOf(req),String(req.params.id))); }));
+router.post('/alphafold/import', wrap(async (req,res) => { res.status(201).json(await alphaFold().importFile(scopeOf(req),req.user!.id,req.body ?? {},cancellation(req,res))); }));
+router.get('/alphafold/imports/:id', wrap(async (req,res) => { res.json(await alphaFold().getImport(scopeOf(req),String(req.params.id))); }));
+router.post('/alphafold/projects/:id/attachments', wrap(async (req,res) => { res.status(201).json(await alphaFold().attach(scopeOf(req),req.user!.id,String(req.params.id),String(req.body?.importId ?? ''),req.body?.replaces)); }));
+router.get('/alphafold/projects/:id/attachments', wrap(async (req,res) => { res.json({ attachments: await alphaFold().attachments(req.user!.id,String(req.params.id)) }); }));
+router.post('/alphafold/projects/:id/receptors', wrap(async (req,res) => { res.status(201).json(await alphaFold().handoff(scopeOf(req),req.user!.id,String(req.params.id),req.body ?? {})); }));
+router.get('/alphafold/projects/:id/receptors/:receptorId', wrap(async (req,res) => { res.json(await alphaFold().getHandoff(req.user!.id,String(req.params.id),String(req.params.receptorId))); }));
 
 router.get('/', wrap(async (_req, res) => { res.json(science().catalog()); }));
 router.post('/search', wrap(async (req, res) => { res.json(await science().search(scopeOf(req), provider(req.body?.provider), req.body?.query)); }));

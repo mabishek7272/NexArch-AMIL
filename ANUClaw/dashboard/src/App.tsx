@@ -43,6 +43,7 @@ const NexArchShell      = lazy(() => import('./nexarch/NexArchShell'));
 const NexArchOverview   = lazy(() => import('./nexarch/pages/Overview'));
 const NexArchStudio     = lazy(() => import('./nexarch/pages/ResearchStudioPage'));
 const NexArchConnections= lazy(() => import('./nexarch/pages/Connections'));
+const NexArchAlphaFold = lazy(() => import('./nexarch/pages/AlphaFoldPage'));
 const NexArchStyleGuide = lazy(() => import('./nexarch/pages/StyleGuide'));
 
 const NAV = [
@@ -325,6 +326,13 @@ export default function App() {
               <Route element={<NexArchShell />}>
                 <Route index                  element={<NexArchOverview />} />
                 <Route path="research-studio" element={<NexArchStudio />} />
+                <Route path="bioinformatics" element={<NexArchAlphaFold />} />
+                <Route path="bioinformatics/structural-biology/alphafold" element={<NexArchAlphaFold />} />
+                <Route path="structural-biology/alphafold" element={<NexArchAlphaFold />} />
+                <Route path="evidence-library" element={<NexArchAlphaFold />} />
+                <Route path="evidence-library/alphafold" element={<NexArchAlphaFold />} />
+                <Route path="dry-lab" element={<NexArchAlphaFold />} />
+                <Route path="dry-lab/alphafold" element={<NexArchAlphaFold />} />
                 <Route path="connections"     element={<NexArchConnections />} />
                 <Route path="style-guide"     element={<NexArchStyleGuide />} />
                 <Route path="*"                element={<Navigate to="/nexarch" replace />} />

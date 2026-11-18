@@ -1,0 +1,876 @@
+{
+  "schema": "anuclaw-alphafold-ui-accessibility/v1",
+  "viewportMatrix": [
+    {
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "width": 390,
+      "height": 844
+    }
+  ],
+  "routes": [
+    "/nexarch/bioinformatics",
+    "/nexarch/bioinformatics/structural-biology/alphafold",
+    "/nexarch/structural-biology/alphafold",
+    "/nexarch/evidence-library",
+    "/nexarch/evidence-library/alphafold",
+    "/nexarch/dry-lab",
+    "/nexarch/dry-lab/alphafold"
+  ],
+  "routeChecks": [
+    {
+      "route": "/nexarch/bioinformatics",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/bioinformatics/structural-biology/alphafold",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/structural-biology/alphafold",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/evidence-library",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/evidence-library/alphafold",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/dry-lab",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/dry-lab/alphafold",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/bioinformatics",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/bioinformatics/structural-biology/alphafold",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/structural-biology/alphafold",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/evidence-library",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/evidence-library/alphafold",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/dry-lab",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/dry-lab/alphafold",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/bioinformatics",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/bioinformatics/structural-biology/alphafold",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/structural-biology/alphafold",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/evidence-library",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/evidence-library/alphafold",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/dry-lab",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/dry-lab/alphafold",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/bioinformatics",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/bioinformatics/structural-biology/alphafold",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/structural-biology/alphafold",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/evidence-library",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/evidence-library/alphafold",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/dry-lab",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/dry-lab/alphafold",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/bioinformatics",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/bioinformatics/structural-biology/alphafold",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/structural-biology/alphafold",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/evidence-library",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/evidence-library/alphafold",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/dry-lab",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    },
+    {
+      "route": "/nexarch/dry-lab/alphafold",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "directStatus": 200,
+      "refreshStatus": 200,
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0,
+      "browserErrors": 0
+    }
+  ],
+  "stateChecks": [
+    {
+      "state": "empty",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "success",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "unavailable",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "malformed",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "rate-limited",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "loading",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "empty",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "success",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "unavailable",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "malformed",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "rate-limited",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "loading",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "empty",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "success",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "unavailable",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "malformed",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "rate-limited",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "loading",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "empty",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "success",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "unavailable",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "malformed",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "rate-limited",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "loading",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "empty",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "success",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "unavailable",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "malformed",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "rate-limited",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    },
+    {
+      "state": "loading",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mainLandmarks": 1,
+      "headingHierarchy": "valid",
+      "axeViolations": 0
+    }
+  ],
+  "expectedResponseChecks": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "expectedProviderResponseConsoleMessages": 3,
+      "applicationConsoleErrors": 0,
+      "pageErrors": 0
+    },
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "expectedProviderResponseConsoleMessages": 3,
+      "applicationConsoleErrors": 0,
+      "pageErrors": 0
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "expectedProviderResponseConsoleMessages": 3,
+      "applicationConsoleErrors": 0,
+      "pageErrors": 0
+    },
+    {
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "expectedProviderResponseConsoleMessages": 3,
+      "applicationConsoleErrors": 0,
+      "pageErrors": 0
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "expectedProviderResponseConsoleMessages": 3,
+      "applicationConsoleErrors": 0,
+      "pageErrors": 0
+    }
+  ],
+  "responsiveNavigation": [
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "opens": true,
+      "navigatesAndCloses": true
+    },
+    {
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "opens": true,
+      "navigatesAndCloses": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "opens": true,
+      "navigatesAndCloses": true
+    }
+  ],
+  "unresolvedRoleNavigation": {
+    "protectedItemsBeforeRoleResolution": 0,
+    "visibleAfterRoleResolution": true
+  },
+  "totals": {
+    "routeViewportPairs": 35,
+    "routeStateViewportChecks": 30,
+    "axeViolations": 0,
+    "browserErrors": 0
+  }
+}

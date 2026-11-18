@@ -48,6 +48,141 @@
           }
         }
       },
+      "AlphaFoldLookup": {
+        "type": "object",
+        "required": [
+          "id",
+          "schema",
+          "models",
+          "annotations",
+          "responseHash",
+          "cache",
+          "retrievedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "schema": {
+            "const": "anuclaw-alphafold/v1"
+          },
+          "operation": {
+            "enum": [
+              "prediction",
+              "complex",
+              "uniprot",
+              "sequence",
+              "annotations"
+            ]
+          },
+          "models": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "modelId",
+                "predicted",
+                "files",
+                "confidence",
+                "provenance"
+              ],
+              "properties": {
+                "modelId": {
+                  "type": "string"
+                },
+                "predicted": {
+                  "const": true
+                },
+                "range": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "start": {
+                      "type": "integer"
+                    },
+                    "end": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "files": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "key": {
+                        "enum": [
+                          "mmcif",
+                          "bcif",
+                          "pdb",
+                          "pae",
+                          "plddt"
+                        ]
+                      },
+                      "url": {
+                        "type": "string",
+                        "format": "uri"
+                      }
+                    }
+                  }
+                },
+                "confidence": {
+                  "type": "object",
+                  "description": "Provider confidence and interface metrics; absent fields remain null"
+                },
+                "provenance": {
+                  "type": "object",
+                  "description": "Actual model producer, tool, version and creation date when supplied"
+                }
+              }
+            }
+          },
+          "annotations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "evidenceClass": {
+                  "enum": [
+                    "experimental",
+                    "transferred",
+                    "computational",
+                    "unknown"
+                  ]
+                },
+                "evidence": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "responseHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "cache": {
+            "enum": [
+              "hit",
+              "miss",
+              "revalidated"
+            ]
+          },
+          "retrievedAt": {
+            "type": "integer"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
       "Correction": {
         "type": "object",
         "properties": {
@@ -1577,6 +1712,347 @@
           },
           {
             "Bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Missing/invalid API key or token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found or not owned by this tenant",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit, quota or concurrency limit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Limits store or auth not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/science/alphafold/lookup": {
+      "post": {
+        "summary": "Official AlphaFold DB metadata, normalized as anuclaw-alphafold/v1; all models and fragments retained. Public provider, private tenant association. Cached data is labelled.",
+        "security": [
+          {
+            "ApiKey": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "operation",
+                  "value"
+                ],
+                "properties": {
+                  "operation": {
+                    "enum": [
+                      "prediction",
+                      "complex",
+                      "uniprot",
+                      "sequence",
+                      "annotations"
+                    ]
+                  },
+                  "value": {
+                    "type": "string",
+                    "maxLength": 10000,
+                    "description": "UniProt accession/model ID, or 20–2700 standard amino acids for sequence operation. Never send patient identifiers."
+                  },
+                  "refresh": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Versioned normalized models, annotations, coverage, warnings, retrieval timestamp, cache status and raw metadata SHA-256",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlphaFoldLookup"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid qualifier or sequence"
+          },
+          "401": {
+            "description": "Missing/invalid API key or token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found or not owned by this tenant",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit, quota or concurrency limit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Malformed provider response, schema change or upstream failure"
+          },
+          "503": {
+            "description": "Limits store or auth not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Bounded provider timeout"
+          }
+        }
+      }
+    },
+    "/v1/science/alphafold/lookups/{id}": {
+      "get": {
+        "summary": "Read a normalized lookup belonging to this tenant",
+        "security": [
+          {
+            "ApiKey": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Missing/invalid API key or token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found or not owned by this tenant",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit, quota or concurrency limit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Limits store or auth not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/science/alphafold/import": {
+      "post": {
+        "summary": "Explicitly import ONE advertised AlphaFold file. Origin/redirect/size/content validation; immutable SHA-256 artifact. No automatic docking.",
+        "security": [
+          {
+            "ApiKey": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "lookupId",
+                  "modelId",
+                  "fileKey"
+                ],
+                "properties": {
+                  "lookupId": {
+                    "type": "string"
+                  },
+                  "modelId": {
+                    "type": "string"
+                  },
+                  "fileKey": {
+                    "enum": [
+                      "mmcif",
+                      "bcif",
+                      "pdb",
+                      "pae",
+                      "plddt"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Scoped import ID, immutable source and attribution/provenance"
+          },
+          "401": {
+            "description": "Missing/invalid API key or token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found or not owned by this tenant",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Artifact exceeds size cap"
+          },
+          "429": {
+            "description": "Rate limit, quota or concurrency limit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Provider failure or content-type/format mismatch"
+          },
+          "503": {
+            "description": "Limits store or auth not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/science/alphafold/imports/{id}": {
+      "get": {
+        "summary": "Read scoped import provenance and integrity status",
+        "security": [
+          {
+            "ApiKey": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {

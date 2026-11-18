@@ -24,7 +24,7 @@ export interface Scope { kind: 'user' | 'tenant'; id: string }
 const originOf = (u: string) => new URL(u).origin;
 /** The origins each provider may talk to (requests AND redirects): a redirect from one provider to another provider's host is refused. */
 export const providerOrigins = (b: Bases, p: ProviderId): string[] => [...new Set(p === 'alphafold' ? [b.alphafold] : p === 'rcsb' ? [b.rcsbData, b.rcsbFiles, b.rcsbSearch] : p === 'ncbi_datasets' ? [b.ncbiDatasets] : [b.ncbiWww, b.ncbiFtp, b.ncbiEutils])].map(originOf);
-export interface ScienceConfig { dir: string; bases: Bases; maxFileBytes: number; maxGenomeBytes: number; maxMatrixBytes: number; maxItemsPerWorkspace: number; maxWorkspacesPerScope: number; describeTtlMs?: number }
+export interface ScienceConfig { dir: string; bases: Bases; maxFileBytes: number; maxGenomeBytes: number; maxMatrixBytes: number; maxItemsPerWorkspace: number; maxWorkspacesPerScope: number; describeTtlMs?: number; fileTtlMs?: number }
 
 export function scienceConfigFromEnv(env: NodeJS.ProcessEnv = process.env): ScienceConfig {
   const mb = (v: string | undefined, d: number) => { const n = Number(v); return Number.isFinite(n) && n > 0 ? n * 1e6 : d * 1e6; };
@@ -96,11 +96,17 @@ export class ScienceService {
     if (!PROVIDER_IDS.includes(provider)) throw new WorkflowError(400, 'bad_provider', 'Unknown provider.');
     let acc: string, desc: RecordDescription, raw: FetchResult;
     try { acc = normalizeAccession(provider, accessionRaw); } catch (e) { return toWf(e); }
+    if (provider === 'alphafold') {
+      const { alphaFoldFor } = await import('./alphafold-service');
+      const r = await alphaFoldFor(this).lookup(scope,scope.id,'prediction',acc);
+      const raw = await this.readContent(scope,r.metadataSourceId);
+      const desc = describeAlphaFold(acc,JSON.parse(raw.bytes.toString('utf8')),this.cfg.bases);
+      return { ...desc, metadataSourceId: r.metadataSourceId, license: r.license, attribution: r.attribution, termsUrl: r.termsUrl, restrictions: PROVIDERS.alphafold.restrictions, cache: r.cache, retrievedAt: r.retrievedAt, researchOnly: true, notice: RESEARCH_ONLY_NOTICE };
+    }
     const b = this.cfg.bases; const ck = `${provider}:${acc}`; const cached = this.descCache.get(ck);
     if (cached && Date.now() - cached.at < (this.cfg.describeTtlMs ?? 60_000)) { desc = cached.desc; raw = cached.raw; return this.finishDescribe(scope, provider, acc, desc, raw); }
     try {
-      if (provider === 'alphafold') { raw = await this.req(provider, `${b.alphafold}/api/prediction/${acc}`, { maxBytes: 2e6, expectTypes: /json/i }); desc = describeAlphaFold(acc, this.json(raw), b); }
-      else if (provider === 'rcsb') { raw = await this.req(provider, `${b.rcsbData}/rest/v1/core/entry/${acc}`, { maxBytes: 2e6, expectTypes: /json/i }); desc = describeRcsb(acc, this.json(raw), b); }
+      if (provider === 'rcsb') { raw = await this.req(provider, `${b.rcsbData}/rest/v1/core/entry/${acc}`, { maxBytes: 2e6, expectTypes: /json/i }); desc = describeRcsb(acc, this.json(raw), b); }
       else if (provider === 'ncbi_datasets') { raw = await this.req(provider, `${b.ncbiDatasets}/datasets/v2/genome/accession/${acc}/dataset_report`, { maxBytes: 2e6, expectTypes: /json/i }); desc = describeNcbiGenome(acc, this.json(raw), b, this.cfg.maxGenomeBytes); }
       else {
         raw = await this.req(provider, geoSoftUrl(b, acc), { maxBytes: 2e6 });
@@ -124,6 +130,20 @@ export class ScienceService {
   // ── retrieve ───────────────────────────────────────────────────────────────
   /** `refresh: true` bypasses the cache for this call (a changed file becomes a NEW immutable version; nothing is replaced). */
   async retrieve(scope: Scope, provider: ProviderId, accessionRaw: unknown, fileKeys: unknown, opts: { refresh?: boolean } = {}) {
+    if (provider === 'alphafold') {
+      const { alphaFoldFor } = await import('./alphafold-service'); const af = alphaFoldFor(this);
+      const lookup = await af.lookup(scope, scope.id, 'prediction', accessionRaw, Boolean(opts.refresh));
+      if (!Array.isArray(fileKeys) || !fileKeys.length || fileKeys.length > 10) throw new WorkflowError(400, 'files_required', 'Choose 1–10 available files.');
+      const sources: SourceRecord[] = []; const problems: Array<{ key: string; code: string; message: string }> = [];
+      for (const key of fileKeys.map(String)) {
+        const separator = key.lastIndexOf(':'); const model = separator > 0 ? lookup.models.find((m) => m.modelId === key.slice(0, separator)) : lookup.models[0];
+        const fkey = separator > 0 ? key.slice(separator + 1) : key === 'cif' ? 'mmcif' : key;
+        if (!model?.files.some((f) => f.key === fkey)) { problems.push({ key, code: lookup.warnings.some((w) => w.code.startsWith('file_url_refused')) ? 'blocked_origin' : 'unknown_file', message: 'No approved file for this model.' }); continue; }
+        try { sources.push((await af.importFile(scope,scope.id,{ lookupId: lookup.id, modelId: model.modelId, fileKey: fkey },undefined)).source); }
+        catch (e) { if (e instanceof WorkflowError) problems.push({ key, code: e.code, message: e.message }); else throw e; }
+      }
+      return { record: { provider, accession: String(accessionRaw), classification: 'predicted', classificationNote: 'Computational prediction.', sourceVersion: String(lookup.models[0]?.provenance.version ?? 'unknown') }, sources, problems, researchOnly: true, notice: RESEARCH_ONLY_NOTICE };
+    }
     const desc = await this.describe(scope, provider, accessionRaw);
     const wanted = Array.isArray(fileKeys) && fileKeys.length ? fileKeys.map(String) : null;
     if (!wanted) throw new WorkflowError(400, 'files_required', `Choose files to retrieve: ${desc.files.map((f) => f.key).join(', ') || '(none available)'}.`);
@@ -142,7 +162,7 @@ export class ScienceService {
     const info = PROVIDERS[provider];
     // cache: same URL + same provider version + integrity-verified bytes on disk → no network
     const hit = await db.queryOne<any>(`SELECT * FROM sci_sources WHERE provider=$1 AND accession=$2 AND kind=$3 AND source_url=$4 AND source_version=$5 AND parent_source_id IS NULL ORDER BY retrieved_at DESC LIMIT 1`, [provider, acc, plan.kind, plan.url, plan.version]);
-    if (!refresh && hit && hit.acquisition !== 'synthetic_fixture' && (await this.verifyOnDisk(hit.sha256.trim()))) {   // cache reuse ALWAYS re-verifies the stored bytes first
+    if (!refresh && hit && Date.now() - Number(hit.retrieved_at) < (this.cfg.fileTtlMs ?? 60_000) && hit.acquisition !== 'synthetic_fixture' && (await this.verifyOnDisk(hit.sha256.trim()))) {   // cache reuse ALWAYS re-verifies the stored bytes first
       const members = await db.query<any>('SELECT id FROM sci_sources WHERE parent_source_id = $1', [hit.id]);
       await this.grant(scope, hit.id); for (const m of members) await this.grant(scope, m.id);
       return [row2src(hit), ...(await Promise.all(members.map(async (m) => row2src((await db.queryOne<any>('SELECT * FROM sci_sources WHERE id=$1', [m.id]))!))))];
@@ -189,8 +209,9 @@ export class ScienceService {
   private filePath(sha: string) { return path.join(this.cfg.dir, 'files', sha.slice(0, 2), sha); }
   private async verifyOnDisk(sha: string): Promise<boolean> { try { return sha256(fs.readFileSync(this.filePath(sha))) === sha; } catch { return false; } }
 
-  private async storeSource(scope: Scope, a: { provider: ProviderId; accession: string; kind: SourceRecord['kind']; classification: Classification; classificationNote: string; format: string; url: string; finalUrl: string; version: string; bytes: Buffer; contentType: string | null; etag: string | null; parent: string | null; member: string; acquisition?: SourceRecord['acquisition']; replayNote?: string | null; retrievedAt?: number }, info: (typeof PROVIDERS)[ProviderId]): Promise<SourceRecord> {
+  async storeSource(scope: Scope, a: { provider: ProviderId; accession: string; kind: SourceRecord['kind']; classification: Classification; classificationNote: string; format: string; url: string; finalUrl: string; version: string; bytes: Buffer; contentType: string | null; etag: string | null; parent: string | null; member: string; acquisition?: SourceRecord['acquisition']; replayNote?: string | null; retrievedAt?: number }, info: (typeof PROVIDERS)[ProviderId]): Promise<SourceRecord> {
     const sha = sha256(a.bytes); const fp = this.filePath(sha);
+    if (fs.existsSync(fp) && !(await this.verifyOnDisk(sha))) throw new ScienceError('integrity_failure', 'Existing content-addressed artifact is corrupt; refusing replacement.', 409);
     if (!(await this.verifyOnDisk(sha))) {
       fs.mkdirSync(path.dirname(fp), { recursive: true }); const tmp = `${fp}.${process.pid}.${crypto.randomBytes(4).toString('hex')}.tmp`;
       const fd = fs.openSync(tmp, 'wx', 0o640); try { fs.writeSync(fd, a.bytes); fs.fsyncSync(fd); } finally { fs.closeSync(fd); }

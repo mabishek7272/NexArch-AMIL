@@ -1,0 +1,57 @@
+{
+  "entry": {
+    "sequence": "MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVADALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVLTSKYR",
+    "checksum": "6077c452d1dc6151040b2b179e2294c7",
+    "checksum_type": "MD5"
+  },
+  "structures": [
+    {
+      "summary": {
+        "model_identifier": "AF-0000000203852801",
+        "model_category": "AB-INITIO",
+        "model_url": "https://alphafold.ebi.ac.uk/files/AF-0000000203852801-model_v1.cif",
+        "model_format": "MMCIF",
+        "model_type": null,
+        "model_page_url": "https://alphafold.ebi.ac.uk/entry/AF-0000000203852801",
+        "provider": "AlphaFold DB",
+        "number_of_conformers": null,
+        "ensemble_sample_url": null,
+        "ensemble_sample_format": null,
+        "created": "2026-02-20T08:22:16Z",
+        "sequence_identity": 1.0,
+        "uniprot_start": 1,
+        "uniprot_end": 142,
+        "coverage": 1.0,
+        "experimental_method": null,
+        "resolution": null,
+        "confidence_type": "pLDDT",
+        "confidence_version": null,
+        "confidence_avg_local_score": 92.8,
+        "oligomeric_state": "HETERODIMER",
+        "preferred_assembly_id": null,
+        "entities": [
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "Q9NZD4",
+            "identifier_category": "UNIPROT",
+            "description": "Alpha-hemoglobin-stabilizing protein",
+            "chain_ids": [
+              "A"
+            ]
+          },
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P69905",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit alpha",
+            "chain_ids": [
+              "B"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

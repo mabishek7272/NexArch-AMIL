@@ -131,7 +131,7 @@ export interface SourceRow {
 
 export interface SourceVersionRow { id: string; source_id: string; version: number; metadata_json: string; content_hash: string | null; retrieved_at: number; retrieval_metadata_json: string }
 export interface SourceLinkRow { id: string; project_id: string; source_id_a: string; source_id_b: string; relation: SourceLinkRelation; status: SourceLinkStatus; decided_by: string | null; decided_at: number | null; created_at: number }
-export interface ArtifactRow { id: string; project_id: string; source_id: string; kind: 'pdf' | 'text'; storage_path: string; sha256: string; size_bytes: number; created_at: number }
+export interface ArtifactRow { id: string; project_id: string; source_id: string; kind: 'pdf' | 'text' | 'structure' | 'confidence'; storage_path: string; sha256: string; size_bytes: number; created_at: number }
 export interface ExcerptRow { id: string; project_id: string; source_id: string; task_id: string | null; locator_json: string; text: string; sha256: string; extracted_by: ExtractedBy; created_by: string; invalidated_at: number | null; invalidated_reason: string | null; created_at: number }
 export interface ClaimRow { id: string; project_id: string; statement: string; created_by: string; created_at: number }
 export interface ClaimEvidenceLinkRow { id: string; project_id: string; claim_id: string; excerpt_id: string; relation: EvidenceRelation; claim_support_status: ClaimSupportStatus; created_by: string; created_at: number }

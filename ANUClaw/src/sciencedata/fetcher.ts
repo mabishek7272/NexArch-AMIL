@@ -10,9 +10,10 @@
  */
 import axios from 'axios';
 import * as fs from 'fs';
+import { createHash } from 'crypto';
 import { ScienceError } from './types';
 
-export interface FetchOptions { /** Restrict THIS request (and every redirect hop) to these origins — a subset of the fetcher's allow-list (the provider's own origins). */ origins?: string[]; maxBytes?: number; timeoutMs?: number; retries?: number; accept?: string; method?: 'GET' | 'HEAD' | 'POST'; body?: unknown; expectTypes?: RegExp; countsAsFile?: boolean }
+export interface FetchOptions { /** Restrict THIS request (and every redirect hop) to these origins — a subset of the fetcher's allow-list (the provider's own origins). */ origins?: string[]; maxBytes?: number; timeoutMs?: number; retries?: number; accept?: string; method?: 'GET' | 'HEAD' | 'POST'; body?: unknown; expectTypes?: RegExp; countsAsFile?: boolean; signal?: AbortSignal; headers?: Record<string, string> }
 export interface FetchResult { status: number; headers: Record<string, string>; body: Buffer; finalUrl: string; attempts: number }
 
 export interface BudgetLimits { maxFiles: number; maxBytes: number }
@@ -26,7 +27,7 @@ export class LiveBudget {
     if (l.files >= this.limits.maxFiles || l.bytes >= this.limits.maxBytes) throw new ScienceError('budget_exhausted', `Live download budget exhausted (${l.files}/${this.limits.maxFiles} files, ${l.bytes}/${this.limits.maxBytes} bytes).`, 429);
   }
   record(url: string, bytes: number, status: number, countsAsFile: boolean): void {
-    const l = this.read(); l.requests++; if (countsAsFile) l.files++; l.bytes += bytes; l.log.push({ url, bytes, status });
+    const l = this.read(); l.requests++; if (countsAsFile) l.files++; l.bytes += bytes; l.log.push({ url: (() => { const u = new URL(url); if (u.pathname.endsWith('/sequence/summary') && u.searchParams.has('id')) u.searchParams.set('id', `sha256:${createHash('sha256').update(u.searchParams.get('id')!).digest('hex')}`); return u.href; })(), bytes, status });
     fs.writeFileSync(this.ledgerPath, JSON.stringify(l, null, 1));
   }
   /** Bytes still allowed; used to cap a single response. */
@@ -39,14 +40,17 @@ export interface FetcherConfig {
 }
 
 /** Reads a response stream with a hard byte cap (declared length checked first) and an idle timeout. Never buffers more than the cap. */
-function readBounded(stream: NodeJS.ReadableStream, cap: number, declared: number, idleMs: number, head: boolean): Promise<Buffer> {
+function readBounded(stream: NodeJS.ReadableStream, cap: number, declared: number, idleMs: number, head: boolean, signal?: AbortSignal): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const destroy = () => (stream as unknown as { destroy?: () => void }).destroy?.();
     if (head) { destroy(); return resolve(Buffer.alloc(0)); }
     if (Number.isFinite(declared) && declared > cap) { destroy(); return reject(new ScienceError('too_large', `The response declares ${declared} bytes, above the ${cap}-byte limit; it was not downloaded.`, 413)); }
     const chunks: Buffer[] = []; let total = 0; let done = false; let timer: NodeJS.Timeout;
-    const finish = (fn: () => void) => { if (done) return; done = true; clearTimeout(timer); fn(); };
+    const finish = (fn: () => void) => { if (done) return; done = true; clearTimeout(timer); signal?.removeEventListener('abort', abort); fn(); };
     const arm = () => { clearTimeout(timer); timer = setTimeout(() => finish(() => { destroy(); reject(new ScienceError('timeout', 'The provider stopped sending data.', 504)); }), idleMs); };
+    const abort = () => finish(() => { destroy(); reject(new ScienceError(signal?.reason?.name === 'TimeoutError' ? 'timeout' : 'cancelled', 'Provider request cancelled or timed out.', 504)); });
+    signal?.addEventListener('abort', abort, { once: true });
+    if (signal?.aborted) { abort(); return; }
     arm();
     stream.on('data', (c: Buffer) => { total += c.length; if (total > cap) { finish(() => { destroy(); reject(new ScienceError('too_large', `The response exceeds the ${cap}-byte limit and was discarded.`, 413)); }); return; } chunks.push(c); arm(); });
     stream.on('end', () => finish(() => { if (Number.isFinite(declared) && total < declared) reject(new ScienceError('unavailable', 'The response ended before its declared length.', 502)); else resolve(Buffer.concat(chunks)); }));
@@ -83,11 +87,14 @@ export class SafeFetcher {
   }
 
   async request(url: string, o: FetchOptions = {}): Promise<FetchResult> {
-    const sleep = this.cfg.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
+    const baseSleep = this.cfg.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
+    const sleep = async (ms: number) => { if (o.signal?.aborted) throw new ScienceError('cancelled', 'Request cancelled.', 499); await new Promise<void>((resolve, reject) => { const abort = () => reject(new ScienceError('cancelled', 'Request cancelled.', 499)); o.signal?.addEventListener('abort', abort, { once: true }); baseSleep(Math.max(0, ms)).then(resolve, reject).finally(() => o.signal?.removeEventListener('abort', abort)); }); };
     const retries = o.retries ?? 2, maxRetryAfter = this.cfg.maxRetryAfterMs ?? 10_000;
     let cap = o.maxBytes ?? this.cfg.defaultMaxBytes ?? 20 * 1024 * 1024;
     let lastErr: ScienceError | null = null;
     for (let attempt = 1; attempt <= retries + 1; attempt++) {
+      if (o.signal?.aborted) throw new ScienceError('cancelled', 'Request cancelled.', 499);
+      const signal = AbortSignal.any([AbortSignal.timeout(o.timeoutMs ?? this.cfg.defaultTimeoutMs ?? 30_000), ...(o.signal ? [o.signal] : [])]);
       this.cfg.budget?.check();
       if (this.cfg.budget) cap = Math.min(cap, Math.max(1, this.cfg.budget.remainingBytes()));
       let cur = url; let hops = 0;
@@ -99,14 +106,15 @@ export class SafeFetcher {
             url: cur, method: o.method ?? 'GET', data: o.body, responseType: 'stream', maxRedirects: 0, validateStatus: () => true, proxy: false,
             timeout: o.timeoutMs ?? this.cfg.defaultTimeoutMs ?? 30_000, maxBodyLength: 1_000_000, decompress: false,
             headers: { 'User-Agent': this.cfg.userAgent ?? 'anuclaw-research-connector/1.0', 'Accept-Encoding': 'identity', Accept: o.accept ?? '*/*',   // axios' default Accept (application/json, text/plain, */*) makes ftp.ncbi.nlm.nih.gov stall on file GETs (found live)
-             ...(o.body !== undefined ? { 'Content-Type': 'application/json' } : {}) },
+             ...(o.body !== undefined ? { 'Content-Type': 'application/json' } : {}), ...o.headers }, signal,
           });
           const headers: Record<string, string> = {}; for (const [k, v] of Object.entries(r.headers)) if (typeof v === 'string') headers[k.toLowerCase()] = v;
           if (r.status >= 300 && r.status < 400 && headers.location) {
+            (r.data as { destroy: () => void }).destroy();
             if (++hops > 3) throw new ScienceError('redirect_refused', 'Too many redirects.', 502);
             cur = new URL(headers.location, cur).toString(); continue;
           }
-          const body = await readBounded(r.data as NodeJS.ReadableStream, cap, Number(headers['content-length']), o.timeoutMs ?? this.cfg.defaultTimeoutMs ?? 30_000, (o.method ?? 'GET') === 'HEAD');
+          const body = await readBounded(r.data as NodeJS.ReadableStream, cap, Number(headers['content-length']), o.timeoutMs ?? this.cfg.defaultTimeoutMs ?? 30_000, (o.method ?? 'GET') === 'HEAD' || r.status === 304, signal);
           const record = () => this.cfg.budget?.record(cur, body.length, r.status, o.countsAsFile !== false && (o.method ?? 'GET') !== 'HEAD');
           if (r.status === 404) { record(); throw new ScienceError('not_found', 'The provider has no such record.', 404); }
           if (r.status === 429 || r.status === 503 && headers['retry-after']) {
@@ -115,16 +123,19 @@ export class SafeFetcher {
             lastErr = new ScienceError('rate_limited', 'The provider is rate limiting requests.', 429, { retryAfterSec: Number.isFinite(ra) ? ra : null });
             if (attempt <= retries) { await sleep(wait); break; } throw lastErr;
           }
+          if (r.status === 408) { record(); lastErr = new ScienceError('timeout', 'The provider returned HTTP 408.', 504); if (attempt <= retries) { await sleep(Math.min(250 * 2 ** (attempt - 1), 2000)); break; } throw lastErr; }
           if (r.status >= 500) { record(); lastErr = new ScienceError('unavailable', `The provider returned HTTP ${r.status}.`, 502); if (attempt <= retries) { await sleep(Math.min(250 * 2 ** (attempt - 1), 2000)); break; } throw lastErr; }
           if (r.status === 401 || r.status === 403) { record(); throw new ScienceError('access_denied', `The provider answered HTTP ${r.status} (access denied). The reason is not established by the response — it is NOT assumed to be controlled-access data. Nothing was retrieved.`, 403, { httpStatus: r.status }); }
           if (r.status >= 400) { record(); throw new ScienceError('unavailable', `The provider rejected the request (HTTP ${r.status}).`, 502); }
           const ct = headers['content-type'] ?? '';
-          if (o.expectTypes && !o.expectTypes.test(ct)) { record(); throw new ScienceError('bad_content_type', `Unexpected content type '${ct.slice(0, 60)}'.`, 502); }
+          if (r.status !== 304 && o.expectTypes && !o.expectTypes.test(ct)) { record(); throw new ScienceError('bad_content_type', `Unexpected content type '${ct.slice(0, 60)}'.`, 502); }
           record();
           return { status: r.status, headers, body, finalUrl: cur, attempts: attempt };
         }
       } catch (e) {
         if (e instanceof ScienceError) { if (e.code === 'rate_limited' || e.code === 'unavailable') { lastErr = e; if (attempt <= retries && !(e.code === 'unavailable' && /rejected the request/.test(e.message))) continue; } throw e; }
+        if (o.signal?.aborted) throw new ScienceError('cancelled', 'Request cancelled.', 499);
+        if (signal.aborted) { lastErr = new ScienceError('timeout', 'Provider request exceeded its time limit.', 504); if (attempt > retries) throw lastErr; await sleep(Math.min(250 * 2 ** (attempt - 1), 2000)); continue; }
         const err = e as { code?: string; message?: string };
         if (/maxContentLength/i.test(err.message ?? '') || err.code === 'ERR_FR_MAX_BODY_LENGTH_EXCEEDED') throw new ScienceError('too_large', `The response exceeds the ${cap}-byte limit and was discarded.`, 413);
         if (err.code === 'ECONNABORTED' || err.code === 'ETIMEDOUT') lastErr = new ScienceError('timeout', 'The provider did not answer in time.', 504);

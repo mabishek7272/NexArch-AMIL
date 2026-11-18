@@ -122,11 +122,11 @@ describe('provider normalisation and classification', () => {
     for (const [p, a] of [['alphafold', 'hemoglobin'], ['alphafold', 'P69905/../x'], ['rcsb', '4HHBX'], ['ncbi_datasets', 'NC_045512.2'], ['geo', 'GDS1'], ['geo', '']] as const) expect(() => normalizeAccession(p, a)).toThrow(/valid .* accession/);
   });
   it('AlphaFold is PREDICTED and says retrieval is not running AlphaFold; confidence metadata is preserved; file URLs come from the record', () => {
-    const d = describeAlphaFold('P69905', [{ entryId: 'AF-P69905-F1', uniprotAccession: 'P69905', latestVersion: 4, globalMetricValue: 97.9, fractionPlddtVeryHigh: 0.9, pdbUrl: 'https://alphafold.ebi.ac.uk/files/AF-P69905-F1-model_v4.pdb', uniprotStart: 1, uniprotEnd: 142 }], b);
-    expect(d.classification).toBe('predicted'); expect(d.classificationNote).toMatch(/not experimental/i); expect(d.sourceVersion).toBe('v4');
+    const d = describeAlphaFold('P69905', [{ modelEntityId: 'AF-P69905-F1', sequenceStart: 1, sequenceEnd: 142, uniprotAccession: 'P69905', latestVersion: 4, globalMetricValue: 97.9, fractionPlddtVeryHigh: 0.9, pdbUrl: 'https://alphafold.ebi.ac.uk/files/AF-P69905-F1-model_v4.pdb', uniprotStart: 1, uniprotEnd: 142 }], b);
+    expect(d.classification).toBe('predicted'); expect(d.classificationNote).toMatch(/not an experimental/i); expect(d.sourceVersion).toBe('v4');
     expect((d.metadata.confidence as any).globalMetricValuePlddt).toBe(97.9); expect(d.metadata.sequenceLength).toBe(142);
-    expect(d.files.map((f) => f.key)).toEqual(['pdb']); expect(d.warnings.join(' ')).toMatch(/No cif/);
-    expect(() => describeAlphaFold('P69905', [], b)).toThrow(/no prediction/); expect(() => describeAlphaFold('P69905', [{ entryId: 'x' }], b)).toThrow(/latestVersion/);
+    expect(d.files.map((f) => f.key)).toEqual(['pdb']); expect(d.warnings.join(' ')).toMatch(/experimental validation/);
+    expect(describeAlphaFold('P69905', [], b).files).toEqual([]); expect(() => describeAlphaFold('P69905', [{ entryId: 'x' }], b)).toThrow(/current model identifier/);
   });
   it('RCSB: experimental vs COMPUTED model are distinguished from the record itself', () => {
     const rec = (method: string, methodology: string) => ({ rcsb_id: '4HHB', exptl: [{ method }], rcsb_entry_info: { structure_determination_methodology: methodology }, rcsb_accession_info: { revision_date: '2024-01-01' }, struct: { title: 't' } });

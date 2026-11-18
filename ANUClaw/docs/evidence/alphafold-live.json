@@ -1,0 +1,93 @@
+{
+  "acquisition": "live",
+  "coordinateDownloads": 0,
+  "evidence": [
+    {
+      "operation": "prediction",
+      "endpoint": "https://alphafold.ebi.ac.uk/api/prediction/P69905",
+      "status": 200,
+      "bytes": 1987,
+      "sha256": "af907bb73c411790ac6a24764314287e5cd331c0ed5b13eae9924ce45b27d8f9",
+      "models": 1,
+      "annotations": 0,
+      "cache": "miss",
+      "retrievedAt": "2026-11-18T17:41:02.583Z"
+    },
+    {
+      "operation": "uniprot",
+      "endpoint": "https://alphafold.ebi.ac.uk/api/uniprot/summary/P69905.json",
+      "status": 200,
+      "bytes": 16717,
+      "sha256": "d95f6f140181775637c98484da4182d1732eafc8a6635611f694d9aa28da7b79",
+      "models": 16,
+      "annotations": 0,
+      "cache": "miss",
+      "retrievedAt": "2026-11-18T17:41:02.638Z"
+    },
+    {
+      "operation": "complex",
+      "endpoint": "https://alphafold.ebi.ac.uk/api/complex/AF-0000000203852801",
+      "status": 200,
+      "bytes": 943,
+      "sha256": "6ca497bc8eabfde6100b78c0ed2a0cf5e75553f73331f5c7968b79886baecad7",
+      "models": 1,
+      "annotations": 0,
+      "cache": "miss",
+      "retrievedAt": "2026-11-18T17:41:03.100Z"
+    },
+    {
+      "operation": "annotations",
+      "endpoint": "https://alphafold.ebi.ac.uk/api/annotations/P69905.json?type=MUTAGEN",
+      "status": 200,
+      "bytes": 9742,
+      "sha256": "23e811d3335d1b21e86206e9a9a584d22c70e0ff894c21ed86415661f64e7b21",
+      "models": 0,
+      "annotations": 1,
+      "cache": "miss",
+      "retrievedAt": "2026-11-18T17:41:03.769Z"
+    },
+    {
+      "operation": "sequence",
+      "endpoint": "https://alphafold.ebi.ac.uk/api/sequence/summary?type=sequence&rows=25&id=sha256:14725a10598943a7aa719eed7d24c7fee599192a6c63c75b051ee6f156341242",
+      "status": 200,
+      "bytes": 22232,
+      "sha256": "35878736f84abb2a9bdb1adf08b65156b4c608ab936863b608b36e319f0e6f8a",
+      "models": 25,
+      "annotations": 0,
+      "cache": "miss",
+      "retrievedAt": "2026-11-18T17:41:04.848Z"
+    }
+  ],
+  "ledger": {
+    "files": 0,
+    "bytes": 51621,
+    "requests": 5,
+    "log": [
+      {
+        "url": "https://alphafold.ebi.ac.uk/api/prediction/P69905",
+        "bytes": 1987,
+        "status": 200
+      },
+      {
+        "url": "https://alphafold.ebi.ac.uk/api/uniprot/summary/P69905.json",
+        "bytes": 16717,
+        "status": 200
+      },
+      {
+        "url": "https://alphafold.ebi.ac.uk/api/complex/AF-0000000203852801",
+        "bytes": 943,
+        "status": 200
+      },
+      {
+        "url": "https://alphafold.ebi.ac.uk/api/annotations/P69905.json?type=MUTAGEN",
+        "bytes": 9742,
+        "status": 200
+      },
+      {
+        "url": "https://alphafold.ebi.ac.uk/api/sequence/summary?type=sequence&rows=25&id=MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVADALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVLTSKYR",
+        "bytes": 22232,
+        "status": 200
+      }
+    ]
+  }
+}

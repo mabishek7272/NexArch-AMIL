@@ -1,0 +1,247 @@
+{
+  "schema": "anuclaw-verification-evidence/v1",
+  "verifiedAt": "2026-11-18T19:32:28Z",
+  "scope": "AlphaFold DB connector implementation; final fixture and regression verification; no deployment or push",
+  "providerLive": {
+    "enabled": true,
+    "test": "ANUCLAW_ALPHAFOLD_LIVE=1 npx vitest run src/sciencedata/alphafold.test.ts",
+    "accession": "P69905",
+    "operations": [
+      "prediction",
+      "uniprot summary",
+      "complex",
+      "annotations",
+      "sequence summary"
+    ],
+    "httpStatuses": [
+      200,
+      200,
+      200,
+      200,
+      200
+    ],
+    "metadataBytes": 51621,
+    "coordinateDownloads": 0,
+    "evidenceFile": "alphafold-live.json"
+  },
+  "fixtureAndPostgres": {
+    "command": "ANUCLAW_TEST_PG_URL=postgres://<disposable>/postgres npx vitest run --maxWorkers=3",
+    "passed": 1464,
+    "failed": 0,
+    "skipped": 53,
+    "postgres": "PostgreSQL 16 disposable Docker container",
+    "coverage": [
+      "normalization and schema changes",
+      "redirects/timeouts/cancellation/408/429/5xx",
+      "size and content validation",
+      "hashes and immutable artifacts",
+      "user/tenant/project isolation",
+      "project copy and attribution export",
+      "replacement invalidation",
+      "docking confirmation"
+    ]
+  },
+  "dashboardBrowser": {
+    "command": "npx playwright test --config=e2e/alphafold/playwright.config.ts",
+    "passed": 12,
+    "failed": 0,
+    "provider": "synthetic local fixture",
+    "screenshots": "alphafold-ui/README.md"
+  },
+  "typecheck": {
+    "command": "npx tsc --noEmit",
+    "result": "passed"
+  },
+  "dashboardBuild": {
+    "command": "npm run build --prefix dashboard",
+    "result": "passed",
+    "viewerChunk": "3Dmol.js 588.12 kB minified / 169.78 kB gzip; bundle-size advisory"
+  },
+  "eslint": {
+    "command": "npm run lint",
+    "result": "passed",
+    "errors": 0,
+    "warnings": 331
+  },
+  "openapi": {
+    "command": "npm run openapi:v1",
+    "result": "passed"
+  },
+  "documentationLinks": {
+    "command": "npx tsx scripts/check-doc-links.ts",
+    "result": "passed; 69 markdown files, 399 relative links, 0 broken"
+  },
+  "notRun": [
+    "No real AlphaFold coordinate was imported live",
+    "No deployment/browser against a deployed app",
+    "53 unrelated optional-infrastructure tests skipped"
+  ],
+  "skippedSuites": [
+    "acceptance-rehearsal-pg: 5 tests require explicit acceptance rehearsal opt-in",
+    "container-contract: 34 tests require the optional container contract environment",
+    "ai/live-models-pg: 3 tests require paid live model providers and explicit opt-in",
+    "posturepulse-live: 7 tests require the external PosturePulse live environment",
+    "documents/ocr-live: 3 tests require the optional live OCR environment",
+    "alphafold live provider: 1 test requires ANUCLAW_ALPHAFOLD_LIVE=1 and was not repeated"
+  ],
+  "changedPaths": [
+    ".gitignore",
+    "dashboard/package-lock.json",
+    "dashboard/package.json",
+    "dashboard/src/App.tsx",
+    "dashboard/src/components/CommandPalette.tsx",
+    "dashboard/src/pages/ApiKeys.tsx",
+    "dashboard/src/pages/Pipelines.tsx",
+    "dashboard/src/pages/Welcome.tsx",
+    "docs/ACCEPTANCE-MATRIX.md",
+    "docs/API.md",
+    "docs/ARCHITECTURE.md",
+    "docs/IMPLEMENTATION-STATUS.md",
+    "docs/INTEGRATION-STATUS.md",
+    "docs/RESEARCH-STUDIO-RELEASE-HANDOFF.md",
+    "docs/RESEARCH-STUDIO-RUNBOOK.md",
+    "docs/SCIENCE-DATA.md",
+    "docs/openapi-v1.json",
+    "src/api/openapi-v1.ts",
+    "src/api/routes/baas-v1.ts",
+    "src/dashboard/server/routes/elab-engine.ts",
+    "src/dashboard/server/routes/science.ts",
+    "src/db/connection.ts",
+    "src/engines/structure/alphafold.test.ts",
+    "src/engines/structure/alphafold.ts",
+    "src/research-studio/evidence-service.ts",
+    "src/research-studio/export-service.ts",
+    "src/research-studio/import-service.ts",
+    "src/research-studio/types.ts",
+    "src/sciencedata/fetcher.ts",
+    "src/sciencedata/providers.ts",
+    "src/sciencedata/science-pg.test.ts",
+    "src/sciencedata/science.test.ts",
+    "src/sciencedata/service.ts",
+    "src/sciencedata/testkit.ts",
+    "src/sciencedata/types.ts",
+    "src/security/shared-limits.ts",
+    "dashboard/e2e/",
+    "dashboard/playwright.config.ts",
+    "dashboard/public/nexarch/",
+    "dashboard/src/nexarch/",
+    "docs/ALPHAFOLD-DB-INTEGRATION.md",
+    "docs/NAV-REDESIGN-ROUTE-MAP.md",
+    "docs/evidence/alphafold-live.json",
+    "docs/evidence/alphafold-ui/",
+    "docs/evidence/nexarch-ui-qa/",
+    "scripts/alphafold-qa-server.ts",
+    "src/sciencedata/alphafold-pg.test.ts",
+    "src/sciencedata/alphafold-service.ts",
+    "src/sciencedata/alphafold.test.ts",
+    "src/sciencedata/alphafold.ts",
+    "src/sciencedata/fixtures/"
+  ],
+  "alphaFoldUiCompatibility": {
+    "command": "npx playwright test --config=e2e/alphafold/playwright.config.ts",
+    "result": "passed",
+    "testsPassed": 12,
+    "testsFailed": 0,
+    "browser": "Playwright bundled Chromium",
+    "provider": "synthetic local fixtures; no live AlphaFold requests",
+    "routes": [
+      "/nexarch/bioinformatics",
+      "/nexarch/bioinformatics/structural-biology/alphafold",
+      "/nexarch/structural-biology/alphafold",
+      "/nexarch/evidence-library",
+      "/nexarch/evidence-library/alphafold",
+      "/nexarch/dry-lab",
+      "/nexarch/dry-lab/alphafold"
+    ],
+    "viewports": [
+      {
+        "width": 1440,
+        "height": 900
+      },
+      {
+        "width": 1280,
+        "height": 800
+      },
+      {
+        "width": 1024,
+        "height": 768
+      },
+      {
+        "width": 768,
+        "height": 1024
+      },
+      {
+        "width": 390,
+        "height": 844
+      }
+    ],
+    "routeViewportPairs": 35,
+    "directLoadsAndRefreshes": "35/35 returned rendered content with HTTP 200",
+    "stateViewportChecks": 30,
+    "states": [
+      "empty",
+      "success",
+      "unavailable",
+      "malformed",
+      "rate-limited",
+      "loading"
+    ],
+    "axeViolations": {
+      "critical": 0,
+      "serious": 0,
+      "moderate": 0,
+      "minor": 0
+    },
+    "mainLandmarks": "exactly one for each checked view",
+    "headingHierarchy": "valid for every checked view",
+    "browserConsoleErrors": 0,
+    "pageErrors": 0,
+    "responsiveNavigation": [
+      {
+        "viewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "opens": true,
+        "navigatesAndCloses": true
+      },
+      {
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "opens": true,
+        "navigatesAndCloses": true
+      },
+      {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "opens": true,
+        "navigatesAndCloses": true
+      }
+    ],
+    "unresolvedRoleNavigation": {
+      "protectedItemsBeforeRoleResolution": 0,
+      "visibleAfterRoleResolution": true
+    },
+    "predictedModelWarningsAndAttributionVisible": true,
+    "fabricatedClinicalOrConfidenceValues": false,
+    "evidenceFile": "alphafold-ui/route-accessibility-matrix.json"
+  },
+  "nexarchExistingBrowserRegression": {
+    "command": "npm run test:e2e",
+    "result": "passed",
+    "passed": 34,
+    "skipped": 10,
+    "failed": 0,
+    "viewportProjects": [
+      "1440x900",
+      "1280x800",
+      "1024x768",
+      "768x1024"
+    ],
+    "notes": "General NexArch regression excludes the dedicated mutable-fixture AlphaFold suite; 10 viewport-guarded cases skipped."
+  }
+}

@@ -111,3 +111,13 @@ export function readArtifactText(storagePath: string): string {
   if (!resolved.startsWith(root + path.sep)) throw new Error('refused: artifact path is outside the research-studio artifact root.');
   return fs.readFileSync(resolved, 'utf8');
 }
+
+/** Structure copy into the existing private project/source artifact tree. Server-selected format, hashed filename. */
+export function storeStructureArtifact(projectId: string, sourceId: string, format: string, buf: Buffer): { path: string; sha256: string; size: number } {
+  if (!['pdb', 'mmcif', 'bcif', 'pae', 'plddt'].includes(format) || !buf.length || buf.length > 20e6) throw new Error('Invalid or oversized structure artifact.');
+  const dir = safeDir(projectId, sourceId); fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+  const hash = crypto.createHash('sha256').update(buf).digest('hex'); const fp = path.join(dir, hash);
+  if (fs.existsSync(fp)) { if (crypto.createHash('sha256').update(fs.readFileSync(fp)).digest('hex') !== hash) throw new Error('Artifact hash mismatch; refusing replacement.'); }
+  else fs.writeFileSync(fp, buf, { flag: 'wx', mode: 0o600 });
+  return { path: fp, sha256: hash, size: buf.length };
+}

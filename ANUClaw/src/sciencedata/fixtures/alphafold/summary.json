@@ -1,0 +1,761 @@
+{
+  "uniprot_entry": {
+    "ac": "P69905",
+    "id": "HBA_HUMAN",
+    "uniprot_checksum": "6077c452d1dc6151040b2b179e2294c7",
+    "sequence_length": 142,
+    "segment_start": 1,
+    "segment_end": 142
+  },
+  "structures": [
+    {
+      "summary": {
+        "model_identifier": "AF-0000000203852801",
+        "model_category": "AB-INITIO",
+        "model_url": "https://alphafold.ebi.ac.uk/files/AF-0000000203852801-model_v1.cif",
+        "model_format": "MMCIF",
+        "model_type": null,
+        "model_page_url": "https://alphafold.ebi.ac.uk/entry/AF-0000000203852801",
+        "provider": "AlphaFold DB",
+        "number_of_conformers": null,
+        "ensemble_sample_url": null,
+        "ensemble_sample_format": null,
+        "created": "2026-02-20T08:22:16Z",
+        "sequence_identity": 1.0,
+        "uniprot_start": 1,
+        "uniprot_end": 142,
+        "coverage": 1.0,
+        "experimental_method": null,
+        "resolution": null,
+        "confidence_type": "pLDDT",
+        "confidence_version": null,
+        "confidence_avg_local_score": 92.8,
+        "oligomeric_state": "HETERODIMER",
+        "preferred_assembly_id": null,
+        "entities": [
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "Q9NZD4",
+            "identifier_category": "UNIPROT",
+            "description": "Alpha-hemoglobin-stabilizing protein",
+            "chain_ids": [
+              "A"
+            ]
+          },
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P69905",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit alpha",
+            "chain_ids": [
+              "B"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "summary": {
+        "model_identifier": "AF-0000000211014131",
+        "model_category": "AB-INITIO",
+        "model_url": "https://alphafold.ebi.ac.uk/files/AF-0000000211014131-model_v1.cif",
+        "model_format": "MMCIF",
+        "model_type": null,
+        "model_page_url": "https://alphafold.ebi.ac.uk/entry/AF-0000000211014131",
+        "provider": "AlphaFold DB",
+        "number_of_conformers": null,
+        "ensemble_sample_url": null,
+        "ensemble_sample_format": null,
+        "created": "2026-02-20T08:21:09Z",
+        "sequence_identity": 1.0,
+        "uniprot_start": 1,
+        "uniprot_end": 142,
+        "coverage": 1.0,
+        "experimental_method": null,
+        "resolution": null,
+        "confidence_type": "pLDDT",
+        "confidence_version": null,
+        "confidence_avg_local_score": 92.21,
+        "oligomeric_state": "HETERODIMER",
+        "preferred_assembly_id": null,
+        "entities": [
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P69905",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit alpha",
+            "chain_ids": [
+              "A"
+            ]
+          },
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P62246",
+            "identifier_category": "UNIPROT",
+            "description": "Small ribosomal subunit protein uS8",
+            "chain_ids": [
+              "B"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "summary": {
+        "model_identifier": "AF-0000000203852721",
+        "model_category": "AB-INITIO",
+        "model_url": "https://alphafold.ebi.ac.uk/files/AF-0000000203852721-model_v1.cif",
+        "model_format": "MMCIF",
+        "model_type": null,
+        "model_page_url": "https://alphafold.ebi.ac.uk/entry/AF-0000000203852721",
+        "provider": "AlphaFold DB",
+        "number_of_conformers": null,
+        "ensemble_sample_url": null,
+        "ensemble_sample_format": null,
+        "created": "2026-02-20T08:22:17Z",
+        "sequence_identity": 1.0,
+        "uniprot_start": 1,
+        "uniprot_end": 142,
+        "coverage": 1.0,
+        "experimental_method": null,
+        "resolution": null,
+        "confidence_type": "pLDDT",
+        "confidence_version": null,
+        "confidence_avg_local_score": 93.52,
+        "oligomeric_state": "HETERODIMER",
+        "preferred_assembly_id": null,
+        "entities": [
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P69905",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit alpha",
+            "chain_ids": [
+              "A"
+            ]
+          },
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P02008",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit zeta",
+            "chain_ids": [
+              "B"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "summary": {
+        "model_identifier": "AF-0000000203484700",
+        "model_category": "AB-INITIO",
+        "model_url": "https://alphafold.ebi.ac.uk/files/AF-0000000203484700-model_v1.cif",
+        "model_format": "MMCIF",
+        "model_type": null,
+        "model_page_url": "https://alphafold.ebi.ac.uk/entry/AF-0000000203484700",
+        "provider": "AlphaFold DB",
+        "number_of_conformers": null,
+        "ensemble_sample_url": null,
+        "ensemble_sample_format": null,
+        "created": "2026-02-20T08:22:16Z",
+        "sequence_identity": 1.0,
+        "uniprot_start": 1,
+        "uniprot_end": 142,
+        "coverage": 1.0,
+        "experimental_method": null,
+        "resolution": null,
+        "confidence_type": "pLDDT",
+        "confidence_version": null,
+        "confidence_avg_local_score": 92.23,
+        "oligomeric_state": "HETERODIMER",
+        "preferred_assembly_id": null,
+        "entities": [
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P69905",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit alpha",
+            "chain_ids": [
+              "A"
+            ]
+          },
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "Q9NZD4",
+            "identifier_category": "UNIPROT",
+            "description": "Alpha-hemoglobin-stabilizing protein",
+            "chain_ids": [
+              "B"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "summary": {
+        "model_identifier": "AF-0000000203852814",
+        "model_category": "AB-INITIO",
+        "model_url": "https://alphafold.ebi.ac.uk/files/AF-0000000203852814-model_v1.cif",
+        "model_format": "MMCIF",
+        "model_type": null,
+        "model_page_url": "https://alphafold.ebi.ac.uk/entry/AF-0000000203852814",
+        "provider": "AlphaFold DB",
+        "number_of_conformers": null,
+        "ensemble_sample_url": null,
+        "ensemble_sample_format": null,
+        "created": "2026-02-20T08:22:17Z",
+        "sequence_identity": 1.0,
+        "uniprot_start": 1,
+        "uniprot_end": 142,
+        "coverage": 1.0,
+        "experimental_method": null,
+        "resolution": null,
+        "confidence_type": "pLDDT",
+        "confidence_version": null,
+        "confidence_avg_local_score": 92.89,
+        "oligomeric_state": "HETERODIMER",
+        "preferred_assembly_id": null,
+        "entities": [
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P69905",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit alpha",
+            "chain_ids": [
+              "A"
+            ]
+          },
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P02042",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit delta",
+            "chain_ids": [
+              "B"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "summary": {
+        "model_identifier": "AF-0000000203852815",
+        "model_category": "AB-INITIO",
+        "model_url": "https://alphafold.ebi.ac.uk/files/AF-0000000203852815-model_v1.cif",
+        "model_format": "MMCIF",
+        "model_type": null,
+        "model_page_url": "https://alphafold.ebi.ac.uk/entry/AF-0000000203852815",
+        "provider": "AlphaFold DB",
+        "number_of_conformers": null,
+        "ensemble_sample_url": null,
+        "ensemble_sample_format": null,
+        "created": "2026-02-20T08:22:17Z",
+        "sequence_identity": 1.0,
+        "uniprot_start": 1,
+        "uniprot_end": 142,
+        "coverage": 1.0,
+        "experimental_method": null,
+        "resolution": null,
+        "confidence_type": "pLDDT",
+        "confidence_version": null,
+        "confidence_avg_local_score": 91.79,
+        "oligomeric_state": "HETERODIMER",
+        "preferred_assembly_id": null,
+        "entities": [
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P69905",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit alpha",
+            "chain_ids": [
+              "A"
+            ]
+          },
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P02100",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit epsilon",
+            "chain_ids": [
+              "B"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "summary": {
+        "model_identifier": "AF-0000000203852816",
+        "model_category": "AB-INITIO",
+        "model_url": "https://alphafold.ebi.ac.uk/files/AF-0000000203852816-model_v1.cif",
+        "model_format": "MMCIF",
+        "model_type": null,
+        "model_page_url": "https://alphafold.ebi.ac.uk/entry/AF-0000000203852816",
+        "provider": "AlphaFold DB",
+        "number_of_conformers": null,
+        "ensemble_sample_url": null,
+        "ensemble_sample_format": null,
+        "created": "2026-02-20T08:22:17Z",
+        "sequence_identity": 1.0,
+        "uniprot_start": 1,
+        "uniprot_end": 142,
+        "coverage": 1.0,
+        "experimental_method": null,
+        "resolution": null,
+        "confidence_type": "pLDDT",
+        "confidence_version": null,
+        "confidence_avg_local_score": 88.14,
+        "oligomeric_state": "HETERODIMER",
+        "preferred_assembly_id": null,
+        "entities": [
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P69905",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit alpha",
+            "chain_ids": [
+              "A"
+            ]
+          },
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P69892",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit gamma-2",
+            "chain_ids": [
+              "B"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "summary": {
+        "model_identifier": "AF-0000000065932364",
+        "model_category": "AB-INITIO",
+        "model_url": "https://alphafold.ebi.ac.uk/files/AF-0000000065932364-model_v1.cif",
+        "model_format": "MMCIF",
+        "model_type": null,
+        "model_page_url": "https://alphafold.ebi.ac.uk/entry/AF-0000000065932364",
+        "provider": "AlphaFold DB",
+        "number_of_conformers": null,
+        "ensemble_sample_url": null,
+        "ensemble_sample_format": null,
+        "created": "2026-02-19T17:17:49Z",
+        "sequence_identity": 1.0,
+        "uniprot_start": 1,
+        "uniprot_end": 142,
+        "coverage": 1.0,
+        "experimental_method": null,
+        "resolution": null,
+        "confidence_type": "pLDDT",
+        "confidence_version": null,
+        "confidence_avg_local_score": 96.03,
+        "oligomeric_state": "HOMODIMER",
+        "preferred_assembly_id": null,
+        "entities": [
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P69905",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit alpha",
+            "chain_ids": [
+              "A",
+              "B"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "summary": {
+        "model_identifier": "AF-P69905-F1",
+        "model_category": "AB-INITIO",
+        "model_url": "https://alphafold.ebi.ac.uk/files/AF-P69905-F1-model_v6.cif",
+        "model_format": "MMCIF",
+        "model_type": null,
+        "model_page_url": "https://alphafold.ebi.ac.uk/entry/AF-P69905-F1",
+        "provider": "AlphaFold DB",
+        "number_of_conformers": null,
+        "ensemble_sample_url": null,
+        "ensemble_sample_format": null,
+        "created": "2025-08-01T00:00:00Z",
+        "sequence_identity": 1.0,
+        "uniprot_start": 1,
+        "uniprot_end": 142,
+        "coverage": 1.0,
+        "experimental_method": null,
+        "resolution": null,
+        "confidence_type": "pLDDT",
+        "confidence_version": null,
+        "confidence_avg_local_score": 98.06,
+        "oligomeric_state": "MONOMER",
+        "preferred_assembly_id": null,
+        "entities": [
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P69905",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit alpha",
+            "chain_ids": [
+              "A"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "summary": {
+        "model_identifier": "AF-0000000203852694",
+        "model_category": "AB-INITIO",
+        "model_url": "https://alphafold.ebi.ac.uk/files/AF-0000000203852694-model_v1.cif",
+        "model_format": "MMCIF",
+        "model_type": null,
+        "model_page_url": "https://alphafold.ebi.ac.uk/entry/AF-0000000203852694",
+        "provider": "AlphaFold DB",
+        "number_of_conformers": null,
+        "ensemble_sample_url": null,
+        "ensemble_sample_format": null,
+        "created": "2026-02-20T08:22:17Z",
+        "sequence_identity": 1.0,
+        "uniprot_start": 1,
+        "uniprot_end": 142,
+        "coverage": 1.0,
+        "experimental_method": null,
+        "resolution": null,
+        "confidence_type": "pLDDT",
+        "confidence_version": null,
+        "confidence_avg_local_score": 92.48,
+        "oligomeric_state": "HETERODIMER",
+        "preferred_assembly_id": null,
+        "entities": [
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P09105",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit theta-1",
+            "chain_ids": [
+              "A"
+            ]
+          },
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P69905",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit alpha",
+            "chain_ids": [
+              "B"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "summary": {
+        "model_identifier": "AF-0000000203852812",
+        "model_category": "AB-INITIO",
+        "model_url": "https://alphafold.ebi.ac.uk/files/AF-0000000203852812-model_v1.cif",
+        "model_format": "MMCIF",
+        "model_type": null,
+        "model_page_url": "https://alphafold.ebi.ac.uk/entry/AF-0000000203852812",
+        "provider": "AlphaFold DB",
+        "number_of_conformers": null,
+        "ensemble_sample_url": null,
+        "ensemble_sample_format": null,
+        "created": "2026-02-20T08:22:17Z",
+        "sequence_identity": 1.0,
+        "uniprot_start": 1,
+        "uniprot_end": 142,
+        "coverage": 1.0,
+        "experimental_method": null,
+        "resolution": null,
+        "confidence_type": "pLDDT",
+        "confidence_version": null,
+        "confidence_avg_local_score": 91.54,
+        "oligomeric_state": "HETERODIMER",
+        "preferred_assembly_id": null,
+        "entities": [
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P02008",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit zeta",
+            "chain_ids": [
+              "A"
+            ]
+          },
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P69905",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit alpha",
+            "chain_ids": [
+              "B"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "summary": {
+        "model_identifier": "AF-0000000203852817",
+        "model_category": "AB-INITIO",
+        "model_url": "https://alphafold.ebi.ac.uk/files/AF-0000000203852817-model_v1.cif",
+        "model_format": "MMCIF",
+        "model_type": null,
+        "model_page_url": "https://alphafold.ebi.ac.uk/entry/AF-0000000203852817",
+        "provider": "AlphaFold DB",
+        "number_of_conformers": null,
+        "ensemble_sample_url": null,
+        "ensemble_sample_format": null,
+        "created": "2026-02-20T08:22:17Z",
+        "sequence_identity": 1.0,
+        "uniprot_start": 1,
+        "uniprot_end": 142,
+        "coverage": 1.0,
+        "experimental_method": null,
+        "resolution": null,
+        "confidence_type": "pLDDT",
+        "confidence_version": null,
+        "confidence_avg_local_score": 90.12,
+        "oligomeric_state": "HETERODIMER",
+        "preferred_assembly_id": null,
+        "entities": [
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P69905",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit alpha",
+            "chain_ids": [
+              "A"
+            ]
+          },
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "Q6B0K9",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit mu",
+            "chain_ids": [
+              "B"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "summary": {
+        "model_identifier": "AF-0000000203853219",
+        "model_category": "AB-INITIO",
+        "model_url": "https://alphafold.ebi.ac.uk/files/AF-0000000203853219-model_v1.cif",
+        "model_format": "MMCIF",
+        "model_type": null,
+        "model_page_url": "https://alphafold.ebi.ac.uk/entry/AF-0000000203853219",
+        "provider": "AlphaFold DB",
+        "number_of_conformers": null,
+        "ensemble_sample_url": null,
+        "ensemble_sample_format": null,
+        "created": "2026-02-20T08:22:17Z",
+        "sequence_identity": 1.0,
+        "uniprot_start": 1,
+        "uniprot_end": 142,
+        "coverage": 1.0,
+        "experimental_method": null,
+        "resolution": null,
+        "confidence_type": "pLDDT",
+        "confidence_version": null,
+        "confidence_avg_local_score": 90.3,
+        "oligomeric_state": "HETERODIMER",
+        "preferred_assembly_id": null,
+        "entities": [
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P02100",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit epsilon",
+            "chain_ids": [
+              "A"
+            ]
+          },
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P69905",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit alpha",
+            "chain_ids": [
+              "B"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "summary": {
+        "model_identifier": "AF-0000000211046780",
+        "model_category": "AB-INITIO",
+        "model_url": "https://alphafold.ebi.ac.uk/files/AF-0000000211046780-model_v1.cif",
+        "model_format": "MMCIF",
+        "model_type": null,
+        "model_page_url": "https://alphafold.ebi.ac.uk/entry/AF-0000000211046780",
+        "provider": "AlphaFold DB",
+        "number_of_conformers": null,
+        "ensemble_sample_url": null,
+        "ensemble_sample_format": null,
+        "created": "2026-02-20T08:22:17Z",
+        "sequence_identity": 1.0,
+        "uniprot_start": 1,
+        "uniprot_end": 142,
+        "coverage": 1.0,
+        "experimental_method": null,
+        "resolution": null,
+        "confidence_type": "pLDDT",
+        "confidence_version": null,
+        "confidence_avg_local_score": 94.52,
+        "oligomeric_state": "HETERODIMER",
+        "preferred_assembly_id": null,
+        "entities": [
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P69905",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit alpha",
+            "chain_ids": [
+              "A"
+            ]
+          },
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P68873",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit beta",
+            "chain_ids": [
+              "B"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "summary": {
+        "model_identifier": "AF-0000000203852921",
+        "model_category": "AB-INITIO",
+        "model_url": "https://alphafold.ebi.ac.uk/files/AF-0000000203852921-model_v1.cif",
+        "model_format": "MMCIF",
+        "model_type": null,
+        "model_page_url": "https://alphafold.ebi.ac.uk/entry/AF-0000000203852921",
+        "provider": "AlphaFold DB",
+        "number_of_conformers": null,
+        "ensemble_sample_url": null,
+        "ensemble_sample_format": null,
+        "created": "2026-02-20T08:25:26Z",
+        "sequence_identity": 1.0,
+        "uniprot_start": 1,
+        "uniprot_end": 142,
+        "coverage": 1.0,
+        "experimental_method": null,
+        "resolution": null,
+        "confidence_type": "pLDDT",
+        "confidence_version": null,
+        "confidence_avg_local_score": 83.75,
+        "oligomeric_state": "HETERODIMER",
+        "preferred_assembly_id": null,
+        "entities": [
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P69905",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit alpha",
+            "chain_ids": [
+              "A"
+            ]
+          },
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "A0A2R8Y7X9",
+            "identifier_category": "UNIPROT",
+            "description": "Globin domain-containing protein",
+            "chain_ids": [
+              "B"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "summary": {
+        "model_identifier": "AF-0000000211047586",
+        "model_category": "AB-INITIO",
+        "model_url": "https://alphafold.ebi.ac.uk/files/AF-0000000211047586-model_v1.cif",
+        "model_format": "MMCIF",
+        "model_type": null,
+        "model_page_url": "https://alphafold.ebi.ac.uk/entry/AF-0000000211047586",
+        "provider": "AlphaFold DB",
+        "number_of_conformers": null,
+        "ensemble_sample_url": null,
+        "ensemble_sample_format": null,
+        "created": "2026-02-20T08:47:59Z",
+        "sequence_identity": 1.0,
+        "uniprot_start": 1,
+        "uniprot_end": 142,
+        "coverage": 1.0,
+        "experimental_method": null,
+        "resolution": null,
+        "confidence_type": "pLDDT",
+        "confidence_version": null,
+        "confidence_avg_local_score": 86.79,
+        "oligomeric_state": "HETERODIMER",
+        "preferred_assembly_id": null,
+        "entities": [
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "Q9NWU1",
+            "identifier_category": "UNIPROT",
+            "description": "3-oxoacyl-",
+            "chain_ids": [
+              "A"
+            ]
+          },
+          {
+            "entity_type": "POLYMER",
+            "entity_poly_type": "POLYPEPTIDE(L)",
+            "identifier": "P69905",
+            "identifier_category": "UNIPROT",
+            "description": "Hemoglobin subunit alpha",
+            "chain_ids": [
+              "B"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -167,3 +167,8 @@ For every route in the table:
 - Governance and Administration stay visually separated at the bottom of the nav.
 - Secondary (tab) navigation expands only where a section actually has more than one tab.
 - Direct URLs are preserved; redirects are added only after step 4's tests exist.
+
+
+## AlphaFold DB update — 18 November 2026
+
+Live structure workflow routes: `/nexarch/bioinformatics/structural-biology/alphafold`, `/nexarch/bioinformatics`, `/nexarch/evidence-library` (Add public structure), `/nexarch/dry-lab` (Select receptor structure). Studio “Attach structure artifact” carries `?project=`. These entries now route to the actual AlphaFold UI; unrelated preview features remain unavailable. See [AlphaFold UI](ALPHAFOLD-DB-INTEGRATION.md#nexarch-ui-and-molecular-viewer).

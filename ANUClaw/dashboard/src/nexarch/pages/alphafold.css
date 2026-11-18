@@ -1,0 +1,156 @@
+.af-page {
+  padding: 24px;
+  max-width: 1500px;
+  margin: auto;
+  color: var(--nx-text);
+  overflow-wrap: anywhere;
+}
+.af-page h1 {
+  font-size: 28px;
+  margin: 10px 0;
+}
+.af-page h2 {
+  font-size: 18px;
+  margin: 0 0 16px;
+}
+.af-page h3 {
+  font-size: 15px;
+  margin-top: 24px;
+}
+.af-page p {
+  line-height: 1.65;
+}
+.af-breadcrumb,
+.af-muted {
+  color: var(--nx-text-dim);
+  font-size: 12px;
+}
+.af-header,
+.af-result-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.af-links,
+.af-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+.af-links a,
+.af-page a {
+  color: var(--nx-gold);
+}
+.af-card {
+  background: var(--nx-surface, #13161b);
+  border: 1px solid var(--nx-border);
+  border-radius: 10px;
+  padding: 22px;
+  margin: 18px 0;
+  min-width: 0;
+}
+.af-search {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(240px, 2fr);
+  gap: 20px;
+  align-items: end;
+}
+.af-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(0, 2fr);
+  gap: 20px;
+}
+.af-page .nx-input {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.af-metadata {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 10px;
+}
+.af-metadata dt {
+  color: var(--nx-text-dim);
+}
+.af-metadata dd {
+  margin: 0;
+}
+.af-page table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 12px;
+}
+.af-page th,
+.af-page td {
+  text-align: left;
+  border-bottom: 1px solid var(--nx-border);
+  padding: 12px;
+  vertical-align: top;
+}
+.af-table-scroll {
+  overflow-x: auto;
+}
+.af-confidence {
+  max-height: 280px;
+  overflow: auto;
+  margin: 14px 0;
+}
+.af-error {
+  border-color: var(--nx-red);
+  color: #f2a5a5;
+}
+.af-notice,
+.af-info {
+  color: #8ac5e8;
+}
+.af-warnings {
+  border-left: 3px solid #e9b75b;
+}
+.af-warnings li {
+  margin: 10px 0;
+  line-height: 1.6;
+}
+.af-hash,
+.af-provenance pre {
+  font: 12px/1.6 monospace;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.af-handoff {
+  border-top: 1px solid var(--nx-border);
+  margin-top: 20px;
+}
+.af-handoff .nx-input {
+  margin: 8px 0 16px;
+}
+.af-confirm {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 20px 0;
+  line-height: 1.6;
+}
+.af-provenance {
+  padding: 20px;
+}
+.af-page select option {
+  background: #17191f;
+  color: #eee;
+}
+@media (max-width: 900px) {
+  .af-grid,
+  .af-search {
+    grid-template-columns: 1fr;
+  }
+  .af-page {
+    padding: 16px;
+  }
+  .af-metadata {
+    grid-template-columns: 110px minmax(0, 1fr);
+  }
+}

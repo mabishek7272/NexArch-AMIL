@@ -698,8 +698,10 @@ export async function migrate(pool: Pool): Promise<void> {
       `CREATE TABLE IF NOT EXISTS research_studio_artifacts (
         id VARCHAR(64) PRIMARY KEY, project_id VARCHAR(64) NOT NULL REFERENCES research_studio_projects(id) ON DELETE CASCADE,
         source_id VARCHAR(64) NOT NULL REFERENCES research_studio_sources(id) ON DELETE CASCADE,
-        kind VARCHAR(10) NOT NULL CHECK (kind IN ('pdf','text')), storage_path VARCHAR(500) NOT NULL, sha256 CHAR(64) NOT NULL, size_bytes INTEGER NOT NULL,
+        kind VARCHAR(10) NOT NULL CHECK (kind IN ('pdf','text','structure','confidence')), storage_path VARCHAR(500) NOT NULL, sha256 CHAR(64) NOT NULL, size_bytes INTEGER NOT NULL,
         created_at BIGINT NOT NULL, ordinal BIGSERIAL)`,
+      `ALTER TABLE research_studio_artifacts DROP CONSTRAINT IF EXISTS research_studio_artifacts_kind_check`,
+      `ALTER TABLE research_studio_artifacts ADD CONSTRAINT research_studio_artifacts_kind_check CHECK (kind IN ('pdf','text','structure','confidence'))`,
       `CREATE INDEX IF NOT EXISTS idx_rs_artifacts_source ON research_studio_artifacts(source_id)`,
       `CREATE TABLE IF NOT EXISTS research_studio_excerpts (
         id VARCHAR(64) PRIMARY KEY, project_id VARCHAR(64) NOT NULL REFERENCES research_studio_projects(id) ON DELETE CASCADE,
@@ -825,6 +827,41 @@ export async function migrate(pool: Pool): Promise<void> {
         content_sha256 CHAR(64) NOT NULL, byte_size INTEGER NOT NULL, storage_path VARCHAR(500) NOT NULL,
         manifest_json TEXT NOT NULL, built_at BIGINT NOT NULL, ordinal BIGSERIAL)`,
       `CREATE INDEX IF NOT EXISTS idx_rs_exports_project ON research_studio_exports(project_id, ordinal)`,
+    );
+    docTables.push(
+      // AlphaFold v1: public bytes use sci_sources; all associations and retrieval audit are private to scope.
+      `CREATE TABLE IF NOT EXISTS sci_af_lookups (
+        id VARCHAR(64) PRIMARY KEY, scope_kind VARCHAR(10) NOT NULL, scope_id VARCHAR(255) NOT NULL, requested_by VARCHAR(255) NOT NULL,
+        operation VARCHAR(20) NOT NULL, cache_key VARCHAR(200) NOT NULL, metadata_source_id VARCHAR(64) NOT NULL REFERENCES sci_sources(id),
+        response_sha256 CHAR(64) NOT NULL, normalized_json TEXT NOT NULL, retrieval_endpoint TEXT NOT NULL, retrieved_at BIGINT NOT NULL,
+        checked_at BIGINT NOT NULL, cache_status VARCHAR(20) NOT NULL, created_at BIGINT NOT NULL)`,
+      `CREATE INDEX IF NOT EXISTS sci_af_lookup_scope ON sci_af_lookups(scope_kind, scope_id, created_at)`,
+      `CREATE TABLE IF NOT EXISTS sci_af_imports (
+        id VARCHAR(64) PRIMARY KEY, lookup_id VARCHAR(64) NOT NULL REFERENCES sci_af_lookups(id), source_id VARCHAR(64) NOT NULL REFERENCES sci_sources(id),
+        scope_kind VARCHAR(10) NOT NULL, scope_id VARCHAR(255) NOT NULL, requested_by VARCHAR(255) NOT NULL,
+        model_id VARCHAR(100) NOT NULL, file_key VARCHAR(20) NOT NULL, provenance_json TEXT NOT NULL, created_at BIGINT NOT NULL)`,
+      `CREATE TABLE IF NOT EXISTS research_studio_structure_links (
+        id VARCHAR(64) PRIMARY KEY, project_id VARCHAR(64) NOT NULL REFERENCES research_studio_projects(id),
+        studio_source_id VARCHAR(64) NOT NULL REFERENCES research_studio_sources(id), import_id VARCHAR(64) NOT NULL REFERENCES sci_af_imports(id),
+        artifact_id VARCHAR(64) NOT NULL REFERENCES research_studio_artifacts(id), created_by VARCHAR(255) NOT NULL, created_at BIGINT NOT NULL,
+        supersedes VARCHAR(64), invalidated_at BIGINT)`,
+      `CREATE TABLE IF NOT EXISTS sci_af_receptors (
+        id VARCHAR(64) PRIMARY KEY, attachment_id VARCHAR(64) NOT NULL REFERENCES research_studio_structure_links(id),
+        project_id VARCHAR(64) NOT NULL REFERENCES research_studio_projects(id), created_by VARCHAR(255) NOT NULL,
+        input_json TEXT NOT NULL, created_at BIGINT NOT NULL, invalidated_at BIGINT)`,
+      `CREATE OR REPLACE FUNCTION sci_af_immutable() RETURNS trigger AS $$ BEGIN RAISE EXCEPTION 'Content-addressed provenance is immutable'; END; $$ LANGUAGE plpgsql`,
+      `DROP TRIGGER IF EXISTS sci_sources_immutable ON sci_sources`,
+      `CREATE TRIGGER sci_sources_immutable BEFORE UPDATE OR DELETE ON sci_sources FOR EACH ROW EXECUTE FUNCTION sci_af_immutable()`,
+      `DROP TRIGGER IF EXISTS rs_artifacts_immutable ON research_studio_artifacts`,
+      `CREATE TRIGGER rs_artifacts_immutable BEFORE UPDATE OR DELETE ON research_studio_artifacts FOR EACH ROW EXECUTE FUNCTION sci_af_immutable()`,
+      `DROP TRIGGER IF EXISTS sci_af_receptor_input_immutable ON sci_af_receptors`,
+      `CREATE TRIGGER sci_af_receptor_input_immutable BEFORE UPDATE OF input_json,attachment_id,project_id,created_by,created_at ON sci_af_receptors FOR EACH ROW EXECUTE FUNCTION sci_af_immutable()`,
+      `DROP TRIGGER IF EXISTS rs_structure_pin_immutable ON research_studio_structure_links`,
+      `CREATE TRIGGER rs_structure_pin_immutable BEFORE UPDATE OF artifact_id,import_id,project_id,studio_source_id ON research_studio_structure_links FOR EACH ROW EXECUTE FUNCTION sci_af_immutable()`,
+      `DROP TRIGGER IF EXISTS sci_af_lookup_immutable ON sci_af_lookups`,
+      `CREATE TRIGGER sci_af_lookup_immutable BEFORE UPDATE OR DELETE ON sci_af_lookups FOR EACH ROW EXECUTE FUNCTION sci_af_immutable()`,
+      `DROP TRIGGER IF EXISTS sci_af_import_immutable ON sci_af_imports`,
+      `CREATE TRIGGER sci_af_import_immutable BEFORE UPDATE OR DELETE ON sci_af_imports FOR EACH ROW EXECUTE FUNCTION sci_af_immutable()`,
     );
     for (const ddl of docTables) await client.query(ddl);
     await client.query('CREATE INDEX IF NOT EXISTS idx_candidates_doc ON observation_candidates(document_id, status)');

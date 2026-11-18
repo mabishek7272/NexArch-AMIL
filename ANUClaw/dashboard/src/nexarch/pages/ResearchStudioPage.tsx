@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Upload, Plus, Check, Lock } from 'lucide-react';
 import { api } from '../../lib/api';
 import { Badge, Button, WorkspaceBar, NotAvailableYet, Drawer, useNarrow, SR_ONLY } from '../ui';
@@ -80,6 +80,7 @@ export default function ResearchStudioPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <Link className="nx-btn" style={{ margin: 16 }} to={`/nexarch/bioinformatics/structural-biology/alphafold?project=${sel.id}`}>Attach structure artifact</Link>
       <WorkspaceBar
         badges={[
           { label: 'PROGRAMME', value: <span style={{ font: '600 13px Inter,sans-serif', color: 'var(--nx-text)' }}>{sel.title}</span> },

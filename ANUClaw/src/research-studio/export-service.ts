@@ -96,7 +96,7 @@ export async function buildDocx(title: string, sections: SectionRow[]): Promise<
 export interface ProvenanceManifest {
   schema: 'anuclaw-research-studio-export-manifest/v1'; builtAt: number; projectId: string;
   sections: Array<{ id: string; sectionKey: string; version: number; contentSource: string; contentSha256: string }>;
-  sources: Array<{ id: string; doi: string | null; metadataVerificationStatus: string }>;
+  sources: Array<{ id: string; doi: string | null; metadataVerificationStatus: string; structureProvenance?: unknown }>;
   visuals: Array<{ id: string; visualKey: string; kind: string; dataProvenance: unknown }>;
   manifestSha256: string;
 }
@@ -104,7 +104,7 @@ export function buildProvenanceManifest(projectId: string, sections: SectionRow[
   const base = {
     schema: 'anuclaw-research-studio-export-manifest/v1' as const, builtAt: now, projectId,
     sections: sections.map((s) => ({ id: s.id, sectionKey: s.section_key, version: s.version, contentSource: s.content_source, contentSha256: sha256Hex(s.content_text) })),
-    sources: sources.map((s) => ({ id: s.id, doi: s.doi, metadataVerificationStatus: s.metadata_verification_status })),
+    sources: sources.map((s) => ({ id: s.id, doi: s.doi, metadataVerificationStatus: s.metadata_verification_status, ...(s.source_type === 'predicted_structure' ? { structureProvenance: JSON.parse(s.metadata_json) } : {}) })),
     visuals: visuals.map((v) => ({ id: v.id, visualKey: v.visual_key, kind: v.kind, dataProvenance: JSON.parse(v.data_provenance_json) })),
   };
   return { ...base, manifestSha256: sha256Hex(canonical(base)) };

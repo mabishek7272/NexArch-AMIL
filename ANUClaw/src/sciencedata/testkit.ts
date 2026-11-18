@@ -1,4 +1,9 @@
 /** Test helpers: a tiny zip writer and a SYNTHETIC mock of the four providers (clearly not the real services). */
+import afFragments from './fixtures/alphafold/fragments.json';
+import afComplex from './fixtures/alphafold/complex.json';
+import afSummary from './fixtures/alphafold/summary.json';
+import afSequence from './fixtures/alphafold/sequence.json';
+import afAnnotations from './fixtures/alphafold/annotations.json';
 import * as http from 'http';
 import * as zlib from 'zlib';
 import type { AddressInfo } from 'net';
@@ -63,10 +68,18 @@ export async function startMockProviders(opts: MockOpts = {}): Promise<{ origin:
       if (m === 'huge') { res.writeHead(200, { 'content-type': 'application/octet-stream', 'content-length': String(60e6) }); res.end(Buffer.alloc(1024)); return true; }
       return false;
     };
+    const afJson = (v: unknown) => JSON.stringify(v).replaceAll('https://alphafold.ebi.ac.uk', origin());
+    if (p.startsWith('/api/complex/')) return send(200,afJson(afComplex));
+    if (p.startsWith('/api/uniprot/summary/')) return send(200,afJson(afSummary));
+    if (p === '/api/sequence/summary') return send(200,afJson(afSequence));
+    if (p.startsWith('/api/annotations/')) return send(200,afJson(afAnnotations));
+    if (p.includes('-confidence_v') && p.endsWith('.json')) return send(200,JSON.stringify({residueNumber:[1,2,3,4],confidenceScore:[95,72,55,30]}));
     const afV = state.afVersion ?? 4;
     if (p === '/api/prediction/P69905') {
       if (injected('afJson')) return;
-      return send(200, JSON.stringify([{ entryId: 'AF-P69905-F1', uniprotAccession: 'P69905', uniprotId: 'HBA_HUMAN', uniprotDescription: 'Hemoglobin subunit alpha', gene: 'HBA1', organismScientificName: 'Homo sapiens', taxId: 9606, modelCreatedDate: '2022-06-01', latestVersion: afV, uniprotStart: 1, uniprotEnd: 142, globalMetricValue: 97.9, fractionPlddtVeryHigh: 0.95, fractionPlddtConfident: 0.05, fractionPlddtLow: 0, fractionPlddtVeryLow: 0, pdbUrl: `${state.afFileBase ?? origin()}/files/AF-P69905-F1-model_v${afV}.pdb`, cifUrl: `${state.afFileBase ?? origin()}/files/AF-P69905-F1-model_v${afV}.cif`, paeDocUrl: `${state.afFileBase ?? origin()}/files/AF-P69905-F1-predicted_aligned_error_v${afV}.json` }]));
+      if (mode('afJson') === 'empty') return send(200,'[]');
+      if (mode('afJson') === 'fragments') return send(200,afJson(afFragments));
+      return send(200, JSON.stringify([{ modelEntityId: 'AF-P69905-F1', sequenceStart: 1, sequenceEnd: 142, sequence: 'A'.repeat(142), plddtDocUrl: `${origin()}/files/AF-P69905-F1-confidence_v${afV}.json`, entryId: 'AF-P69905-F1', uniprotAccession: 'P69905', uniprotId: 'HBA_HUMAN', uniprotDescription: 'Hemoglobin subunit alpha', gene: 'HBA1', organismScientificName: 'Homo sapiens', taxId: 9606, modelCreatedDate: '2022-06-01', latestVersion: afV, uniprotStart: 1, uniprotEnd: 142, globalMetricValue: 97.9, fractionPlddtVeryHigh: 0.95, fractionPlddtConfident: 0.05, fractionPlddtLow: 0, fractionPlddtVeryLow: 0, pdbUrl: `${state.afFileBase ?? origin()}/files/AF-P69905-F1-model_v${afV}.pdb`, cifUrl: `${state.afFileBase ?? origin()}/files/AF-P69905-F1-model_v${afV}.cif`, paeDocUrl: `${state.afFileBase ?? origin()}/files/AF-P69905-F1-predicted_aligned_error_v${afV}.json` }]));
     }
     if (p.startsWith('/files/AF-P69905-F1-model_v') && p.endsWith('.pdb')) { if (injected('afFile')) return; return send(200, PDB_TEXT.replace('SYNTHETIC MINI', `SYNTHETIC v${afV} MINI`), 'chemical/x-pdb'); }
     if (p.startsWith('/files/AF-P69905-F1-predicted_aligned_error')) return send(200, JSON.stringify([{ predicted_aligned_error: [[0, 1], [1, 0]], max_predicted_aligned_error: 31.75 }]));

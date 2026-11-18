@@ -10,6 +10,7 @@
  *                   search via E-utilities (db=gds)
  * Base URLs can be overridden ONLY for tests/local demos (ANUCLAW_SCIDATA_BASE_OVERRIDES, non-production, loopback only).
  */
+import { AF_QUALIFIER, normalizeAlphaFold } from './alphafold';
 import { Classification, ProviderId, ProviderInfo, ScienceError, SourceKind } from './types';
 
 export interface FilePlan { key: string; label: string; kind: SourceKind; classification: Classification; classificationNote: string; format: string; url: string; maxBytes: number; version: string; archive?: boolean; sizeKnownBytes?: number }
@@ -37,8 +38,8 @@ export function resolveBases(env: NodeJS.ProcessEnv = process.env): Bases {
 export const allowedOrigins = (b: Bases) => [...new Set(Object.values(b).map((u) => new URL(u).origin))];
 
 export const PROVIDERS: Record<ProviderId, ProviderInfo> = {
-  alphafold: { id: 'alphafold', name: 'AlphaFold Protein Structure Database (EMBL-EBI / Google DeepMind)', origins: ['alphafold.ebi.ac.uk'], accessionPattern: '^(?:[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9](?:[A-Z][A-Z0-9]{2}[0-9]){1,2})$', accessionExample: 'P69905', searchable: false,
-    license: 'CC BY 4.0 (provider-wide policy; see terms URL)', attribution: 'AlphaFold Protein Structure Database, EMBL-EBI; models by Google DeepMind. Cite Jumper et al. 2021 (Nature) and Varadi et al. 2022 (NAR).', termsUrl: 'https://alphafold.ebi.ac.uk/faq', restrictions: 'Computationally PREDICTED models. Retrieving an existing prediction is not running AlphaFold. Search by UniProt accession only.' },
+  alphafold: { id: 'alphafold', name: 'AlphaFold Protein Structure Database (EMBL-EBI / Google DeepMind)', origins: ['alphafold.ebi.ac.uk'], accessionPattern: AF_QUALIFIER, accessionExample: 'P69905', searchable: false,
+    license: 'CC BY 4.0 (provider-wide policy; see terms URL)', attribution: 'AlphaFold Protein Structure Database, EMBL-EBI; model producer and tool as reported in entry metadata. Cite Jumper et al. 2021 (Nature) and Varadi et al. 2022 (NAR).', termsUrl: 'https://alphafold.ebi.ac.uk/faq', restrictions: 'Computationally PREDICTED models. Retrieving an existing prediction is not running AlphaFold. Lookup by UniProt accession or supported model ID. Subject to EMBL-EBI terms: https://www.ebi.ac.uk/about/terms-of-use/' },
   rcsb: { id: 'rcsb', name: 'RCSB Protein Data Bank', origins: ['data.rcsb.org', 'files.rcsb.org', 'search.rcsb.org'], accessionPattern: '^[0-9][A-Za-z0-9]{3}$', accessionExample: '4HHB', searchable: true,
     license: 'CC0 1.0 for core archive data (provider-wide policy; see terms URL)', attribution: 'RCSB Protein Data Bank (rcsb.org); wwPDB. Cite the entry\'s primary citation.', termsUrl: 'https://www.rcsb.org/pages/usage-policy', restrictions: 'Entries may be experimental OR computed models; the connector reports which, from the record itself.' },
   ncbi_datasets: { id: 'ncbi_datasets', name: 'NCBI Datasets (genome assemblies)', origins: ['api.ncbi.nlm.nih.gov'], accessionPattern: '^GC[AF]_[0-9]{9}\\.[0-9]+$', accessionExample: 'GCF_000819615.1', searchable: true,
@@ -49,7 +50,7 @@ export const PROVIDERS: Record<ProviderId, ProviderInfo> = {
 
 export function normalizeAccession(provider: ProviderId, raw: unknown): string {
   const s = typeof raw === 'string' ? raw.trim() : '';
-  const acc = provider === 'alphafold' || provider === 'geo' || provider === 'ncbi_datasets' ? s.toUpperCase() : s.toUpperCase();
+  const acc = provider === 'alphafold' || provider === 'geo' || provider === 'ncbi_datasets' ? s.toUpperCase().replace(/-MODEL_V/,'-model_v') : s.toUpperCase();
   if (!new RegExp(PROVIDERS[provider].accessionPattern).test(acc)) throw new ScienceError('bad_accession', `'${s.slice(0, 40)}' is not a valid ${PROVIDERS[provider].name.split(' (')[0]} accession (example: ${PROVIDERS[provider].accessionExample}).`, 400);
   return acc;
 }
@@ -60,25 +61,10 @@ const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFi
 const must = <T>(v: T | null | undefined, what: string): T => { if (v === null || v === undefined) throw new ScienceError('malformed_response', `The provider response has no ${what}.`, 502); return v; };
 
 export function describeAlphaFold(acc: string, json: unknown, b: Bases): RecordDescription {
-  if (!Array.isArray(json) || !json.length) throw new ScienceError('malformed_response', 'AlphaFold returned no prediction list.', 502);
-  const e = json[0] as Record<string, any>;
-  const entryId = must(str(e.entryId), 'entryId'); const version = must(num(e.latestVersion), 'latestVersion');
-  const files: FilePlan[] = []; const warnings: string[] = [];
-  for (const [key, field, fmt, kind] of [['pdb', 'pdbUrl', 'pdb', 'structure_file'], ['cif', 'cifUrl', 'mmcif', 'structure_file'], ['pae', 'paeDocUrl', 'json', 'confidence_file']] as const) {
-    const u = str(e[field]); if (!u) { warnings.push(`No ${key} file is listed for this entry.`); continue; }
-    files.push({ key, label: key === 'pae' ? 'Predicted aligned error (confidence)' : `Predicted model (${fmt})`, kind, classification: 'predicted', classificationNote: 'Computationally predicted by AlphaFold; not an experimental structure. Per-residue pLDDT is stored in the B-factor column.', format: fmt, url: u, maxBytes: key === 'pae' ? 20e6 : 15e6, version: String(version) });
-  }
-  return {
-    provider: 'alphafold', accession: acc, title: str(e.uniprotDescription), classification: 'predicted',
-    classificationNote: 'AlphaFold DB models are computational predictions. They are not experimental structures and are not validated for any clinical or ligand-binding use.', sourceVersion: `v${version}`,
-    metadata: {
-      entryId, uniprotAccession: str(e.uniprotAccession), uniprotId: str(e.uniprotId), gene: str(e.gene), organism: str(e.organismScientificName), taxId: num(e.taxId), modelCreatedDate: str(e.modelCreatedDate), latestVersion: version,
-      sequenceLength: num(e.uniprotEnd) !== null && num(e.uniprotStart) !== null ? e.uniprotEnd - e.uniprotStart + 1 : null,
-      confidence: { globalMetricValuePlddt: num(e.globalMetricValue), fractionPlddtVeryHigh: num(e.fractionPlddtVeryHigh), fractionPlddtConfident: num(e.fractionPlddtConfident), fractionPlddtLow: num(e.fractionPlddtLow), fractionPlddtVeryLow: num(e.fractionPlddtVeryLow), meaning: 'pLDDT is the model\'s own per-residue confidence estimate (0–100). It is not an accuracy guarantee.' },
-      entriesInResponse: json.length,
-    },
-    files, warnings,
-  };
+  const normalized = normalizeAlphaFold('prediction', json, b.alphafold);
+  const files: FilePlan[] = normalized.models.flatMap((m, i) => m.files.map((f) => ({ key: i === 0 ? ({ mmcif: 'cif' } as Record<string, string>)[f.key] ?? f.key : `${m.modelId}:${f.key}`, label: `${m.modelId} (${f.format})`, kind: f.format === 'pae' || f.format === 'plddt' ? 'confidence_file' as const : 'structure_file' as const, classification: 'predicted' as const, classificationNote: normalized.warnings[0].message, format: f.format === 'pae' || f.format === 'plddt' ? 'json' : f.format, url: f.url, maxBytes: 20e6, version: String(m.provenance.version ?? 'unknown') })));
+  const m = normalized.models[0];
+  return { provider: 'alphafold', accession: acc, title: m?.proteinNames[0] ?? null, classification: 'predicted', classificationNote: 'AlphaFold DB computational prediction; not an experimental structure or clinical evidence.', sourceVersion: m?.provenance.version ? `v${m.provenance.version}` : 'unknown', metadata: { ...normalized, entryId: m?.modelId ?? null, entriesInResponse: normalized.models.length, sequenceLength: m?.sequenceLength ?? (m?.range ? m.range.end - m.range.start + 1 : null), confidence: { meaning: 'pLDDT is a confidence estimate, not experimental evidence and not an accuracy guarantee.', ...m?.confidence, globalMetricValuePlddt: m?.confidence.meanPlddt ?? null } }, files, warnings: normalized.warnings.map((w) => w.message) };
 }
 
 export function describeRcsb(id: string, json: unknown, b: Bases): RecordDescription {

@@ -93,7 +93,9 @@ export async function setFulltextStatus(sourceId: string, projectId: string, use
 export async function reviseSourceMetadata(sourceId: string, projectId: string, userId: string, patch: Partial<NewSourceInput> & { correctionStatus?: SourceRow['correction_status'] }, retrievalMetadata: Record<string, unknown>, now = Date.now()): Promise<{ source: SourceRow; invalidatedExcerpts: string[]; invalidatedTasks: string[] }> {
   const current = await ownSource(sourceId, projectId, userId);
   const nextMeta = { ...JSON.parse(current.metadata_json), ...(patch.metadata ?? {}) };
-  const material = (patch.doi !== undefined && patch.doi !== current.doi) || (patch.title !== undefined && patch.title !== current.title)
+  const oldMeta = JSON.parse(current.metadata_json);
+  const structureChanged = current.source_type === 'predicted_structure' && patch.metadata != null && ['sha256','modelVersion','rawMetadataHash'].some((k) => (patch.metadata as Record<string, unknown>)[k] !== undefined && (patch.metadata as Record<string, unknown>)[k] !== oldMeta[k]);
+  const material = structureChanged || (patch.doi !== undefined && patch.doi !== current.doi) || (patch.title !== undefined && patch.title !== current.title)
     || (patch.correctionStatus !== undefined && patch.correctionStatus !== current.correction_status);
   const metaJson = JSON.stringify(nextMeta);
   const versions = await db.query<{ n: string }>('SELECT COUNT(*)::text AS n FROM research_studio_source_versions WHERE source_id = $1', [sourceId]);
@@ -133,7 +135,7 @@ export async function decideSourceLink(linkId: string, projectId: string, userId
 }
 
 // ── Artifacts (metadata row; file bytes live under import-service's artifactRoot) ──────────────────────────────────
-export async function recordArtifact(projectId: string, sourceId: string, userId: string, kind: 'pdf' | 'text', storagePath: string, sha256: string, sizeBytes: number, now = Date.now()): Promise<ArtifactRow> {
+export async function recordArtifact(projectId: string, sourceId: string, userId: string, kind: ArtifactRow['kind'], storagePath: string, sha256: string, sizeBytes: number, now = Date.now()): Promise<ArtifactRow> {
   await ownSource(sourceId, projectId, userId);
   const id = uid();
   await db.query('INSERT INTO research_studio_artifacts (id, project_id, source_id, kind, storage_path, sha256, size_bytes, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)',

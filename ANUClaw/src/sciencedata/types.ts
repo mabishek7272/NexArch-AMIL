@@ -32,7 +32,7 @@ export interface SourceRecord {
 
 /** Explicit, machine-readable failure states. */
 export type FetchErrorCode =
-  | 'blocked_origin' | 'redirect_refused' | 'too_large' | 'rate_limited' | 'not_found' | 'unavailable' | 'timeout'
+  | 'cancelled' | 'blocked_origin' | 'redirect_refused' | 'too_large' | 'rate_limited' | 'not_found' | 'unavailable' | 'timeout'
   | 'bad_content_type' | 'malformed_response' | 'budget_exhausted' | 'bad_accession' | 'unsupported_format' | 'integrity_failure' | 'access_denied';   // access_denied = the provider answered 401/403; WHY is not established (never inferred to be controlled access)
 
 export class ScienceError extends Error {

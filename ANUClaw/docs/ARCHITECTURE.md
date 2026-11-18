@@ -47,3 +47,8 @@
 
 PostgreSQL only (schema created by `ensureDbReady()` in `src/db/connection.ts`; additive migrations). Files for uploaded
 documents live under `ANUCLAW_DOCUMENT_DIR`. Nothing is stored in the browser except UI preferences.
+
+
+## AlphaFold DB update — 18 November 2026
+
+AlphaFold DB now extends the existing science provider hierarchy, SafeFetcher, scoped blobs/retrievals, shared PG limits, and Studio artifacts. Current-schema normalization and raw-response hashes are retained separately. Private project links and confirmed receptor inputs remain owner scoped. See [AlphaFold integration](ALPHAFOLD-DB-INTEGRATION.md).

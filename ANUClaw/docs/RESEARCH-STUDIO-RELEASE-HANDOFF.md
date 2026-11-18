@@ -249,3 +249,8 @@ and no fabricated measurements anywhere. The exact boundary preventing a product
 claim is: no live AI-provider or browser-account integration exists, no real-world data or approval has ever
 been used, and every output explicitly requires human confirmation before any external, academic, or clinical
 use.
+
+
+## AlphaFold DB update — 18 November 2026
+
+AlphaFold structure sources now attach through the existing project/source artifact service. Both copied bytes and raw provider metadata are SHA-256 linked; exports retain CC BY 4.0/EMBL attribution. Replacing a pinned structure marks prior receptor inputs and downstream evidence/tasks/sections/visuals stale. See [structure handoff](ALPHAFOLD-DB-INTEGRATION.md#docking-boundary). This public data connector does not change the separate browser/model-provider connector status.

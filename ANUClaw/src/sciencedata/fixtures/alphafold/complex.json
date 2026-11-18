@@ -1,0 +1,52 @@
+[
+  {
+    "modelEntityId": "AF-0000000203852801",
+    "latestVersion": 1,
+    "globalMetricValue": 92.8,
+    "complexPredictionAccuracy_ipTM": 0.89,
+    "complexPredictionAccuracy_ipSAE": 0.83,
+    "complexPredictionAccuracy_pDockQ": 0.46,
+    "complexPredictionAccuracy_pDockQ2": 0.82,
+    "complexPredictionAccuracy_LIS": 0.69,
+    "providerId": "NVIDIA",
+    "isUniProtReferenceProteome": true,
+    "isUniProtReviewed": true,
+    "organismScientificName": [
+      "Homo sapiens"
+    ],
+    "uniprotAccession": [
+      "Q9NZD4",
+      "P69905"
+    ],
+    "uniprotDescription": [
+      "Alpha-hemoglobin-stabilizing protein",
+      "Hemoglobin subunit alpha"
+    ],
+    "gene": [
+      "AHSP",
+      "HBA1"
+    ],
+    "taxId": [
+      9606,
+      9606
+    ],
+    "assemblyType": "Hetero",
+    "oligomericState": "dimer",
+    "complexName": "Complex of Alpha-hemoglobin-stabilizing protein/Hemoglobin subunit alpha",
+    "complexComposition": [
+      {
+        "identifierType": "uniprotAccession",
+        "identifier": "Q9NZD4",
+        "stoichiometry": 1
+      },
+      {
+        "identifierType": "uniprotAccession",
+        "identifier": "P69905",
+        "stoichiometry": 1
+      }
+    ],
+    "isIsoform": false,
+    "isAMdata": false,
+    "isComplex": true
+  }
+]

@@ -182,3 +182,8 @@ Live checks establish connectivity and that the parsers read real files of these
 | 4 | Clinical approvals (named reviewer, source, population, exclusions, boundary cases) per rule/module | dossier status `signed_record_asserted_unverified` **plus** the reviewer's own signed record attached to the PR adding the register entry |
 | 5 | Provider data-processing terms; a provider-side spend limit on the API key | written agreement on file; limit visible in the provider console |
 | 6 | Real devices, real video of consenting people (ethics approval), study datasets | measured results attached to the relevant protocol |
+
+
+## AlphaFold DB update — 18 November 2026
+
+AlphaFold DB current API: all five official metadata operations; fixture transport failures and real PostgreSQL ownership/hash/invalidation routes; NexArch import/confidence/provenance/receptor workflow. Live metadata and fixture/browser evidence are separate. Governed PDBQT preparation remains unavailable, so receptor handoffs require preparation and never auto-run docking. Exact results: [integration and evidence](ALPHAFOLD-DB-INTEGRATION.md#verification-and-reproduction).

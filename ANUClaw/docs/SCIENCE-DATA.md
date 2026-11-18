@@ -99,3 +99,8 @@ Tests/demos only: `ANUCLAW_SCIDATA_BASE_OVERRIDES` (JSON of base URLs; loopback 
 | **LIVE, bounded** (`scripts/verify-science-live.ts`, `docs/evidence/science-live-*.json`) | real AlphaFold DB, RCSB, NCBI Datasets, GEO — see [ACCEPTANCE-MATRIX.md](ACCEPTANCE-MATRIX.md) for exact results and what was **not** verified live | the connectors work against the real services for the examples listed |
 
 None of this is clinical validation, and live retrieval of a record says nothing about the scientific validity of its content.
+
+
+## AlphaFold DB update — 18 November 2026
+
+Current AlphaFold normalization uses `modelEntityId`, `sequence`, `sequenceStart/end`; retains all returned fragments; exposes five official operations and explicit advertised PDB/mmCIF/bCIF/PAE/pLDDT import. Caches expire and support manual refresh; corrupt hashed blobs are now refused instead of silently repaired. Historical tests/live evidence above remain historical. See [current integration](ALPHAFOLD-DB-INTEGRATION.md).

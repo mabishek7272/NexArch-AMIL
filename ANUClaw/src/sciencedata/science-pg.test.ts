@@ -18,6 +18,7 @@ describe.skipIf(!URL_)('science data service (real PostgreSQL, synthetic mock pr
   const A = { kind: 'user' as const, id: 'user-A' }, B = { kind: 'user' as const, id: 'user-B' }, T1 = { kind: 'tenant' as const, id: 'tenant-1' };
 
   beforeAll(async () => {
+    process.env.ANUCLAW_AF_DAILY_BYTES = '1000000000'; process.env.ANUCLAW_AF_USER_RPM = '600';
     mock = await startMockProviders();
     const u = new URL(URL_!); admin = new Client({ connectionString: URL_ }); await admin.connect(); await admin.query(`CREATE DATABASE ${dbName}`);
     Object.assign(process.env, { PG_HOST: u.hostname, PG_PORT: u.port, PG_USER: decodeURIComponent(u.username), PG_PASSWORD: decodeURIComponent(u.password), PG_DATABASE: dbName });
@@ -196,12 +197,12 @@ describe.skipIf(!URL_)('science data service (real PostgreSQL, synthetic mock pr
     const man: any = await svc.manifest(A, (await svc.createWorkspace(A, 'sep', 'separation check')).id); expect(man.items).toEqual([]);
   });
 
-  it('REVIEW: cache reuse re-verifies the stored bytes — a corrupted cached file is NOT served and is re-fetched and repaired; refresh makes a new immutable version', async () => {
+  it('REVIEW: cache reuse re-verifies the stored bytes — a corrupted cached file is NOT served or silently repaired; refresh makes a new immutable version', async () => {
     const r1: any = await svc.retrieve(B, 'rcsb', '4HHB', ['pdb']); const s = r1.sources[0]; const fp = path.join(dir, 'files', s.sha256.slice(0, 2), s.sha256);
-    fs.chmodSync(fp, 0o644); fs.appendFileSync(fp, 'corrupt'); mock.hits.length = 0;
+    const good = fs.readFileSync(fp); fs.chmodSync(fp, 0o644); fs.appendFileSync(fp, 'corrupt'); mock.hits.length = 0;
     const r2: any = await svc.retrieve(B, 'rcsb', '4HHB', ['pdb']);
     expect(mock.hits.some((h) => h.includes('/download/4HHB.pdb'))).toBe(true);                    // not served from the corrupt cache
-    expect(r2.sources[0].id).toBe(s.id); expect((await svc.getSource(B, s.id) as any).integrity).toBe('ok');           // same immutable row, bytes repaired
+    expect(r2.problems[0].code).toBe('integrity_failure'); expect((await svc.getSource(B,s.id) as any).integrity).toBe('failed'); fs.writeFileSync(fp,good); // explicit test-only restoration after refusal
     mock.hits.length = 0; await svc.retrieve(B, 'rcsb', '4HHB', ['pdb']); expect(mock.hits.some((h) => h.includes('/download/'))).toBe(false);   // verified cache hit: no download
     mock.hits.length = 0; await svc.retrieve(B, 'rcsb', '4HHB', ['pdb'], { refresh: true }); expect(mock.hits.some((h) => h.includes('/download/4HHB.pdb'))).toBe(true);   // refresh bypasses the cache
   });

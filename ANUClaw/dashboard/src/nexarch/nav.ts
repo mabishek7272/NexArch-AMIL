@@ -33,15 +33,15 @@ export const NEXARCH_NAV: NavGroup[] = [
     items: [
       { label: 'Overview', icon: LayoutDashboard, to: '/nexarch', roles: ALL, status: 'live' },
       { label: 'Research Studio', icon: Microscope, to: '/nexarch/research-studio', roles: ['admin', 'operator'], status: 'live' },
-      { label: 'Evidence Library', icon: Library, to: '/nexarch/evidence-library', roles: ['admin', 'operator'], status: 'preview' },
+      { label: 'Evidence Library', icon: Library, to: '/nexarch/evidence-library', roles: ['admin', 'operator'], status: 'live' },
       { label: 'Manuscripts', icon: FileText, to: '/nexarch/manuscripts', roles: ['admin', 'operator'], status: 'preview' },
     ],
   },
   {
     group: 'Laboratory',
     items: [
-      { label: 'Dry Lab', icon: Beaker, to: '/nexarch/dry-lab', roles: ['admin', 'operator'], status: 'preview' },
-      { label: 'Bioinformatics', icon: Dna, to: '/nexarch/bioinformatics', roles: ['admin', 'operator'], status: 'preview' },
+      { label: 'Dry Lab', icon: Beaker, to: '/nexarch/dry-lab', roles: ['admin', 'operator'], status: 'live' },
+      { label: 'Bioinformatics', icon: Dna, to: '/nexarch/bioinformatics', roles: ['admin', 'operator'], status: 'live' },
       { label: 'Posture Analysis', icon: PersonStanding, to: '/nexarch/posture-analysis', roles: ['admin', 'operator', 'clinician'], status: 'preview' },
       { label: 'Monitoring', icon: Activity, to: '/nexarch/monitoring', roles: ['admin', 'operator', 'clinician'], status: 'preview' },
     ],

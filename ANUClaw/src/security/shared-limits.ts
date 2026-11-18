@@ -54,3 +54,16 @@ export async function pgReserveQuota(tenantId: string, quota: number | null, mon
     [tenantId, month, quota, new Date().toISOString()]);
   return r.length ? Number(r[0].usage_this_month) : null;
 }
+
+/** Generic atomic unit reservation using the shared fixed-window counter store.
+ * Used for conservative download-byte budgets: reserve the full response cap before I/O.
+ * Failed/short downloads do not refund reservations (bounds partial responses and retries).
+ */
+export async function pgReserveUnits(key: string, units: number, limit: number, windowMs: number, now = Date.now()): Promise<boolean> {
+  if (!Number.isSafeInteger(units) || units < 1 || units > limit) return false;
+  const start = now - now % windowMs;
+  const rows = await db.query(`INSERT INTO rate_counters (key, window_start, count) VALUES ($1,$2,$3)
+    ON CONFLICT (key, window_start) DO UPDATE SET count=rate_counters.count+$3
+    WHERE rate_counters.count+$3 <= $4 RETURNING count`, [key, start, units, limit]);
+  return rows.length > 0;
+}

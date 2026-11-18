@@ -3,12 +3,13 @@ import { AlphaFoldStructureEngine } from './alphafold';
 
 // Shape mirrors the real EBI AlphaFold DB /api/prediction/<acc> response.
 const SAMPLE = [{
-  entryId: 'AF-P69905-F1',
+  modelEntityId: 'AF-P69905-F1',
   gene: 'HBA1',
   uniprotAccession: 'P69905',
   uniprotDescription: 'Hemoglobin subunit alpha',
   organismScientificName: 'Homo sapiens',
-  uniprotEnd: 142,
+  sequenceEnd: 142,
+  sequenceStart: 1,
   latestVersion: 4,
   cifUrl: 'https://alphafold.ebi.ac.uk/files/AF-P69905-F1-model_v4.cif',
   pdbUrl: 'https://alphafold.ebi.ac.uk/files/AF-P69905-F1-model_v4.pdb',
@@ -26,7 +27,7 @@ describe('AlphaFold structure engine', () => {
     expect(r.output.sequence_length).toBe(142);
     expect(r.output.pdb_url).toContain('.pdb');
     expect(r.reproducibility_class).toBe('snapshot_only_external');
-    expect(r.artifacts[0]?.kind).toBe('structure');
+    expect(r.artifacts).toEqual([]); expect(r.output.models).toHaveLength(1);
   });
 
   it('validates the accession format', async () => {

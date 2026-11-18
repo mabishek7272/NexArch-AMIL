@@ -101,3 +101,8 @@ Every model call (OCR, embedding, Decision, review) is reserved against a per-UT
 - **Public scientific data:** AlphaFold DB, RCSB PDB, NCBI Datasets and GEO connectors with provenance, immutable versioned cache, scoped workspaces and manifests — research-only. **Live (real providers, bounded to 20 files/0.70 MiB):** AlphaFold P69905 ✓, RCSB 4HHB ✓, NCBI GCF_000819615.1 ✓ (after a Zip64 fix found live), GEO search/describe ✓, GEO series matrix fetched and parsed with the fixed fetcher (after an `Accept`-header fix found live) but the full GEO retrieve→store flow was not re-run within the budget. Mock-only: rate limits, outages, oversize, tamper detection. See SCIENCE-DATA.md and the acceptance matrix.
 
 - **Task 72:** nextflow functional; PyMOL non-functional on Python 3.12 (recorded); application-path container job verified with an agent double (no Claude); rehearsal evidence in `evidence/acceptance-rehearsal-latest.json`; reproducibility manifest in `evidence/repro-manifest.json`. GSE2 real-bytes replay impossible (bytes not retained) — fresh request pending.
+
+
+## AlphaFold DB update — 18 November 2026
+
+AlphaFold DB current-schema connector implemented. The official prediction/complex/UniProt summary/sequence summary/annotations endpoints were live checked with metadata-only bounds; PDB/mmCIF/bCIF/PAE/pLDDT are explicit advertised import choices. Fixture imports and browser workflows do not constitute live coordinate validation. See [current AlphaFold status](ALPHAFOLD-DB-INTEGRATION.md).

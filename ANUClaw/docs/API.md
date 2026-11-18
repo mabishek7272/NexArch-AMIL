@@ -503,3 +503,8 @@ Each company's data is fully isolated:
 
 Built by **AMGI Research — Abi and Anu**  
 Enterprise plans, custom skill development, on-premise deployment: contact AMGI.
+
+
+## AlphaFold DB update — 18 November 2026
+
+`POST /v1/science/alphafold/lookup`, `GET /v1/science/alphafold/lookups/{id}`, `POST /v1/science/alphafold/import`, and `GET /v1/science/alphafold/imports/{id}` use existing tenant authentication/quotas. Dashboard `/api/science/alphafold` adds owner-only project attachment/receptor operations. [Request formats, errors, limits and runbook](ALPHAFOLD-DB-INTEGRATION.md#application-api).

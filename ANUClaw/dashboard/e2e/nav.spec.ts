@@ -13,7 +13,6 @@ const ALL_NAV_LABELS = [
 ];
 
 const PREVIEW_LABELS = [
-  'Evidence Library', 'Dry Lab', 'Bioinformatics',
   'Manuscripts', 'Posture Analysis', 'Monitoring', 'Validation', 'Pipelines',
   'Governance', 'Administration',
 ];

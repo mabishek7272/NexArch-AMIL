@@ -116,3 +116,8 @@
   against `ANUCLAW_TEST_PG_URL` is the fastest way to confirm the engine still behaves correctly
   after a change; see [RESEARCH-STUDIO-EVALUATION.md](RESEARCH-STUDIO-EVALUATION.md) for the exact
   commands and current results.
+
+
+## AlphaFold DB update — 18 November 2026
+
+Use NexArch “Attach structure artifact”, select a public model and one format, import it, then attach to an owned project. Review predicted-model warnings and record any project criterion/source. For Dry Lab, confirm the selected chain/model/coverage; preparation remains required. Export provenance preserves attribution. Operational details: [AlphaFold runbook](ALPHAFOLD-DB-INTEGRATION.md).

@@ -25,6 +25,7 @@ import { runRules, RULE_ENGINE_VERSION } from '../../documents/rules';
 import { modelRoles } from '../../ai/openrouter';
 import { SPECIALTIES } from '../../specialties/registry';
 import { isUtcDay, pgReport } from '../../ai/spend';
+import { alphaFold } from '../../sciencedata/alphafold-service';
 import { science, Scope as SciScope } from '../../sciencedata/service';
 import { PROVIDER_IDS, ProviderId } from '../../sciencedata/types';
 
@@ -220,6 +221,10 @@ router.get('/v1/evidence/search', ...guards, get(async (req, res) => {
 // ── Public scientific data (research-only; tenant-scoped searches, retrievals, workspaces) ──────────────────
 const sciScope = (req: AuthRequest): SciScope => ({ kind: 'tenant', id: req.tenant!.tenant_id });
 const sciProvider = (v: unknown): ProviderId => { if (!PROVIDER_IDS.includes(v as ProviderId)) throw new WorkflowError(400, 'bad_provider', `provider must be one of ${PROVIDER_IDS.join(', ')}.`); return v as ProviderId; };
+router.post('/v1/science/alphafold/lookup', ...guards, get(async (req,res) => { const controller = new AbortController(); res.once('close', () => { if (!res.writableEnded) controller.abort(); }); res.json(await alphaFold().lookup(sciScope(req),actor(req),req.body?.operation,req.body?.value,req.body?.refresh === true,controller.signal)); }));
+router.get('/v1/science/alphafold/lookups/:id', ...guards, get(async (req,res) => { res.json(await alphaFold().getLookup(sciScope(req),String(req.params.id))); }));
+router.post('/v1/science/alphafold/import', ...guards, get(async (req,res) => { const controller = new AbortController(); res.once('close', () => { if (!res.writableEnded) controller.abort(); }); res.status(201).json(await alphaFold().importFile(sciScope(req),actor(req),req.body ?? {},controller.signal)); }));
+router.get('/v1/science/alphafold/imports/:id', ...guards, get(async (req,res) => { res.json(await alphaFold().getImport(sciScope(req),String(req.params.id))); }));
 router.get('/v1/science', ...guards, get(async (_req, res) => { res.json(science().catalog()); }));
 router.post('/v1/science/search', ...guards, get(async (req, res) => { res.json(await science().search(sciScope(req), sciProvider(req.body?.provider), req.body?.query)); }));
 router.post('/v1/science/describe', ...guards, get(async (req, res) => { res.json(await science().describe(sciScope(req), sciProvider(req.body?.provider), req.body?.accession)); }));

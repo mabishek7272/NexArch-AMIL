@@ -13,6 +13,7 @@
  * Clinical content is SEED/unvalidated; internal demonstration only.
  */
 
+import { alphaFold } from '../../../sciencedata/alphafold-service';
 import { Router, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { db } from '../../../db';
@@ -201,6 +202,15 @@ router.post('/clinical/drug-combination', requireEngineRole, requireElabMfa, asy
 
 // ── Engine: Docking (RUO) — real AutoDock Vina from SMILES (needs Docker) ───────
 router.post('/dock', requireEngineRole, requireElabMfa, async (req: AuthRequest, res) => {
+  // Predicted-structure handoffs are pinned artifacts, never coerced into receptor SMILES.
+  // This runtime has no governed coordinate→PDBQT preparation adapter yet.
+  if (req.body?.receptorInputId) {
+    try {
+      const input = await alphaFold().getHandoff(req.user!.id,String(req.body.projectId ?? ''),String(req.body.receptorInputId));
+      if (input.invalidatedAt) { res.status(409).json({ code: 'receptor_invalidated', error: 'Receptor input was invalidated by an artifact replacement.' }); return; }
+      res.status(409).json({ code: 'receptor_preparation_required', error: 'Prepare the pinned coordinate artifact as PDBQT using a recorded tool/version and review it before docking.', receptorInput: input }); return;
+    } catch (e) { const err = e as { status?: number }; res.status(err.status === 404 ? 404 : 500).json({ error: err.status === 404 ? 'Not found.' : 'Unable to read receptor input.' }); return; }
+  }
   const { ligand_smiles, receptor_smiles, seed } = req.body ?? {};
   const out = await dockFromSmiles({ ligand_smiles, receptor_smiles, seed });
   await auditElab(req.user!.id, 'elab.dock', { ligand_smiles, ok: out.ok });

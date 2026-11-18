@@ -10,6 +10,8 @@
  * fails closed with EngineError('unavailable').
  */
 
+import { AlphaFoldConnector, AF_ORIGIN, AFModel, normalizeAlphaFold, validateQualifier } from '../../sciencedata/alphafold';
+import { SafeFetcher } from '../../sciencedata/fetcher';
 import {
   EngineAdapter,
   EngineError,
@@ -21,6 +23,8 @@ import {
 
 export interface StructureInput { uniprot: string }
 export interface StructureResult {
+  models: AFModel[];
+  warnings: string[];
   uniprot_accession: string;
   entry_id: string;
   gene?: string;
@@ -41,12 +45,12 @@ type FetchLike = (url: string, init?: { signal?: AbortSignal; headers?: Record<s
 
 export class AlphaFoldStructureEngine implements EngineAdapter<StructureInput, StructureResult> {
   readonly id = 'structure-alphafold-db';
-  readonly version = '1.0.0';
+  readonly version = '2.0.0';
   readonly validated = false; // RUO
   readonly reproducibility_class = 'snapshot_only_external' as const;
 
   /** fetch is injectable so the parse/mapping logic is testable without network. */
-  constructor(private readonly fetchImpl: FetchLike = (url, init) => fetch(url, init) as any) {}
+  constructor(private readonly fetchImpl?: FetchLike) {}
 
   async run(input: StructureInput, ctx?: RunContext): Promise<EngineResult<StructureResult>> {
     const acc = String(input?.uniprot ?? '').trim().toUpperCase();
@@ -54,31 +58,34 @@ export class AlphaFoldStructureEngine implements EngineAdapter<StructureInput, S
       throw new EngineError('invalid_input', 'uniprot must be a UniProt accession (e.g. P69905)');
     }
 
-    let arr: any[];
+    let models: AFModel[];
+    let warnings: string[];
     try {
-      const resp = await this.fetchImpl(`${API}/${acc}`, { signal: ctx?.signal, headers: { accept: 'application/json' } });
-      if (resp.status === 404) throw new EngineError('invalid_input', `no AlphaFold model for accession ${acc}`);
-      if (!resp.ok) throw new EngineError('unavailable', `AlphaFold DB returned ${resp.status}`);
-      arr = (await resp.json()) as any[];
-    } catch (e) {
-      if (e instanceof EngineError) throw e;
-      throw new EngineError('unavailable', `AlphaFold DB unreachable: ${e instanceof Error ? e.message : String(e)}`);
-    }
-    const p = Array.isArray(arr) ? arr[0] : undefined;
-    if (!p) throw new EngineError('invalid_input', `no AlphaFold model for accession ${acc}`);
+      validateQualifier(acc);
+      let normalized;
+      if (this.fetchImpl) { // deterministic test injection; production always uses bounded SafeFetcher
+        const resp = await this.fetchImpl(`${API}/${acc}`, { signal: ctx?.signal, headers: { accept: 'application/json' } });
+        if (resp.status === 404) throw new EngineError('invalid_input', 'No AlphaFold model for this accession.');
+        if (!resp.ok) throw new EngineError('unavailable', `AlphaFold DB returned ${resp.status}`);
+        normalized = normalizeAlphaFold('prediction',await resp.json());
+      } else normalized = (await new AlphaFoldConnector(new SafeFetcher({ allowedOrigins: [AF_ORIGIN] })).lookup('prediction',acc,false,ctx?.signal)).normalized;
+      models = normalized.models; warnings = normalized.warnings.map((w) => w.message);
+    } catch (e) { if (e instanceof EngineError) throw e; throw new EngineError('unavailable', 'AlphaFold DB request failed or returned an unsupported schema.'); }
+    const p = models[0];
+    if (!p) throw new EngineError('invalid_input', 'No AlphaFold model for this accession.');
 
     const fetched_at = nowIso(ctx?.now);
     const output: StructureResult = {
+      models, warnings,
       uniprot_accession: acc,
-      entry_id: p.entryId ?? `AF-${acc}`,
-      gene: p.gene,
-      organism: p.organismScientificName,
-      description: p.uniprotDescription,
-      sequence_length: typeof p.uniprotEnd === 'number' ? p.uniprotEnd : undefined,
-      model_version: p.latestVersion,
-      cif_url: p.cifUrl,
-      pdb_url: p.pdbUrl,
-      pae_image_url: p.paeImageUrl,
+      entry_id: p.modelId,
+      gene: p.genes[0],
+      organism: p.organisms[0],
+      description: p.proteinNames[0],
+      sequence_length: p.sequenceLength ?? (p.range ? p.range.end-p.range.start+1 : undefined),
+      model_version: p.provenance.version ?? undefined,
+      cif_url: p.files.find((f)=>f.format==='mmcif')?.url,
+      pdb_url: p.files.find((f)=>f.format==='pdb')?.url,
       source: `${API}/${acc}`,
       fetched_at,
     };
@@ -88,8 +95,8 @@ export class AlphaFoldStructureEngine implements EngineAdapter<StructureInput, S
       engine_version: this.version,
       input_hash: hashEngineInput(this.id, this.version, { uniprot: acc }),
       output,
-      artifacts: output.pdb_url ? [{ id: output.entry_id, kind: 'structure', hash: output.pdb_url }] : [],
-      provenance: { tool: 'alphafold-db', tool_version: String(p.latestVersion ?? 'unknown'), params: { uniprot: acc }, refdb_versions: { alphafold_db: String(p.latestVersion ?? 'unknown') } },
+      artifacts: [], // metadata lookup does not import bytes; never label a URL as an artifact hash
+      provenance: { tool: 'alphafold-db', tool_version: String(p.provenance.version ?? 'unknown'), params: { uniprot: acc }, refdb_versions: { alphafold_db: String(p.provenance.version ?? 'unknown') } },
       reproducibility_class: this.reproducibility_class,
       started_at: fetched_at,
       finished_at: nowIso(ctx?.now),
