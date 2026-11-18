@@ -36,6 +36,15 @@ const OcrStudy      = lazy(() => import('./pages/OcrStudy'));
 const AikoshRegistry = lazy(() => import('./pages/AikoshRegistry'));
 const ResearchStudio = lazy(() => import('./pages/ResearchStudio'));
 
+// NexArch Lab redesign preview — feature-flagged by route prefix only; nothing above this line
+// changes, and nothing here is reachable unless a user navigates to /nexarch. See
+// docs/NAV-REDESIGN-ROUTE-MAP.md for the nav/role structure this follows.
+const NexArchShell      = lazy(() => import('./nexarch/NexArchShell'));
+const NexArchOverview   = lazy(() => import('./nexarch/pages/Overview'));
+const NexArchStudio     = lazy(() => import('./nexarch/pages/ResearchStudioPage'));
+const NexArchConnections= lazy(() => import('./nexarch/pages/Connections'));
+const NexArchStyleGuide = lazy(() => import('./nexarch/pages/StyleGuide'));
+
 const NAV = [
   { to: '/',              label: 'Dashboard',     Icon: LayoutDashboard, end: true },
   { to: '/conversations', label: 'Conversations', Icon: MessageSquare },
@@ -152,6 +161,14 @@ function Shell({ children }: { children: React.ReactNode }) {
             <span className="w-2 h-2 rounded-full dot-online" />
             <span className="text-3xs font-medium" style={{ color: '#00E676', letterSpacing: '0.06em' }}>SYSTEM ONLINE</span>
           </div>
+          <a
+            href="/nexarch"
+            className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-sm transition-all duration-200 mb-1"
+            style={{ color: 'rgba(214,166,74,0.8)', border: '1px solid rgba(214,166,74,0.2)', textDecoration: 'none' }}
+          >
+            NexArch Lab preview
+            <span className="text-3xs" style={{ opacity: 0.7 }}>→</span>
+          </a>
           <button
             onClick={logout}
             className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm transition-all duration-200"
@@ -299,6 +316,23 @@ export default function App() {
     <Routes>
       <Route path="/login"   element={<Suspense fallback={null}><Login /></Suspense>} />
       <Route path="/welcome" element={<Suspense fallback={null}><Welcome /></Suspense>} />
+      {/* NexArch Lab preview — deliberately NOT nested inside <Shell>: it has its own full-page
+          shell (NexArchShell) so the old and new navigation never render inside one another. */}
+      <Route path="/nexarch/*" element={
+        <TermsGuard>
+          <Suspense fallback={null}>
+            <Routes>
+              <Route element={<NexArchShell />}>
+                <Route index                  element={<NexArchOverview />} />
+                <Route path="research-studio" element={<NexArchStudio />} />
+                <Route path="connections"     element={<NexArchConnections />} />
+                <Route path="style-guide"     element={<NexArchStyleGuide />} />
+                <Route path="*"                element={<Navigate to="/nexarch" replace />} />
+              </Route>
+            </Routes>
+          </Suspense>
+        </TermsGuard>
+      } />
       <Route path="/*" element={
         <TermsGuard>
           <Shell>

@@ -1,0 +1,235 @@
+{
+  "viewports": {
+    "1440x900": {
+      "routes": {
+        "overview": {
+          "httpStatus": 200,
+          "screenshot": "/private/tmp/claude-502/-Users-reainmaker-Downloads-posture-analysis-claude-kind-galileo-qcm0y1/2d2df713-71a0-4951-abb5-e919784a882c/scratchpad/nexarch-qa/out/1440x900_overview.png",
+          "consoleErrorCount": 0,
+          "consoleErrors": [],
+          "axeViolations": []
+        },
+        "research-studio": {
+          "httpStatus": 200,
+          "screenshot": "/private/tmp/claude-502/-Users-reainmaker-Downloads-posture-analysis-claude-kind-galileo-qcm0y1/2d2df713-71a0-4951-abb5-e919784a882c/scratchpad/nexarch-qa/out/1440x900_research-studio.png",
+          "consoleErrorCount": 0,
+          "consoleErrors": [],
+          "axeViolations": []
+        },
+        "connections": {
+          "httpStatus": 200,
+          "screenshot": "/private/tmp/claude-502/-Users-reainmaker-Downloads-posture-analysis-claude-kind-galileo-qcm0y1/2d2df713-71a0-4951-abb5-e919784a882c/scratchpad/nexarch-qa/out/1440x900_connections.png",
+          "consoleErrorCount": 0,
+          "consoleErrors": [],
+          "axeViolations": []
+        },
+        "style-guide": {
+          "httpStatus": 200,
+          "screenshot": "/private/tmp/claude-502/-Users-reainmaker-Downloads-posture-analysis-claude-kind-galileo-qcm0y1/2d2df713-71a0-4951-abb5-e919784a882c/scratchpad/nexarch-qa/out/1440x900_style-guide.png",
+          "consoleErrorCount": 0,
+          "consoleErrors": [],
+          "axeViolations": []
+        }
+      }
+    },
+    "1280x800": {
+      "routes": {
+        "overview": {
+          "httpStatus": 200,
+          "screenshot": "/private/tmp/claude-502/-Users-reainmaker-Downloads-posture-analysis-claude-kind-galileo-qcm0y1/2d2df713-71a0-4951-abb5-e919784a882c/scratchpad/nexarch-qa/out/1280x800_overview.png",
+          "consoleErrorCount": 0,
+          "consoleErrors": [],
+          "axeViolations": []
+        },
+        "research-studio": {
+          "httpStatus": 200,
+          "screenshot": "/private/tmp/claude-502/-Users-reainmaker-Downloads-posture-analysis-claude-kind-galileo-qcm0y1/2d2df713-71a0-4951-abb5-e919784a882c/scratchpad/nexarch-qa/out/1280x800_research-studio.png",
+          "consoleErrorCount": 0,
+          "consoleErrors": [],
+          "axeViolations": []
+        },
+        "connections": {
+          "httpStatus": 200,
+          "screenshot": "/private/tmp/claude-502/-Users-reainmaker-Downloads-posture-analysis-claude-kind-galileo-qcm0y1/2d2df713-71a0-4951-abb5-e919784a882c/scratchpad/nexarch-qa/out/1280x800_connections.png",
+          "consoleErrorCount": 0,
+          "consoleErrors": [],
+          "axeViolations": []
+        },
+        "style-guide": {
+          "httpStatus": 200,
+          "screenshot": "/private/tmp/claude-502/-Users-reainmaker-Downloads-posture-analysis-claude-kind-galileo-qcm0y1/2d2df713-71a0-4951-abb5-e919784a882c/scratchpad/nexarch-qa/out/1280x800_style-guide.png",
+          "consoleErrorCount": 0,
+          "consoleErrors": [],
+          "axeViolations": []
+        }
+      }
+    },
+    "1024x768": {
+      "routes": {
+        "overview": {
+          "httpStatus": 200,
+          "screenshot": "/private/tmp/claude-502/-Users-reainmaker-Downloads-posture-analysis-claude-kind-galileo-qcm0y1/2d2df713-71a0-4951-abb5-e919784a882c/scratchpad/nexarch-qa/out/1024x768_overview.png",
+          "consoleErrorCount": 0,
+          "consoleErrors": [],
+          "axeViolations": []
+        },
+        "research-studio": {
+          "httpStatus": 200,
+          "screenshot": "/private/tmp/claude-502/-Users-reainmaker-Downloads-posture-analysis-claude-kind-galileo-qcm0y1/2d2df713-71a0-4951-abb5-e919784a882c/scratchpad/nexarch-qa/out/1024x768_research-studio.png",
+          "consoleErrorCount": 0,
+          "consoleErrors": [],
+          "axeViolations": []
+        },
+        "connections": {
+          "httpStatus": 200,
+          "screenshot": "/private/tmp/claude-502/-Users-reainmaker-Downloads-posture-analysis-claude-kind-galileo-qcm0y1/2d2df713-71a0-4951-abb5-e919784a882c/scratchpad/nexarch-qa/out/1024x768_connections.png",
+          "consoleErrorCount": 0,
+          "consoleErrors": [],
+          "axeViolations": []
+        },
+        "style-guide": {
+          "httpStatus": 200,
+          "screenshot": "/private/tmp/claude-502/-Users-reainmaker-Downloads-posture-analysis-claude-kind-galileo-qcm0y1/2d2df713-71a0-4951-abb5-e919784a882c/scratchpad/nexarch-qa/out/1024x768_style-guide.png",
+          "consoleErrorCount": 0,
+          "consoleErrors": [],
+          "axeViolations": []
+        }
+      }
+    },
+    "768x1024": {
+      "routes": {
+        "overview": {
+          "httpStatus": 200,
+          "screenshot": "/private/tmp/claude-502/-Users-reainmaker-Downloads-posture-analysis-claude-kind-galileo-qcm0y1/2d2df713-71a0-4951-abb5-e919784a882c/scratchpad/nexarch-qa/out/768x1024_overview.png",
+          "consoleErrorCount": 0,
+          "consoleErrors": [],
+          "axeViolations": []
+        },
+        "research-studio": {
+          "httpStatus": 200,
+          "screenshot": "/private/tmp/claude-502/-Users-reainmaker-Downloads-posture-analysis-claude-kind-galileo-qcm0y1/2d2df713-71a0-4951-abb5-e919784a882c/scratchpad/nexarch-qa/out/768x1024_research-studio.png",
+          "consoleErrorCount": 0,
+          "consoleErrors": [],
+          "axeViolations": []
+        },
+        "connections": {
+          "httpStatus": 200,
+          "screenshot": "/private/tmp/claude-502/-Users-reainmaker-Downloads-posture-analysis-claude-kind-galileo-qcm0y1/2d2df713-71a0-4951-abb5-e919784a882c/scratchpad/nexarch-qa/out/768x1024_connections.png",
+          "consoleErrorCount": 0,
+          "consoleErrors": [],
+          "axeViolations": []
+        },
+        "style-guide": {
+          "httpStatus": 200,
+          "screenshot": "/private/tmp/claude-502/-Users-reainmaker-Downloads-posture-analysis-claude-kind-galileo-qcm0y1/2d2df713-71a0-4951-abb5-e919784a882c/scratchpad/nexarch-qa/out/768x1024_style-guide.png",
+          "consoleErrorCount": 0,
+          "consoleErrors": [],
+          "axeViolations": []
+        }
+      }
+    }
+  },
+  "directRefresh": {
+    "1440x900_overview": {
+      "status": 200,
+      "nonBlank": true
+    },
+    "1440x900_research-studio": {
+      "status": 200,
+      "nonBlank": true
+    },
+    "1440x900_connections": {
+      "status": 200,
+      "nonBlank": true
+    },
+    "1440x900_style-guide": {
+      "status": 200,
+      "nonBlank": true
+    },
+    "1280x800_overview": {
+      "status": 200,
+      "nonBlank": true
+    },
+    "1280x800_research-studio": {
+      "status": 200,
+      "nonBlank": true
+    },
+    "1280x800_connections": {
+      "status": 200,
+      "nonBlank": true
+    },
+    "1280x800_style-guide": {
+      "status": 200,
+      "nonBlank": true
+    },
+    "1024x768_overview": {
+      "status": 200,
+      "nonBlank": true
+    },
+    "1024x768_research-studio": {
+      "status": 200,
+      "nonBlank": true
+    },
+    "1024x768_connections": {
+      "status": 200,
+      "nonBlank": true
+    },
+    "1024x768_style-guide": {
+      "status": 200,
+      "nonBlank": true
+    },
+    "768x1024_overview": {
+      "status": 200,
+      "nonBlank": true
+    },
+    "768x1024_research-studio": {
+      "status": 200,
+      "nonBlank": true
+    },
+    "768x1024_connections": {
+      "status": 200,
+      "nonBlank": true
+    },
+    "768x1024_style-guide": {
+      "status": 200,
+      "nonBlank": true
+    }
+  },
+  "drawerA11y": {
+    "steps": [
+      {
+        "step": "locate trigger candidates",
+        "count": 1
+      },
+      {
+        "step": "drawer opened via Enter on trigger",
+        "drawerCount": 1
+      },
+      {
+        "step": "focus moved inside drawer on open",
+        "pass": true
+      },
+      {
+        "step": "background inert/aria-hidden while open",
+        "pass": true
+      },
+      {
+        "step": "focus trapped inside drawer across 15 Tabs",
+        "pass": true
+      },
+      {
+        "step": "close control accessible name",
+        "value": "Close Provenance"
+      },
+      {
+        "step": "Escape closes drawer",
+        "pass": true
+      },
+      {
+        "step": "focus returned to triggering element after close",
+        "pass": true
+      }
+    ]
+  },
+  "consoleErrorsAnyRoute": []
+}

@@ -10,14 +10,16 @@ import { ECGLine } from '../components/ECGLine';
 
 const CAPABILITIES = [
   {
+    // Verified against container/skills/ (13 skill directories) — do not restate as "1,100+".
     icon: <Cpu size={22} />, color: '#00B8CC',
-    title: '1,100+ Domain Skills',
-    desc: 'Medical, legal, finance, genomics, oncology, radiology, pharmacology and more — all accessible via natural language.',
+    title: '13 Domain Skills',
+    desc: 'Clinical assessment, genomics, drug discovery, protein modeling, medical NLP, EHR/patient data, regulatory and security — all accessible via natural language.',
   },
   {
+    // Verified against src/channels/ (11 channel implementations) — do not restate as "14".
     icon: <Globe size={22} />, color: '#00C878',
-    title: '14 Messaging Channels',
-    desc: 'WhatsApp, Telegram, Discord, Slack, Signal, Gmail, Matrix and 7 more — one unified AI across every platform.',
+    title: '11 Messaging Channels',
+    desc: 'Discord, Slack, Telegram, Signal, Email, Matrix, IRC, Feishu, DingTalk, Nostr and a local web UI — one unified AI across every platform.',
   },
   {
     icon: <Brain size={22} />, color: '#9C27B0',
@@ -138,8 +140,8 @@ export default function Welcome() {
                   Before you begin, take a moment to understand what you're accessing.
                 </p>
                 <p className="text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-                  ANUClaw is a medical-grade AI research and clinical assistant platform with over 1,100 domain skills,
-                  real-time messaging across 14 channels, and a full audit trail. It is designed for authorised AMGI
+                  ANUClaw is a medical-grade AI research and clinical assistant platform with 13 domain skills,
+                  real-time messaging across 11 channels, and a full audit trail. It is designed for authorised AMGI
                   research staff and approved clinical teams only.
                 </p>
               </div>

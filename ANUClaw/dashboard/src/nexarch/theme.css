@@ -1,0 +1,273 @@
+/* NexArch Lab theme — scoped entirely under .nx-root so it never leaks into
+   the existing teal/navy dashboard theme (index.css, tailwind.config.js) and
+   never changes behavior for any existing page or component. Mounted only at
+   /nexarch/* via NexArchShell. */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+.nx-root {
+  --nx-bg:          #060708;
+  --nx-panel:       #0A0C0F;
+  --nx-panel-alt:   #10141A;
+  --nx-panel-row:   #0D1116;
+  --nx-active:      #171C23;
+  --nx-border:      #202730;
+  --nx-border-strong:#303842;
+  --nx-hairline:    #171C23;
+
+  --nx-text:        #F2EFE8;
+  --nx-text-soft:   #C5CAD0;
+  --nx-text-muted:  #9199A3;
+  --nx-text-dim:    #868C92; /* was #5C636C — lightened to pass WCAG AA (axe: 4.5:1 min) on all panel backgrounds */
+  --nx-text-disabled:#888D93; /* was #4A525B — lightened to pass WCAG AA */
+
+  --nx-gold:        #D6A64A;
+  --nx-gold-bright: #F0C66E;
+  --nx-gold-dim:    #A8895C; /* was #8C6428 — lightened to pass WCAG AA */
+
+  --nx-green:       #46A681;
+  --nx-green-bg:    #0D1713;
+  --nx-green-border:#2C5E4C;
+
+  --nx-amber:       #D78A45;
+  --nx-amber-bg:    #1B1309;
+  --nx-amber-border:#6B4522;
+
+  --nx-red:         #D65F63;
+  --nx-red-bg:      #1C1012;
+  --nx-red-border:  #6B3034;
+
+  --nx-purple:      #8474D8;
+  --nx-purple-bg:   #14121F;
+  --nx-purple-border:#4A3F7A;
+
+  --nx-blue:        #5684D8;
+  --nx-blue-bg:     #0E141F;
+  --nx-blue-border: #2F4878;
+
+  --nx-radius:      7px;
+  --nx-font-ui:     'Inter', system-ui, sans-serif;
+  --nx-font-mono:   'IBM Plex Mono', monospace;
+
+  background: var(--nx-bg);
+  color: var(--nx-text);
+  font-family: var(--nx-font-ui);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.nx-root * { box-sizing: border-box; }
+.nx-root table { border-collapse: collapse; }
+.nx-root svg { display: block; }
+
+.nx-mono { font-family: var(--nx-font-mono); }
+
+.nx-label {
+  font: 500 9.5px var(--nx-font-mono);
+  letter-spacing: .16em;
+  color: var(--nx-text-dim);
+  text-transform: uppercase;
+}
+
+.nx-panel {
+  background: var(--nx-panel);
+  border: 1px solid var(--nx-border);
+  border-radius: var(--nx-radius);
+}
+
+.nx-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--nx-hairline);
+  background: var(--nx-panel-alt);
+  font: 600 12.5px var(--nx-font-ui);
+  color: var(--nx-text);
+}
+
+.nx-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font: 600 9.5px var(--nx-font-mono);
+  white-space: nowrap;
+  border: 1px solid var(--nx-border-strong);
+  color: var(--nx-text-muted);
+}
+.nx-badge-green  { border-color: var(--nx-green-border);  background: var(--nx-green-bg);  color: var(--nx-green); }
+.nx-badge-amber  { border-color: var(--nx-amber-border);  background: var(--nx-amber-bg);  color: var(--nx-amber); }
+.nx-badge-red    { border-color: var(--nx-red-border);    background: var(--nx-red-bg);    color: var(--nx-red); }
+.nx-badge-purple { border-color: var(--nx-purple-border); background: var(--nx-purple-bg); color: var(--nx-purple); }
+.nx-badge-blue   { border-color: var(--nx-blue-border);   background: var(--nx-blue-bg);   color: var(--nx-blue); }
+.nx-badge-gold   { border-color: #8C6428; background: #15110A; color: var(--nx-gold); }
+.nx-badge-disabled { border-color: var(--nx-border); color: var(--nx-text-disabled); }
+
+.nx-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border-radius: 5px;
+  font: 500 12px var(--nx-font-ui);
+  white-space: nowrap;
+  border: 1px solid var(--nx-border-strong);
+  background: var(--nx-panel-alt);
+  color: var(--nx-text-soft);
+  cursor: pointer;
+  transition: border-color .15s, background .15s, color .15s;
+}
+.nx-btn:hover { border-color: #4A525B; color: var(--nx-text); }
+.nx-btn:disabled { opacity: .4; cursor: not-allowed; }
+.nx-btn-primary {
+  border-color: var(--nx-gold);
+  background: var(--nx-gold);
+  color: #0A0C0F;
+  font-weight: 600;
+}
+.nx-btn-primary:hover { border-color: var(--nx-gold-bright); background: var(--nx-gold-bright); color: #0A0C0F; }
+.nx-btn-ghost { border-color: transparent; background: transparent; color: var(--nx-text-muted); }
+.nx-btn-ghost:hover { color: var(--nx-text-soft); }
+.nx-btn-destructive { border-color: var(--nx-red-border); background: transparent; color: var(--nx-red); }
+.nx-btn-destructive:hover { background: var(--nx-red-bg); }
+.nx-btn:focus-visible { outline: 2px solid var(--nx-blue); outline-offset: 2px; }
+
+.nx-input {
+  padding: 8px 11px;
+  border: 1px solid var(--nx-border-strong);
+  border-radius: 5px;
+  background: var(--nx-panel-alt);
+  color: var(--nx-text);
+  font: 400 12.5px var(--nx-font-ui);
+  width: 100%;
+}
+.nx-input:focus {
+  border-color: var(--nx-gold);
+  outline: 2px solid rgba(214,166,74,.25);
+  outline-offset: 0;
+}
+.nx-input-error { border-color: var(--nx-red); background: #120C0D; }
+
+.nx-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  margin: 1px 0;
+  border-radius: 5px;
+  font: 400 13px/1.3 var(--nx-font-ui);
+  color: var(--nx-text-muted);
+  cursor: pointer;
+  text-decoration: none;
+}
+.nx-nav-item:hover { color: var(--nx-text-soft); background: rgba(255,255,255,0.02); }
+.nx-nav-item.active {
+  background: var(--nx-active);
+  box-shadow: inset 2px 0 0 var(--nx-gold);
+  font-weight: 600;
+  color: var(--nx-gold-bright);
+}
+.nx-nav-group {
+  padding: 14px 8px 6px;
+  font: 600 9px/1 var(--nx-font-mono);
+  letter-spacing: .2em;
+  color: var(--nx-text-dim);
+  text-transform: uppercase;
+}
+
+.nx-table { width: 100%; table-layout: fixed; font: 400 12.5px var(--nx-font-ui); }
+.nx-table thead tr { background: var(--nx-panel-row); }
+.nx-table th {
+  text-align: left;
+  padding: 7px 14px;
+  font: 600 9.5px var(--nx-font-mono);
+  letter-spacing: .14em;
+  color: var(--nx-text-dim);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--nx-hairline);
+}
+.nx-table td { padding: 8px 14px; border-bottom: 1px solid var(--nx-hairline); color: var(--nx-text-soft); }
+.nx-table tr:last-child td { border-bottom: none; }
+
+.nx-empty {
+  border: 1px dashed var(--nx-border-strong);
+  border-radius: 6px;
+  background: var(--nx-panel);
+  padding: 26px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: var(--nx-text-muted);
+}
+
+.nx-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(6,7,8,.62);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 60;
+}
+.nx-dialog {
+  width: 420px;
+  border: 1px solid var(--nx-border-strong);
+  border-radius: var(--nx-radius);
+  background: var(--nx-panel-alt);
+  box-shadow: 0 18px 40px rgba(0,0,0,.6);
+  overflow: hidden;
+}
+
+.nx-drawer {
+  /* fixed, not absolute: the Drawer component portals to document.body so it can make
+     #root inert while open, so it can no longer rely on a positioned ancestor. */
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  background: var(--nx-panel);
+  border-left: 1px solid var(--nx-border-strong);
+  box-shadow: -18px 0 40px rgba(0,0,0,.55);
+  display: flex;
+  flex-direction: column;
+  z-index: 50;
+}
+.nx-drawer-scrim { position: fixed; inset: 0; background: rgba(6,7,8,.62); z-index: 40; }
+
+/* #root while a Drawer is open — belt-and-suspenders for browsers without native `inert`
+   support: the attribute alone already removes it from the accessibility tree and tab
+   order, this just keeps it visually inert too. */
+#root[inert] { pointer-events: none; }
+
+.nx-skel {
+  border-radius: 3px;
+  background: var(--nx-active);
+}
+
+.nx-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+.nx-scroll::-webkit-scrollbar-thumb { background: var(--nx-border-strong); border-radius: 3px; }
+
+@keyframes nx-spin { to { transform: rotate(360deg); } }
+
+[data-nx-tooltip] { position: relative; }
+[data-nx-tooltip]::after {
+  content: attr(data-nx-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--nx-active);
+  border: 1px solid var(--nx-border-strong);
+  color: var(--nx-text);
+  font: 400 11px Inter, sans-serif;
+  padding: 5px 9px;
+  border-radius: 5px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s;
+  box-shadow: 0 6px 16px rgba(0,0,0,.5);
+  z-index: 80;
+}
+[data-nx-tooltip]:hover::after { opacity: 1; }

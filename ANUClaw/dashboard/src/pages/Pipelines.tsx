@@ -385,7 +385,7 @@ export default function Pipelines() {
               <h1 className="font-bold text-lg" style={{ color: '#E8EEF6' }}>Autonomous Pipelines</h1>
             </div>
             <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-              Chain 1,100+ specialist skills into automated medical workflows
+              Chain 13 specialist skills into automated medical workflows
             </p>
           </div>
           <div className="flex gap-2 items-center">

@@ -47,9 +47,9 @@ function apiFetch(path: string, method = 'GET', body?: object) {
 const DEMO_FEATURES = [
   {
     icon: <Cpu size={20} />, color: '#00B8CC',
-    title: '1,100+ Specialist Skills',
-    detail: 'Medical, genomics, oncology, radiology, pharmacology, EHR/PMR, legal, finance, bioinformatics — all callable via a single API endpoint.',
-    metric: '1,100+', metricLabel: 'domain skills',
+    title: '13 Specialist Skills',
+    detail: 'Clinical, genomics, protein, drug discovery, EHR/PMR, medical NLP, document processing, lab XR, digital twin, security, regulatory, and report analysis — all callable via a single API endpoint.',
+    metric: '13', metricLabel: 'domain skills',
   },
   {
     icon: <Globe size={20} />, color: '#00C878',
@@ -83,7 +83,7 @@ const DEMO_FEATURES = [
   },
 ];
 
-const DEMO_CODE = `// One API call — 1,100+ skills
+const DEMO_CODE = `// One API call — 13 skills
 const response = await fetch('https://api.anuclaw.amgi.io/v1/message', {
   method: 'POST',
   headers: {
@@ -147,7 +147,7 @@ function ProofOfValue({ onProceed }: { onProceed: () => void }) {
           ANUClaw Cloud API
         </h1>
         <p className="text-base max-w-xl mx-auto" style={{ color: 'var(--text-muted)' }}>
-          Embed 1,100+ medical and research AI skills into your application with a single REST endpoint.
+          Embed 13 medical and research AI skills into your application with a single REST endpoint.
           No model hosting, no infrastructure, no compliance overhead.
         </p>
         <div className="flex justify-center">
@@ -165,10 +165,15 @@ function ProofOfValue({ onProceed }: { onProceed: () => void }) {
             Real-time
           </span>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4">
           {[
             { label: 'Messages Processed', value: stats?.msgs ?? 0,        color: '#00B8CC', suffix: '' },
-            { label: 'Skills Available',   value: stats?.skills ?? 1100,   color: '#00C878', suffix: '+' },
+            // "Skills in catalogue" (static — how many skills exist) and "Skills invoked"
+            // (dynamic — how many have actually been called) are different measurements;
+            // they used to be shown as one combined "Skills Available" number. Kept
+            // separate and accurately labeled so neither implies the other.
+            { label: 'Skills in Catalogue', value: 13, color: '#00C878', suffix: '' },
+            { label: 'Skills Invoked',     value: stats ? (stats.skills ?? 0) : null, color: '#4FD1C5', suffix: '' },
             { label: 'Total API Calls',    value: stats?.totalCalls ?? 0,  color: '#9C27B0', suffix: '' },
             { label: 'Success Rate',       value: stats?.successRate ?? 99.9, color: '#00E676', suffix: '%' },
             { label: 'Avg Response',       value: stats?.avgMs ?? 187,     color: '#FFB300', suffix: 'ms' },
@@ -182,7 +187,7 @@ function ProofOfValue({ onProceed }: { onProceed: () => void }) {
               className="flex flex-col gap-1 text-center"
             >
               <span className="text-2xl font-bold font-mono tabular-nums" style={{ color }}>
-                <CountUp to={value} suffix={suffix} />
+                {value === null ? '—' : <CountUp to={value} suffix={suffix} />}
               </span>
               <span className="text-xs leading-tight" style={{ color: 'var(--text-muted)' }}>{label}</span>
             </motion.div>
