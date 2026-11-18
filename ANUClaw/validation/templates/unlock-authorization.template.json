@@ -1,0 +1,15 @@
+{
+ "_howTo": [
+  "BLANK. Must be completed by a HUMAN with authority under the approved protocol; the software cannot check who you are and offers no bypass.",
+  "manifestSha256 and lockDigest must equal the CURRENT values of the locked dataset (run 'ocr-study verify'); the record is bound to that state and can be used once.",
+  "authorizedBy must be a different person from the user running the unlock command.",
+  "Unlocking is permanent in the manifest history and the audit log; any later evaluation is labelled as coming from a reopened lock."
+ ],
+ "schema": "anuclaw-unlock-authorization/v1",
+ "manifestSha256": "",
+ "lockDigest": "",
+ "reason": "",
+ "protocolDeviationRef": "",
+ "authorizedBy": { "name": "", "role": "", "credentialRef": "" },
+ "authorizedAt": ""
+}

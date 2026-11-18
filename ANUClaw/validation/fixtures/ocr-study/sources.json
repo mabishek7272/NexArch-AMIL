@@ -1,0 +1,17 @@
+[
+ {
+  "file": "synthetic-1.txt",
+  "pages": 1,
+  "mediaType": "text/plain"
+ },
+ {
+  "file": "synthetic-2.txt",
+  "pages": 1,
+  "mediaType": "text/plain"
+ },
+ {
+  "file": "synthetic-3.txt",
+  "pages": 1,
+  "mediaType": "text/plain"
+ }
+]

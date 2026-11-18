@@ -1,0 +1,249 @@
+{
+ "schema": "anuclaw-science-manifest/v1",
+ "generatedAt": "2026-11-17T07:22:04.122Z",
+ "workspace": {
+  "id": "fe39c9fe-2a47-43d0-9e39-c94815f6e6e2",
+  "name": "Live check",
+  "purpose": "bounded live verification of public connectors"
+ },
+ "researchOnly": true,
+ "notice": "Public reference data for research use only. It is not clinical evidence, is not part of the approved evidence corpus, and a successful download validates nothing (no prediction, docking, biomarker discovery or clinical validity is implied).",
+ "evidenceCorpus": "These files are NOT part of the approved clinical evidence corpus.",
+ "items": [
+  {
+   "label": "alphafold:P69905",
+   "attachedAt": 1794900124114,
+   "attachedBy": "live-check",
+   "source": {
+    "id": "db84d8ea-c280-42a8-9551-2a47bd461b8c",
+    "provider": "alphafold",
+    "accession": "P69905",
+    "kind": "structure_file",
+    "classification": "predicted",
+    "classificationNote": "Computationally predicted by AlphaFold; not an experimental structure. Per-residue pLDDT is stored in the B-factor column.",
+    "format": "pdb",
+    "sourceUrl": "https://alphafold.ebi.ac.uk/files/AF-P69905-F1-model_v6.pdb",
+    "finalUrl": "https://alphafold.ebi.ac.uk/files/AF-P69905-F1-model_v6.pdb",
+    "sourceVersion": "6",
+    "retrievedAt": 1794900089240,
+    "sha256": "d9d7ad4607164de17b65767b467d366909d74f96df5176ee368a9a515aaa1911",
+    "bytes": 92096,
+    "license": "CC BY 4.0",
+    "attribution": "AlphaFold Protein Structure Database, EMBL-EBI; models by Google DeepMind. Cite Jumper et al. 2021 (Nature) and Varadi et al. 2022 (NAR).",
+    "termsUrl": "https://alphafold.ebi.ac.uk/faq",
+    "restrictions": "Computationally PREDICTED models. Retrieving an existing prediction is not running AlphaFold. Search by UniProt accession only.",
+    "contentType": "application/octet-stream",
+    "etag": "W/\"d2a0de1ea60475215716fb52b0f0681b\"",
+    "parentSourceId": null,
+    "memberPath": null,
+    "researchOnly": true,
+    "localStorage": "content-addressed:d9d7ad4607164de17b65767b467d366909d74f96df5176ee368a9a515aaa1911",
+    "integrityCheckedAtExport": "ok"
+   },
+   "derived": [
+    {
+     "parser": "pdb",
+     "parserVersion": "anuclaw-scidata-parsers/1",
+     "status": "ok",
+     "summary": {
+      "format": "pdb",
+      "models": 1,
+      "chains": [
+       {
+        "id": "A",
+        "residues": 142,
+        "atoms": 1077,
+        "hetatmAtoms": 0
+       }
+      ],
+      "atoms": 1077,
+      "residues": 142,
+      "elements": {
+       "N": 188,
+       "C": 690,
+       "O": 195,
+       "S": 4
+      },
+      "coordinateRange": {
+       "min": [
+        -19.915,
+        -10.085,
+        -21.741
+       ],
+       "max": [
+        24.484,
+        16.782,
+        20
+       ]
+      },
+      "bFactor": {
+       "n": 1077,
+       "min": 65.38,
+       "max": 98.88,
+       "mean": 98.04426183844014
+      },
+      "plddt": {
+       "residuesScored": 142,
+       "mean": 98.0637323943662,
+       "fractionVeryHigh": 0.9929577464788732,
+       "fractionConfident": 0,
+       "fractionLow": 0.007042253521126761,
+       "fractionVeryLow": 0
+      },
+      "headerTitle": "ALPHAFOLD MONOMER V2.0 PREDICTION FOR HEMOGLOBIN SUBUNIT ALPHA (P69905)",
+      "experimentalMethod": null,
+      "resolutionAngstrom": null
+     }
+    }
+   ],
+   "newerVersionKnown": null,
+   "attributionRequired": "AlphaFold Protein Structure Database, EMBL-EBI; models by Google DeepMind. Cite Jumper et al. 2021 (Nature) and Varadi et al. 2022 (NAR)."
+  },
+  {
+   "label": "rcsb:4HHB",
+   "attachedAt": 1794900124117,
+   "attachedBy": "live-check",
+   "source": {
+    "id": "57eb5a4d-6c33-45b3-957f-95f23d7e1179",
+    "provider": "rcsb",
+    "accession": "4HHB",
+    "kind": "structure_file",
+    "classification": "experimental",
+    "classificationNote": "Experimental structure determined by X-RAY DIFFRACTION.",
+    "format": "pdb",
+    "sourceUrl": "https://files.rcsb.org/download/4HHB.pdb",
+    "finalUrl": "https://files.rcsb.org/download/4HHB.pdb",
+    "sourceVersion": "2026-08-12T00:00:00.000+00:00 (rev 4.3)",
+    "retrievedAt": 1794900103175,
+    "sha256": "abf382e0fd84b53bd4c08b373d37c0d7fe9fbe1a9a9c3851b2f5f2fbbe627101",
+    "bytes": 473850,
+    "license": "CC0 1.0 (core archive data)",
+    "attribution": "RCSB Protein Data Bank (rcsb.org); wwPDB. Cite the entry's primary citation.",
+    "termsUrl": "https://www.rcsb.org/pages/usage-policy",
+    "restrictions": "Entries may be experimental OR computed models; the connector reports which, from the record itself.",
+    "contentType": "text/plain",
+    "etag": "W/\"1aa37648e019ab86a3c2077088ddaf29-identity\"",
+    "parentSourceId": null,
+    "memberPath": null,
+    "researchOnly": true,
+    "localStorage": "content-addressed:abf382e0fd84b53bd4c08b373d37c0d7fe9fbe1a9a9c3851b2f5f2fbbe627101",
+    "integrityCheckedAtExport": "ok"
+   },
+   "derived": [
+    {
+     "parser": "pdb",
+     "parserVersion": "anuclaw-scidata-parsers/1",
+     "status": "ok",
+     "summary": {
+      "format": "pdb",
+      "models": 1,
+      "chains": [
+       {
+        "id": "A",
+        "residues": 141,
+        "atoms": 1168,
+        "hetatmAtoms": 99
+       },
+       {
+        "id": "B",
+        "residues": 146,
+        "atoms": 1224,
+        "hetatmAtoms": 101
+       },
+       {
+        "id": "C",
+        "residues": 141,
+        "atoms": 1171,
+        "hetatmAtoms": 102
+       },
+       {
+        "id": "D",
+        "residues": 146,
+        "atoms": 1216,
+        "hetatmAtoms": 93
+       }
+      ],
+      "atoms": 4779,
+      "residues": 574,
+      "elements": {
+       "N": 780,
+       "C": 2954,
+       "O": 1027,
+       "S": 12,
+       "FE": 4,
+       "P": 2
+      },
+      "coordinateRange": {
+       "min": [
+        -24.242,
+        -15.297,
+        10.19
+       ],
+       "max": [
+        46.081,
+        41.915,
+        70.977
+       ]
+      },
+      "bFactor": {
+       "n": 4779,
+       "min": 4.91,
+       "max": 80.12,
+       "mean": 24.79611215735517
+      },
+      "plddt": null,
+      "headerTitle": "THE CRYSTAL STRUCTURE OF HUMAN DEOXYHAEMOGLOBIN AT 1.74 ANGSTROMS RESOLUTION",
+      "experimentalMethod": "X-RAY DIFFRACTION",
+      "resolutionAngstrom": 1.74
+     }
+    }
+   ],
+   "newerVersionKnown": null,
+   "attributionRequired": "RCSB Protein Data Bank (rcsb.org); wwPDB. Cite the entry's primary citation."
+  },
+  {
+   "label": "ncbi_datasets:GCF_000819615.1",
+   "attachedAt": 1794900124118,
+   "attachedBy": "live-check",
+   "source": {
+    "id": "be6f3294-de77-41d4-87e0-21b2c76ce58b",
+    "provider": "ncbi_datasets",
+    "accession": "GCF_000819615.1",
+    "kind": "archive",
+    "classification": "curated_reference",
+    "classificationNote": "RefSeq curated reference assembly.",
+    "format": "zip",
+    "sourceUrl": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000819615.1/download?include_annotation_type=GENOME_FASTA&include_annotation_type=GENOME_GFF&hydrated=FULLY_HYDRATED",
+    "finalUrl": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000819615.1/download?include_annotation_type=GENOME_FASTA&include_annotation_type=GENOME_GFF&hydrated=FULLY_HYDRATED",
+    "sourceVersion": "GCF_000819615.1",
+    "retrievedAt": 1794900110588,
+    "sha256": "d5501835063629eb44212d9ccb2a10214a37a01af29be32fbd13e75564d1fd9b",
+    "bytes": 6348,
+    "license": "NCBI data are generally public domain; submitters may assert rights",
+    "attribution": "NCBI Datasets / RefSeq, National Center for Biotechnology Information.",
+    "termsUrl": "https://www.ncbi.nlm.nih.gov/home/about/policies/",
+    "restrictions": "Assembly accessions only; genomes above the configured size cap are refused (no bulk downloads). Controlled-access data (dbGaP) is out of scope.",
+    "contentType": "application/zip",
+    "etag": null,
+    "parentSourceId": null,
+    "memberPath": null,
+    "researchOnly": true,
+    "localStorage": "content-addressed:d5501835063629eb44212d9ccb2a10214a37a01af29be32fbd13e75564d1fd9b",
+    "integrityCheckedAtExport": "ok"
+   },
+   "derived": [
+    {
+     "parser": "zip",
+     "parserVersion": "anuclaw-scidata-parsers/1",
+     "status": "unsupported",
+     "summary": {
+      "reason": "Archive: members are stored and parsed individually."
+     }
+    }
+   ],
+   "newerVersionKnown": null,
+   "attributionRequired": "NCBI Datasets / RefSeq, National Center for Biotechnology Information."
+  }
+ ],
+ "manifestSha256": "78f72af2a6538786d99b617389c12c953b8b5f6baffa2ed9c91c1a70349a5bd1"
+}

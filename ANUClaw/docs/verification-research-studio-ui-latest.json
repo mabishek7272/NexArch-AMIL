@@ -1,0 +1,86 @@
+{
+  "at": "2026-11-18T07:22:19.055Z",
+  "pass": 19,
+  "fail": 0,
+  "outcomes": [
+    {
+      "name": "page shows the M1-foundation-only notice (header and footer)",
+      "status": "pass"
+    },
+    {
+      "name": "the connector panel is honest that no real AI-provider automation is connected",
+      "status": "pass"
+    },
+    {
+      "name": "creating and connecting a simulated browser profile through the UI round-trips to active, then disconnect/revoke work",
+      "status": "pass"
+    },
+    {
+      "name": "creating a research_protocol project runs the real Research Planner and renders a non-empty, honestly-labelled task graph",
+      "status": "pass",
+      "detail": "6 task rows rendered"
+    },
+    {
+      "name": "by M5, every task type in a fresh research_protocol graph has a real registered agent — the honesty line correctly reports 0 of N, not a fabricated gap",
+      "status": "pass",
+      "detail": "0 of 6 task(s) have no registered agent yet and will stay queued until that agent is built — this is reported honestly, not hidden."
+    },
+    {
+      "name": "a queued task can be paused, resumed and cancelled from the UI (export.manuscript — its dependency, critique.review, has not completed yet, so it is guaranteed still queued; outline.draft, by contrast, has already completed instantly on project creation, since it is free/deterministic with no unmet dependency in this mode)",
+      "status": "pass"
+    },
+    {
+      "name": "the event chain for the project verifies as intact",
+      "status": "pass"
+    },
+    {
+      "name": "\"Advance now\" progresses the graph and completes everything it can without human input, without fabricating anything it could not actually run",
+      "status": "pass"
+    },
+    {
+      "name": "importing a malformed RIS bibliography reports the parse failure and imports only the well-formed record",
+      "status": "pass"
+    },
+    {
+      "name": "adding a manual source with the same DOI is flagged as an exact duplicate in the review panel",
+      "status": "pass"
+    },
+    {
+      "name": "a human-supplied excerpt (with a page locator) is recorded and listed under the source",
+      "status": "pass"
+    },
+    {
+      "name": "a claim can be linked to that excerpt, and the claim-support status renders with its own badge (never collapsed into \"verified\")",
+      "status": "pass"
+    },
+    {
+      "name": "resolving the writing task with human-authored text makes it render in the manuscript workspace with the right content_source badge",
+      "status": "pass"
+    },
+    {
+      "name": "a reviewer comment posted through the UI round-trips to the real backend and renders back",
+      "status": "pass"
+    },
+    {
+      "name": "creating a guideline, confirming a checklist item, and building a compliance report all work, and the report states it is not a journal acceptance",
+      "status": "pass"
+    },
+    {
+      "name": "building a PRISMA-style flow renders a real SVG with a real (zero) count from this project's evidence graph",
+      "status": "pass"
+    },
+    {
+      "name": "running export produces 7 real files (including a real DOCX) with working downloads, and states it is not journal acceptance",
+      "status": "pass"
+    },
+    {
+      "name": "the second operator's project list does not include the first operator's project",
+      "status": "pass"
+    },
+    {
+      "name": "viewer role gets 403 from the Research Studio API",
+      "status": "pass"
+    }
+  ],
+  "screenshots": "/var/folders/r6/37zj90jx3qj__r7g178g2hmm0000gp/T/research-studio-ui-shots-sxSdHp"
+}

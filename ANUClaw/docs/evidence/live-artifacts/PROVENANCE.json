@@ -1,0 +1,44 @@
+{
+ "note": "Real bytes fetched LIVE from the providers during the bounded live check and retained here for offline replay. Hashes and URLs are copied from docs/evidence/science-live-results*.json.",
+ "artifacts": [
+  {
+   "kind": "structure_file",
+   "format": "pdb",
+   "classification": "predicted",
+   "sourceVersion": "6",
+   "sha256": "d9d7ad4607164de17b65767b467d366909d74f96df5176ee368a9a515aaa1911",
+   "bytes": 92096,
+   "sourceUrl": "https://alphafold.ebi.ac.uk/files/AF-P69905-F1-model_v6.pdb",
+   "retrievedAt": "2026-11-17T07:21:29.240Z",
+   "memberPath": null,
+   "run": "run1",
+   "file": "docs/evidence/live-artifacts/alphafold-P69905-model.pdb"
+  },
+  {
+   "kind": "structure_file",
+   "format": "pdb",
+   "classification": "experimental",
+   "sourceVersion": "2026-08-12T00:00:00.000+00:00 (rev 4.3)",
+   "sha256": "abf382e0fd84b53bd4c08b373d37c0d7fe9fbe1a9a9c3851b2f5f2fbbe627101",
+   "bytes": 473850,
+   "sourceUrl": "https://files.rcsb.org/download/4HHB.pdb",
+   "retrievedAt": "2026-11-17T07:21:43.175Z",
+   "memberPath": null,
+   "run": "run1",
+   "file": "docs/evidence/live-artifacts/rcsb-4HHB.pdb"
+  },
+  {
+   "kind": "archive",
+   "format": "zip",
+   "classification": "curated_reference",
+   "sourceVersion": "GCF_000819615.1",
+   "sha256": "9a24fd06f09cc59ef2e6a3c8c782b12ba20cdee6f9645bd6af15173363832c8c",
+   "bytes": 6348,
+   "sourceUrl": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000819615.1/download?include_annotation_type=GENOME_FASTA&include_annotation_type=GENOME_GFF&hydrated=FULLY_HYDRATED",
+   "retrievedAt": "2026-11-17T07:26:12.226Z",
+   "memberPath": null,
+   "run": "run2",
+   "file": "docs/evidence/live-artifacts/ncbi-GCF_000819615.1-genome.zip"
+  }
+ ]
+}

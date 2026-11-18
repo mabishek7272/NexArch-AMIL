@@ -1,0 +1,24 @@
+{
+ "_howTo": [
+  "results.items come from the pipeline output (report rows / metric-result events). Unsupported or not-measurable outcomes must be listed with their status \u2014 they count against the system, they are not dropped.",
+  "For repeatability include several clips of the same subject (repeat = 1, 2, \u2026) under identical conditions."
+ ],
+ "schema": "anuclaw-pose-results/v1",
+ "system": {
+  "pipeline": "",
+  "modelVersion": "",
+  "metricsVersion": ""
+ },
+ "items": [
+  {
+   "clipId": "",
+   "subjectId": "",
+   "repeat": 1,
+   "metricKey": "static.shoulder_line_tilt",
+   "unit": "deg",
+   "status": "estimate",
+   "value": 0,
+   "uncertainty": 0
+  }
+ ]
+}

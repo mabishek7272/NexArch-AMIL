@@ -1,0 +1,3 @@
+# OCR-study fixtures (SYNTHETIC ONLY)
+
+Tiny plain-text stand-ins and hand-made annotator/result files used by `src/validation/study/study.test.ts` and as a CLI walkthrough. Case ids are random at registration, so the files use `@1`, `@2`, `@3` placeholders (map them with `ocr-study import --fixture-keys`, `ocr-study evaluate` via the test helper). annotator-b disagrees with annotator-a on purpose (a value, a comparator, one extra item); `results.json` contains one unflagged wrong unit (a silent error). **There is deliberately no unlock authorization here**: that record must be written by a human (blank template: `validation/templates/unlock-authorization.template.json`).

@@ -1,0 +1,289 @@
+{
+ "ranAt": "2026-11-17T07:26:09.307Z",
+ "limits": {
+  "maxFiles": 20,
+  "maxBytes": 104857600
+ },
+ "label": "LIVE retrieval of public reference records. A successful download validates nothing about any model, analysis or clinical use.",
+ "steps": [
+  {
+   "name": "NCBI Datasets: GCF_000819615.1 (phage phiX174 RefSeq, ~5.4 kb) — FASTA + GFF3",
+   "ok": true,
+   "ms": 2552,
+   "record": {
+    "provider": "ncbi_datasets",
+    "accession": "GCF_000819615.1",
+    "title": "Escherichia phage phiX174 — ViralProj14015",
+    "classification": "curated_reference",
+    "classificationNote": "RefSeq reference assembly (NCBI-curated). Gene annotation in it is computational/curated by NCBI, not experimental evidence.",
+    "sourceVersion": "GCF_000819615.1 (1993-04-28)"
+   },
+   "problems": [],
+   "sources": [
+    {
+     "id": "c967f5e2-9f67-4f8a-aca1-eee66b7e73b4",
+     "kind": "archive",
+     "format": "zip",
+     "memberPath": null,
+     "classification": "curated_reference",
+     "sourceVersion": "GCF_000819615.1",
+     "sha256": "9a24fd06f09cc59ef2e6a3c8c782b12ba20cdee6f9645bd6af15173363832c8c",
+     "bytes": 6348,
+     "sourceUrl": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000819615.1/download?include_annotation_type=GENOME_FASTA&include_annotation_type=GENOME_GFF&hydrated=FULLY_HYDRATED",
+     "license": "NCBI data are generally public domain; submitters may assert rights",
+     "retrievedAt": "2026-11-17T07:26:12.226Z"
+    },
+    {
+     "id": "61ae4785-402b-48bd-a455-7104e92f6eb5",
+     "kind": "sequence_file",
+     "format": "fasta",
+     "memberPath": "ncbi_dataset/data/GCF_000819615.1/GCF_000819615.1_ViralProj14015_genomic.fna",
+     "classification": "curated_reference",
+     "sourceVersion": "GCF_000819615.1",
+     "sha256": "74c1aca649f207a175b7d99e22fe4ef785c88f924aa5a7f5223c07c4e5c2b5aa",
+     "bytes": 5510,
+     "sourceUrl": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000819615.1/download?include_annotation_type=GENOME_FASTA&include_annotation_type=GENOME_GFF&hydrated=FULLY_HYDRATED",
+     "license": "NCBI data are generally public domain; submitters may assert rights",
+     "retrievedAt": "2026-11-17T07:26:12.235Z"
+    },
+    {
+     "id": "85a71c5c-14a5-4563-bae9-81a24138c43c",
+     "kind": "annotation_file",
+     "format": "gff3",
+     "memberPath": "ncbi_dataset/data/GCF_000819615.1/genomic.gff",
+     "classification": "predicted",
+     "sourceVersion": "GCF_000819615.1",
+     "sha256": "bdf7fffd02143906ac82a88f4d8e1723af03d57d70d59d0b30ffcd02e599f9b6",
+     "bytes": 6571,
+     "sourceUrl": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000819615.1/download?include_annotation_type=GENOME_FASTA&include_annotation_type=GENOME_GFF&hydrated=FULLY_HYDRATED",
+     "license": "NCBI data are generally public domain; submitters may assert rights",
+     "retrievedAt": "2026-11-17T07:26:12.241Z"
+    }
+   ],
+   "derived": [
+    {
+     "parser": "fasta",
+     "status": "ok",
+     "summary": {
+      "records": 1,
+      "totalResidues": 5386,
+      "kind": "nucleotide",
+      "kindIsInferred": true,
+      "ambiguousResidues": 0,
+      "gcFraction": 0.44764203490531007,
+      "entries": [
+       {
+        "id": "NC_001422.1",
+        "description": "Escherichia phage phiX174, complete genome",
+        "length": 5386
+       }
+      ],
+      "entriesTruncated": false
+     }
+    }
+   ]
+  },
+  {
+   "name": "GEO: describe GSE2",
+   "ok": true,
+   "ms": 6319,
+   "title": "Cerebellar development",
+   "classification": "author_supplied",
+   "files": [
+    {
+     "key": "series_matrix",
+     "sizeKnownBytes": 14878
+    }
+   ],
+   "refused": [],
+   "warnings": []
+  },
+  {
+   "name": "GEO: retrieve GSE2 series matrix (only if within the size cap)",
+   "ok": false,
+   "ms": 341397,
+   "record": {
+    "provider": "geo",
+    "accession": "GSE2",
+    "title": "Cerebellar development",
+    "classification": "author_supplied",
+    "classificationNote": "GEO series data are submitter-supplied; the connector does not re-process or validate them.",
+    "sourceVersion": "last update Jul 26 2013"
+   },
+   "problems": [
+    {
+     "key": "series_matrix",
+     "code": "unavailable",
+     "message": "The provider could not be reached."
+    }
+   ],
+   "sources": []
+  },
+  {
+   "name": "workspace: attach all retrieved sources and export the manifest",
+   "ok": true,
+   "ms": 34,
+   "items": 3,
+   "manifestSha256": "abcd2eb02b2aafec89973f47c20a93957005dccd7947c4fa726b86050e7998ef",
+   "allIntegrityOk": true
+  }
+ ],
+ "ledger": {
+  "files": 15,
+  "bytes": 661580,
+  "requests": 29,
+  "withinLimits": true,
+  "urls": [
+   {
+    "url": "https://alphafold.ebi.ac.uk/api/prediction/P69905",
+    "bytes": 1987,
+    "status": 200
+   },
+   {
+    "url": "https://alphafold.ebi.ac.uk/files/AF-P69905-F1-model_v6.pdb",
+    "bytes": 92096,
+    "status": 200
+   },
+   {
+    "url": "https://data.rcsb.org/rest/v1/core/entry/4HHB",
+    "bytes": 26055,
+    "status": 200
+   },
+   {
+    "url": "https://files.rcsb.org/download/4HHB.pdb",
+    "bytes": 473850,
+    "status": 200
+   },
+   {
+    "url": "https://search.rcsb.org/rcsbsearch/v2/query",
+    "bytes": 784,
+    "status": 200
+   },
+   {
+    "url": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000819615.1/dataset_report",
+    "bytes": 1102,
+    "status": 200
+   },
+   {
+    "url": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000819615.1/download?include_annotation_type=GENOME_FASTA&include_annotation_type=GENOME_GFF&hydrated=FULLY_HYDRATED",
+    "bytes": 6348,
+    "status": 200
+   },
+   {
+    "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=gds&retmode=json&retmax=5&term=yeast%20cell%20cycle%20AND%20gse%5BETYP%5D",
+    "bytes": 1320,
+    "status": 200
+   },
+   {
+    "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=gds&retmode=json&id=200346184,200346163,200336480,200350949,200327180",
+    "bytes": 23883,
+    "status": 200
+   },
+   {
+    "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE346184&targ=self&form=text&view=brief",
+    "bytes": 11772,
+    "status": 200
+   },
+   {
+    "url": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE346nnn/GSE346184/matrix/GSE346184_series_matrix.txt.gz",
+    "bytes": 0,
+    "status": 403
+   },
+   {
+    "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE346184&targ=self&form=text&view=brief",
+    "bytes": 11772,
+    "status": 200
+   },
+   {
+    "url": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE346nnn/GSE346184/matrix/GSE346184_series_matrix.txt.gz",
+    "bytes": 0,
+    "status": 403
+   },
+   {
+    "url": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE346nnn/GSE346184/matrix/GSE346184_series_matrix.txt.gz",
+    "bytes": 980,
+    "status": 403
+   },
+   {
+    "url": "MANUAL PROBE HEAD matrix (curl default UA)",
+    "bytes": 0,
+    "status": null
+   },
+   {
+    "url": "MANUAL PROBE HEAD matrix (connector UA)",
+    "bytes": 0,
+    "status": null
+   },
+   {
+    "url": "MANUAL PROBE HEAD series dir",
+    "bytes": 0,
+    "status": null
+   },
+   {
+    "url": "MANUAL HEAD probe of series matrix GSE1",
+    "bytes": 0,
+    "status": null
+   },
+   {
+    "url": "MANUAL HEAD probe of series matrix GSE2",
+    "bytes": 0,
+    "status": null
+   },
+   {
+    "url": "MANUAL HEAD probe of series matrix GSE10",
+    "bytes": 0,
+    "status": null
+   },
+   {
+    "url": "MANUAL HEAD probe of series matrix GSE20",
+    "bytes": 0,
+    "status": null
+   },
+   {
+    "url": "MANUAL HEAD probe of series matrix GSE100",
+    "bytes": 0,
+    "status": null
+   },
+   {
+    "url": "MANUAL HEAD probe of series matrix GSE346163",
+    "bytes": 0,
+    "status": null
+   },
+   {
+    "url": "MANUAL HEAD probe of series matrix GSE327180",
+    "bytes": 0,
+    "status": null
+   },
+   {
+    "url": "MANUAL HEAD probe of series matrix GSE350949",
+    "bytes": 0,
+    "status": null
+   },
+   {
+    "url": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000819615.1/dataset_report",
+    "bytes": 1102,
+    "status": 200
+   },
+   {
+    "url": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000819615.1/download?include_annotation_type=GENOME_FASTA&include_annotation_type=GENOME_GFF&hydrated=FULLY_HYDRATED",
+    "bytes": 6348,
+    "status": 200
+   },
+   {
+    "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE2&targ=self&form=text&view=brief",
+    "bytes": 2181,
+    "status": 200
+   },
+   {
+    "url": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSEnnn/GSE2/matrix/GSE2_series_matrix.txt.gz",
+    "bytes": 0,
+    "status": 200
+   }
+  ]
+ },
+ "summary": {
+  "steps": 4,
+  "ok": 3,
+  "failed": 1
+ }
+}

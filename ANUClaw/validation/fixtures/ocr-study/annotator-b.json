@@ -1,0 +1,77 @@
+{
+ "schema": "anuclaw-ocr-annotator-file/v1",
+ "annotatorId": "annotator-b",
+ "completedCaseIds": [
+  "@1",
+  "@2",
+  "@3"
+ ],
+ "items": [
+  {
+   "caseId": "@1",
+   "page": 1,
+   "analyte": "Sodium",
+   "valueRaw": "140",
+   "valueNum": 140,
+   "comparator": null,
+   "unit": "mmol/L",
+   "refLow": 135,
+   "refHigh": 145
+  },
+  {
+   "caseId": "@1",
+   "page": 1,
+   "analyte": "Potassium",
+   "valueRaw": "4.1",
+   "valueNum": 4.1,
+   "comparator": null,
+   "unit": "mmol/L",
+   "refLow": 3.5,
+   "refHigh": 5.1
+  },
+  {
+   "caseId": "@2",
+   "page": 1,
+   "analyte": "Glucose",
+   "valueRaw": "5.2",
+   "valueNum": 5.2,
+   "comparator": null,
+   "unit": "mmol/L",
+   "refLow": 3.9,
+   "refHigh": 5.6
+  },
+  {
+   "caseId": "@2",
+   "page": 1,
+   "analyte": "CRP",
+   "valueRaw": "<5",
+   "valueNum": 5,
+   "comparator": null,
+   "unit": "mg/L",
+   "refLow": 0,
+   "refHigh": 5
+  },
+  {
+   "caseId": "@3",
+   "page": 1,
+   "analyte": "Creatinine",
+   "valueRaw": "88",
+   "valueNum": 88,
+   "comparator": null,
+   "unit": "umol/L",
+   "refLow": 60,
+   "refHigh": 110
+  },
+  {
+   "caseId": "@3",
+   "page": 1,
+   "analyte": "Urea",
+   "valueRaw": "5.0",
+   "valueNum": 5.0,
+   "comparator": null,
+   "unit": "mmol/L",
+   "refLow": 2.5,
+   "refHigh": 7.8
+  }
+ ]
+}

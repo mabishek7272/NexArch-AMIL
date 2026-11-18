@@ -1,0 +1,63 @@
+{
+ "_howTo": [
+  "One dossier per rule VERSION. Fill every field with specifics; placeholders (TBD, n/a, example\u2026) are rejected.",
+  "Boundary cases must cover: below_lower, at_lower, inside, at_upper, above_upper, missing_input, unit_mismatch (+ outside_population when exclusions exist).",
+  "Leave \"signature\" null until the named reviewer has signed THEIR OWN record; paste only its reference. The checker never approves anything.",
+  "Run: npm run validate -- rule --dossier dossier.json [--evaluator ./path/to/evaluator.js] --out report.json"
+ ],
+ "schema": "anuclaw-rule-approval/v1",
+ "rule": {
+  "id": "",
+  "version": "0.0.0",
+  "title": "",
+  "category": "clinical"
+ },
+ "intendedUse": "",
+ "population": {
+  "included": [
+   ""
+  ],
+  "excluded": [
+   ""
+  ]
+ },
+ "source": {
+  "citation": "",
+  "version": "",
+  "license": ""
+ },
+ "thresholds": [
+  {
+   "name": "",
+   "lower": null,
+   "upper": null,
+   "unit": ""
+  }
+ ],
+ "inputs": [
+  {
+   "name": "",
+   "unit": ""
+  }
+ ],
+ "boundaryCases": [
+  {
+   "id": "",
+   "kind": "at_lower",
+   "input": {},
+   "expected": "",
+   "rationale": ""
+  }
+ ],
+ "evaluationPlan": {
+  "documentRef": "",
+  "acceptanceTargets": {},
+  "resultsRef": ""
+ },
+ "reviewer": null,
+ "signature": null,
+ "changeControl": {
+  "previousVersion": null,
+  "changeSummary": ""
+ }
+}

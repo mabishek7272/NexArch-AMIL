@@ -1,0 +1,3371 @@
+{
+ "schema": "anuclaw-aikosh-inventory/v1",
+ "root": "data/aikosh",
+ "fileCount": 20,
+ "files": [
+  {
+   "path": "clinical_eval/indian_protocols_clinical_qna.csv",
+   "sizeBytes": 1430253,
+   "sha256": "f54010327d1f09225442463d147053c519bf146296716072c76abc2d6a9cf603",
+   "format": "csv",
+   "rowCount": 504,
+   "rowCountMethod": "full csv parse",
+   "columns": [
+    "prompt_id",
+    "query_rubrics",
+    "answer_rubrics",
+    "doctor_persona",
+    "patient_case",
+    "scenario",
+    "ground_truth_query",
+    "answer_citation",
+    "corpus_id",
+    "doctor_query",
+    "query_style",
+    "question_type",
+    "difficulty_level",
+    "publisher"
+   ],
+   "schema": {
+    "prompt_id": "string (csv)",
+    "query_rubrics": "string (csv)",
+    "answer_rubrics": "string (csv)",
+    "doctor_persona": "string (csv)",
+    "patient_case": "string (csv)",
+    "scenario": "string (csv)",
+    "ground_truth_query": "string (csv)",
+    "answer_citation": "string (csv)",
+    "corpus_id": "string (csv)",
+    "doctor_query": "string (csv)",
+    "query_style": "string (csv)",
+    "question_type": "string (csv)",
+    "difficulty_level": "string (csv)",
+    "publisher": "string (csv)"
+   },
+   "columnIndicators": [
+    {
+     "column": "prompt_id",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 10.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "pin_code_like": 29
+     }
+    },
+    {
+     "column": "query_rubrics",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 986.2,
+     "narrativeLike": true,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "pin_code_like": 20
+     }
+    },
+    {
+     "column": "answer_rubrics",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 727.0,
+     "narrativeLike": true,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "pin_code_like": 50
+     }
+    },
+    {
+     "column": "doctor_persona",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 147.3,
+     "narrativeLike": false,
+     "nameIndicator": true,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "patient_case",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 184.5,
+     "narrativeLike": true,
+     "nameIndicator": true,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "scenario",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 128.7,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "ground_truth_query",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 113.7,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "answer_citation",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 196.7,
+     "narrativeLike": true,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": true,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "corpus_id",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 18.7,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": true,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "doctor_query",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 108.0,
+     "narrativeLike": false,
+     "nameIndicator": true,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "date_like": 1
+     }
+    },
+    {
+     "column": "query_style",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 10.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "question_type",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 11.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "difficulty_level",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 1.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "publisher",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 33.5,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": true,
+     "patternHitsInSample": {}
+    }
+   ],
+   "indicators": {
+    "provenanceFieldsFound": [
+     "answer_citation",
+     "corpus_id",
+     "publisher"
+    ],
+    "narrativeColumns": [
+     "query_rubrics",
+     "answer_rubrics",
+     "patient_case",
+     "answer_citation"
+    ],
+    "directIdentifierNameIndicators": [
+     "doctor_persona",
+     "patient_case",
+     "doctor_query"
+    ],
+    "quasiIdentifierColumns": [],
+    "patternIndicators": [
+     "date_like",
+     "pin_code_like"
+    ]
+   }
+  },
+  {
+   "path": "clinical_eval/indian_protocols_clinical_qna.parquet",
+   "sizeBytes": 484678,
+   "sha256": "5b75b5f6918d19c8d9a3b97bfb83e997b9aea95c4b4087839e0e648858c4e5c4",
+   "format": "parquet",
+   "rowCount": 504,
+   "rowCountMethod": "parquet footer metadata",
+   "rowGroups": 1,
+   "columns": [
+    "prompt_id",
+    "query_rubrics",
+    "answer_rubrics",
+    "doctor_persona",
+    "patient_case",
+    "scenario",
+    "ground_truth_query",
+    "answer_citation",
+    "corpus_id",
+    "doctor_query",
+    "query_style",
+    "question_type",
+    "difficulty_level",
+    "publisher"
+   ],
+   "schema": {
+    "prompt_id": "string",
+    "query_rubrics": "string",
+    "answer_rubrics": "string",
+    "doctor_persona": "string",
+    "patient_case": "string",
+    "scenario": "string",
+    "ground_truth_query": "string",
+    "answer_citation": "string",
+    "corpus_id": "string",
+    "doctor_query": "string",
+    "query_style": "string",
+    "question_type": "string",
+    "difficulty_level": "int64",
+    "publisher": "string"
+   },
+   "embeddedMetadataKeys": [
+    "info"
+   ],
+   "columnIndicators": [
+    {
+     "column": "prompt_id",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 10.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "pin_code_like": 29
+     }
+    },
+    {
+     "column": "query_rubrics",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 986.2,
+     "narrativeLike": true,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "pin_code_like": 20
+     }
+    },
+    {
+     "column": "answer_rubrics",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 727.0,
+     "narrativeLike": true,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "pin_code_like": 50
+     }
+    },
+    {
+     "column": "doctor_persona",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 147.3,
+     "narrativeLike": false,
+     "nameIndicator": true,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "patient_case",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 184.5,
+     "narrativeLike": true,
+     "nameIndicator": true,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "scenario",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 128.7,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "ground_truth_query",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 113.7,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "answer_citation",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 196.7,
+     "narrativeLike": true,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": true,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "corpus_id",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 18.7,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": true,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "doctor_query",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 108.0,
+     "narrativeLike": false,
+     "nameIndicator": true,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "date_like": 1
+     }
+    },
+    {
+     "column": "query_style",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 10.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "question_type",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 11.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "difficulty_level",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 1.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "publisher",
+     "nonEmptyInSample": 504,
+     "sampleSize": 504,
+     "avgLength": 33.5,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": true,
+     "patternHitsInSample": {}
+    }
+   ],
+   "indicators": {
+    "provenanceFieldsFound": [
+     "answer_citation",
+     "corpus_id",
+     "publisher"
+    ],
+    "narrativeColumns": [
+     "query_rubrics",
+     "answer_rubrics",
+     "patient_case",
+     "answer_citation"
+    ],
+    "directIdentifierNameIndicators": [
+     "doctor_persona",
+     "patient_case",
+     "doctor_query"
+    ],
+    "quasiIdentifierColumns": [],
+    "patternIndicators": [
+     "date_like",
+     "pin_code_like"
+    ]
+   }
+  },
+  {
+   "path": "clinical_eval/medical_calculator_eval.csv",
+   "sizeBytes": 1319982,
+   "sha256": "c83d5301ae1b84da82ac82fca104dbea0fdfa0de70416252669779f619d04b67",
+   "format": "csv",
+   "rowCount": 1066,
+   "rowCountMethod": "full csv parse",
+   "columns": [
+    "id",
+    "category",
+    "expected_calculator",
+    "primary_field",
+    "primary_field_unit",
+    "difficulty_tier",
+    "language_style",
+    "clinical_domain",
+    "input_type",
+    "question_text",
+    "confinement_instruction",
+    "expected_output",
+    "tolerance"
+   ],
+   "schema": {
+    "id": "string (csv)",
+    "category": "string (csv)",
+    "expected_calculator": "string (csv)",
+    "primary_field": "string (csv)",
+    "primary_field_unit": "string (csv)",
+    "difficulty_tier": "string (csv)",
+    "language_style": "string (csv)",
+    "clinical_domain": "string (csv)",
+    "input_type": "string (csv)",
+    "question_text": "string (csv)",
+    "confinement_instruction": "string (csv)",
+    "expected_output": "string (csv)",
+    "tolerance": "string (csv)"
+   },
+   "columnIndicators": [
+    {
+     "column": "id",
+     "nonEmptyInSample": 1066,
+     "sampleSize": 1066,
+     "avgLength": 18.2,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "category",
+     "nonEmptyInSample": 1066,
+     "sampleSize": 1066,
+     "avgLength": 26.2,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "expected_calculator",
+     "nonEmptyInSample": 1066,
+     "sampleSize": 1066,
+     "avgLength": 28.8,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "primary_field",
+     "nonEmptyInSample": 1066,
+     "sampleSize": 1066,
+     "avgLength": 11.3,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "primary_field_unit",
+     "nonEmptyInSample": 514,
+     "sampleSize": 1066,
+     "avgLength": 4.2,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "difficulty_tier",
+     "nonEmptyInSample": 1066,
+     "sampleSize": 1066,
+     "avgLength": 4.6,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "language_style",
+     "nonEmptyInSample": 1066,
+     "sampleSize": 1066,
+     "avgLength": 17.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "clinical_domain",
+     "nonEmptyInSample": 1066,
+     "sampleSize": 1066,
+     "avgLength": 11.1,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "input_type",
+     "nonEmptyInSample": 1066,
+     "sampleSize": 1066,
+     "avgLength": 7.9,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "question_text",
+     "nonEmptyInSample": 1066,
+     "sampleSize": 1066,
+     "avgLength": 302.0,
+     "narrativeLike": true,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "phone_like_10_digit": 1,
+      "date_like": 9,
+      "pin_code_like": 7
+     }
+    },
+    {
+     "column": "confinement_instruction",
+     "nonEmptyInSample": 1066,
+     "sampleSize": 1066,
+     "avgLength": 528.3,
+     "narrativeLike": true,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "expected_output",
+     "nonEmptyInSample": 1066,
+     "sampleSize": 1066,
+     "avgLength": 227.3,
+     "narrativeLike": true,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "phone_like_10_digit": 7,
+      "aadhaar_like_12_digit": 5,
+      "date_like": 40,
+      "pin_code_like": 25
+     }
+    },
+    {
+     "column": "tolerance",
+     "nonEmptyInSample": 1066,
+     "sampleSize": 1066,
+     "avgLength": 3.4,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    }
+   ],
+   "indicators": {
+    "provenanceFieldsFound": [],
+    "narrativeColumns": [
+     "question_text",
+     "confinement_instruction",
+     "expected_output"
+    ],
+    "directIdentifierNameIndicators": [],
+    "quasiIdentifierColumns": [],
+    "patternIndicators": [
+     "aadhaar_like_12_digit",
+     "date_like",
+     "phone_like_10_digit",
+     "pin_code_like"
+    ]
+   }
+  },
+  {
+   "path": "clinical_eval/medical_calculator_eval.parquet",
+   "sizeBytes": 390427,
+   "sha256": "56b097b53a66862cce42b7c82966f1d40b62c2a62088af1fa7801e68bb646ff0",
+   "format": "parquet",
+   "rowCount": 1066,
+   "rowCountMethod": "parquet footer metadata",
+   "rowGroups": 1,
+   "columns": [
+    "id",
+    "category",
+    "expected_calculator",
+    "primary_field",
+    "primary_field_unit",
+    "difficulty_tier",
+    "language_style",
+    "clinical_domain",
+    "input_type",
+    "question_text",
+    "confinement_instruction",
+    "expected_output",
+    "tolerance"
+   ],
+   "schema": {
+    "id": "string",
+    "category": "string",
+    "expected_calculator": "string",
+    "primary_field": "string",
+    "primary_field_unit": "string",
+    "difficulty_tier": "string",
+    "language_style": "string",
+    "clinical_domain": "string",
+    "input_type": "string",
+    "question_text": "string",
+    "confinement_instruction": "string",
+    "expected_output": "string",
+    "tolerance": "double"
+   },
+   "embeddedMetadataKeys": [
+    "info"
+   ],
+   "columnIndicators": [
+    {
+     "column": "id",
+     "nonEmptyInSample": 1066,
+     "sampleSize": 1066,
+     "avgLength": 18.2,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "category",
+     "nonEmptyInSample": 1066,
+     "sampleSize": 1066,
+     "avgLength": 26.2,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "expected_calculator",
+     "nonEmptyInSample": 1066,
+     "sampleSize": 1066,
+     "avgLength": 28.8,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "primary_field",
+     "nonEmptyInSample": 1066,
+     "sampleSize": 1066,
+     "avgLength": 11.3,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "primary_field_unit",
+     "nonEmptyInSample": 514,
+     "sampleSize": 1066,
+     "avgLength": 4.2,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "difficulty_tier",
+     "nonEmptyInSample": 1066,
+     "sampleSize": 1066,
+     "avgLength": 4.6,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "language_style",
+     "nonEmptyInSample": 1066,
+     "sampleSize": 1066,
+     "avgLength": 17.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "clinical_domain",
+     "nonEmptyInSample": 1066,
+     "sampleSize": 1066,
+     "avgLength": 11.1,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "input_type",
+     "nonEmptyInSample": 1066,
+     "sampleSize": 1066,
+     "avgLength": 7.9,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "question_text",
+     "nonEmptyInSample": 1066,
+     "sampleSize": 1066,
+     "avgLength": 302.0,
+     "narrativeLike": true,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "phone_like_10_digit": 1,
+      "date_like": 9,
+      "pin_code_like": 7
+     }
+    },
+    {
+     "column": "confinement_instruction",
+     "nonEmptyInSample": 1066,
+     "sampleSize": 1066,
+     "avgLength": 528.3,
+     "narrativeLike": true,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "expected_output",
+     "nonEmptyInSample": 1066,
+     "sampleSize": 1066,
+     "avgLength": 227.3,
+     "narrativeLike": true,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "phone_like_10_digit": 7,
+      "aadhaar_like_12_digit": 5,
+      "date_like": 40,
+      "pin_code_like": 25
+     }
+    },
+    {
+     "column": "tolerance",
+     "nonEmptyInSample": 1066,
+     "sampleSize": 1066,
+     "avgLength": 3.4,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    }
+   ],
+   "indicators": {
+    "provenanceFieldsFound": [],
+    "narrativeColumns": [
+     "question_text",
+     "confinement_instruction",
+     "expected_output"
+    ],
+    "directIdentifierNameIndicators": [],
+    "quasiIdentifierColumns": [],
+    "patternIndicators": [
+     "aadhaar_like_12_digit",
+     "date_like",
+     "phone_like_10_digit",
+     "pin_code_like"
+    ]
+   }
+  },
+  {
+   "path": "clinical_eval/medmcqa_indic_en.csv",
+   "sizeBytes": 2126544,
+   "sha256": "23b417dbc723ae359f87741ec08098ba2d3085f79ed4e8765999da70e8ba471c",
+   "format": "csv",
+   "rowCount": 4183,
+   "rowCountMethod": "full csv parse",
+   "columns": [
+    "id",
+    "question",
+    "opa",
+    "opb",
+    "opc",
+    "opd",
+    "cop",
+    "choice_type",
+    "subject_name",
+    "topic_name",
+    "exp",
+    "language",
+    "translator",
+    "prompt_template_id",
+    "integrity_flags"
+   ],
+   "schema": {
+    "id": "string (csv)",
+    "question": "string (csv)",
+    "opa": "string (csv)",
+    "opb": "string (csv)",
+    "opc": "string (csv)",
+    "opd": "string (csv)",
+    "cop": "string (csv)",
+    "choice_type": "string (csv)",
+    "subject_name": "string (csv)",
+    "topic_name": "string (csv)",
+    "exp": "string (csv)",
+    "language": "string (csv)",
+    "translator": "string (csv)",
+    "prompt_template_id": "string (csv)",
+    "integrity_flags": "string (csv)"
+   },
+   "columnIndicators": [
+    {
+     "column": "id",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 36.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "phone_like_10_digit": 8,
+      "aadhaar_like_12_digit": 5,
+      "pin_code_like": 242
+     }
+    },
+    {
+     "column": "question",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 85.2,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "pin_code_like": 1
+     }
+    },
+    {
+     "column": "opa",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 20.1,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "opb",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 20.4,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "pin_code_like": 1
+     }
+    },
+    {
+     "column": "opc",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 20.8,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "opd",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 20.5,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "pin_code_like": 2
+     }
+    },
+    {
+     "column": "cop",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 1.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "choice_type",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 5.7,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "subject_name",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 9.6,
+     "narrativeLike": false,
+     "nameIndicator": true,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "topic_name",
+     "nonEmptyInSample": 207,
+     "sampleSize": 2000,
+     "avgLength": 10.0,
+     "narrativeLike": false,
+     "nameIndicator": true,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "exp",
+     "nonEmptyInSample": 1056,
+     "sampleSize": 2000,
+     "avgLength": 472.7,
+     "narrativeLike": true,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "date_like": 1,
+      "pin_code_like": 5
+     }
+    },
+    {
+     "column": "language",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 2.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "translator",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 6.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": true,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "prompt_template_id",
+     "nonEmptyInSample": 0,
+     "sampleSize": 2000,
+     "avgLength": 0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "integrity_flags",
+     "nonEmptyInSample": 0,
+     "sampleSize": 2000,
+     "avgLength": 0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    }
+   ],
+   "indicators": {
+    "provenanceFieldsFound": [
+     "translator"
+    ],
+    "narrativeColumns": [
+     "exp"
+    ],
+    "directIdentifierNameIndicators": [
+     "subject_name",
+     "topic_name"
+    ],
+    "quasiIdentifierColumns": [],
+    "patternIndicators": [
+     "aadhaar_like_12_digit",
+     "date_like",
+     "phone_like_10_digit",
+     "pin_code_like"
+    ]
+   }
+  },
+  {
+   "path": "clinical_eval/medmcqa_indic_en.parquet",
+   "sizeBytes": 1428423,
+   "sha256": "a14a5a81a929590df052f4f8bef07c9164c14c6b0660c7e145c24a999f29421a",
+   "format": "parquet",
+   "rowCount": 4183,
+   "rowCountMethod": "parquet footer metadata",
+   "rowGroups": 1,
+   "columns": [
+    "id",
+    "question",
+    "opa",
+    "opb",
+    "opc",
+    "opd",
+    "cop",
+    "choice_type",
+    "subject_name",
+    "topic_name",
+    "exp",
+    "language",
+    "translator",
+    "prompt_template_id",
+    "integrity_flags"
+   ],
+   "schema": {
+    "id": "string",
+    "question": "string",
+    "opa": "string",
+    "opb": "string",
+    "opc": "string",
+    "opd": "string",
+    "cop": "int64",
+    "choice_type": "string",
+    "subject_name": "string",
+    "topic_name": "string",
+    "exp": "string",
+    "language": "string",
+    "translator": "string",
+    "prompt_template_id": "null",
+    "integrity_flags": "null"
+   },
+   "columnIndicators": [
+    {
+     "column": "id",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 36.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "phone_like_10_digit": 8,
+      "aadhaar_like_12_digit": 5,
+      "pin_code_like": 242
+     }
+    },
+    {
+     "column": "question",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 85.2,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "pin_code_like": 1
+     }
+    },
+    {
+     "column": "opa",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 20.1,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "opb",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 20.4,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "pin_code_like": 1
+     }
+    },
+    {
+     "column": "opc",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 20.8,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "opd",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 20.5,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "pin_code_like": 2
+     }
+    },
+    {
+     "column": "cop",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 1.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "choice_type",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 5.7,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "subject_name",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 9.6,
+     "narrativeLike": false,
+     "nameIndicator": true,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "topic_name",
+     "nonEmptyInSample": 207,
+     "sampleSize": 2000,
+     "avgLength": 10.0,
+     "narrativeLike": false,
+     "nameIndicator": true,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "exp",
+     "nonEmptyInSample": 1056,
+     "sampleSize": 2000,
+     "avgLength": 472.7,
+     "narrativeLike": true,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "date_like": 1,
+      "pin_code_like": 5
+     }
+    },
+    {
+     "column": "language",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 2.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "translator",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 6.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": true,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "prompt_template_id",
+     "nonEmptyInSample": 0,
+     "sampleSize": 2000,
+     "avgLength": 0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "integrity_flags",
+     "nonEmptyInSample": 0,
+     "sampleSize": 2000,
+     "avgLength": 0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    }
+   ],
+   "indicators": {
+    "provenanceFieldsFound": [
+     "translator"
+    ],
+    "narrativeColumns": [
+     "exp"
+    ],
+    "directIdentifierNameIndicators": [
+     "subject_name",
+     "topic_name"
+    ],
+    "quasiIdentifierColumns": [],
+    "patternIndicators": [
+     "aadhaar_like_12_digit",
+     "date_like",
+     "phone_like_10_digit",
+     "pin_code_like"
+    ]
+   }
+  },
+  {
+   "path": "knowledge_graph/bodhi_m_nl_facts.jsonl",
+   "sizeBytes": 340181,
+   "sha256": "006100efc268bfe1fe5e0ad986a0cca0ed4358471d22ea99eeb6aa862bf5c0da",
+   "format": "jsonl",
+   "rowCount": 3566,
+   "rowCountMethod": "full line count",
+   "columns": [
+    "text"
+   ],
+   "schema": {
+    "text": "str"
+   },
+   "columnIndicators": [
+    {
+     "column": "text",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 83.8,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    }
+   ],
+   "indicators": {
+    "provenanceFieldsFound": [],
+    "narrativeColumns": [],
+    "directIdentifierNameIndicators": [],
+    "quasiIdentifierColumns": [],
+    "patternIndicators": []
+   }
+  },
+  {
+   "path": "knowledge_graph/bodhi_m_triples.jsonl",
+   "sizeBytes": 528595,
+   "sha256": "5fca934e9d74d0a6adb17c85481fde7749e6a6317b3ea06f3890240d9e11348d",
+   "format": "jsonl",
+   "rowCount": 3566,
+   "rowCountMethod": "full line count",
+   "columns": [
+    "head",
+    "head_type",
+    "relation",
+    "tail",
+    "tail_type",
+    "properties"
+   ],
+   "schema": {
+    "head": "str",
+    "head_type": "str",
+    "relation": "str",
+    "tail": "str",
+    "tail_type": "str",
+    "properties": "dict"
+   },
+   "columnIndicators": [
+    {
+     "column": "head",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 8.6,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "aadhaar_like_12_digit": 7,
+      "pin_code_like": 5
+     }
+    },
+    {
+     "column": "head_type",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 7.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "relation",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 8.2,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "tail",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 11.9,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "phone_like_10_digit": 4,
+      "aadhaar_like_12_digit": 4,
+      "pin_code_like": 68
+     }
+    },
+    {
+     "column": "tail_type",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 6.7,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "properties",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 4.6,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    }
+   ],
+   "indicators": {
+    "provenanceFieldsFound": [],
+    "narrativeColumns": [],
+    "directIdentifierNameIndicators": [],
+    "quasiIdentifierColumns": [],
+    "patternIndicators": [
+     "aadhaar_like_12_digit",
+     "phone_like_10_digit",
+     "pin_code_like"
+    ]
+   }
+  },
+  {
+   "path": "knowledge_graph/bodhi_s_nl_facts.jsonl",
+   "sizeBytes": 1370405,
+   "sha256": "f4c250487e5fd11ed62fd533ea0a71b31da659481389633395e28ca06456240a",
+   "format": "jsonl",
+   "rowCount": 13204,
+   "rowCountMethod": "full line count",
+   "columns": [
+    "text"
+   ],
+   "schema": {
+    "text": "str"
+   },
+   "columnIndicators": [
+    {
+     "column": "text",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 88.8,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    }
+   ],
+   "indicators": {
+    "provenanceFieldsFound": [],
+    "narrativeColumns": [],
+    "directIdentifierNameIndicators": [],
+    "quasiIdentifierColumns": [],
+    "patternIndicators": []
+   }
+  },
+  {
+   "path": "knowledge_graph/bodhi_s_triples.jsonl",
+   "sizeBytes": 3174110,
+   "sha256": "2f3f78cebac500f6f33e9ecea616af73bee65716a946ec99bf15a7d63a227d38",
+   "format": "jsonl",
+   "rowCount": 13204,
+   "rowCountMethod": "full line count",
+   "columns": [
+    "head",
+    "head_type",
+    "relation",
+    "tail",
+    "tail_type",
+    "properties"
+   ],
+   "schema": {
+    "head": "str",
+    "head_type": "str",
+    "relation": "str",
+    "tail": "str",
+    "tail_type": "str",
+    "properties": "dict"
+   },
+   "columnIndicators": [
+    {
+     "column": "head",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 36.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "aadhaar_like_12_digit": 1,
+      "pin_code_like": 1913
+     }
+    },
+    {
+     "column": "head_type",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 7.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "relation",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 10.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "tail",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 8.4,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "tail_type",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 9.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "properties",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 99.7,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    }
+   ],
+   "indicators": {
+    "provenanceFieldsFound": [],
+    "narrativeColumns": [],
+    "directIdentifierNameIndicators": [],
+    "quasiIdentifierColumns": [],
+    "patternIndicators": [
+     "aadhaar_like_12_digit",
+     "pin_code_like"
+    ]
+   }
+  },
+  {
+   "path": "lab/nidaankosha_lab_readings_sample.csv",
+   "sizeBytes": 1462880,
+   "sha256": "42a013896a78113323d4eb587ac276e5f0e27078dffd38d3b69beaac99b0ee23",
+   "format": "csv",
+   "rowCount": 15000,
+   "rowCountMethod": "full csv parse",
+   "columns": [
+    "document_id",
+    "age",
+    "gender",
+    "test_name",
+    "display_ranges",
+    "value",
+    "unit",
+    "specimen",
+    "loinc"
+   ],
+   "schema": {
+    "document_id": "string (csv)",
+    "age": "string (csv)",
+    "gender": "string (csv)",
+    "test_name": "string (csv)",
+    "display_ranges": "string (csv)",
+    "value": "string (csv)",
+    "unit": "string (csv)",
+    "specimen": "string (csv)",
+    "loinc": "string (csv)"
+   },
+   "columnIndicators": [
+    {
+     "column": "document_id",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 32.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": true,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "phone_like_10_digit": 48,
+      "pin_code_like": 477
+     }
+    },
+    {
+     "column": "age",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 2.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": true,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "gender",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 4.9,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": true,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "test_name",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 15.2,
+     "narrativeLike": false,
+     "nameIndicator": true,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "display_ranges",
+     "nonEmptyInSample": 1805,
+     "sampleSize": 2000,
+     "avgLength": 15.1,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "date_like": 2,
+      "pin_code_like": 1
+     }
+    },
+    {
+     "column": "value",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 6.8,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "pin_code_like": 1
+     }
+    },
+    {
+     "column": "unit",
+     "nonEmptyInSample": 1692,
+     "sampleSize": 2000,
+     "avgLength": 4.5,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "specimen",
+     "nonEmptyInSample": 1890,
+     "sampleSize": 2000,
+     "avgLength": 5.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": true,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "loinc",
+     "nonEmptyInSample": 1845,
+     "sampleSize": 2000,
+     "avgLength": 6.5,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    }
+   ],
+   "indicators": {
+    "provenanceFieldsFound": [],
+    "narrativeColumns": [],
+    "directIdentifierNameIndicators": [
+     "test_name"
+    ],
+    "quasiIdentifierColumns": [
+     "document_id",
+     "age",
+     "gender",
+     "specimen"
+    ],
+    "patternIndicators": [
+     "date_like",
+     "phone_like_10_digit",
+     "pin_code_like"
+    ]
+   }
+  },
+  {
+   "path": "lab/nidaankosha_lab_readings_sample.json",
+   "sizeBytes": 260251,
+   "sha256": "6cd03aa22e6facb9aa4a8c80b3a553fdaaa5b561d1a1f997743806bf720212d5",
+   "format": "json",
+   "rowCount": 1000,
+   "rowCountMethod": "top-level array length",
+   "columns": [
+    "document_id",
+    "age",
+    "gender",
+    "test_name",
+    "display_ranges",
+    "value",
+    "unit",
+    "specimen",
+    "loinc"
+   ],
+   "schema": {
+    "document_id": "str",
+    "age": "int",
+    "gender": "str",
+    "test_name": "str",
+    "display_ranges": "NoneType",
+    "value": "str",
+    "unit": "str",
+    "specimen": "str",
+    "loinc": "str"
+   },
+   "columnIndicators": [
+    {
+     "column": "document_id",
+     "nonEmptyInSample": 1000,
+     "sampleSize": 1000,
+     "avgLength": 32.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": true,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "phone_like_10_digit": 48,
+      "pin_code_like": 340
+     }
+    },
+    {
+     "column": "age",
+     "nonEmptyInSample": 1000,
+     "sampleSize": 1000,
+     "avgLength": 2.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": true,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "gender",
+     "nonEmptyInSample": 1000,
+     "sampleSize": 1000,
+     "avgLength": 5.2,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": true,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "test_name",
+     "nonEmptyInSample": 1000,
+     "sampleSize": 1000,
+     "avgLength": 15.8,
+     "narrativeLike": false,
+     "nameIndicator": true,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "display_ranges",
+     "nonEmptyInSample": 911,
+     "sampleSize": 1000,
+     "avgLength": 13.4,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "date_like": 1,
+      "pin_code_like": 1
+     }
+    },
+    {
+     "column": "value",
+     "nonEmptyInSample": 1000,
+     "sampleSize": 1000,
+     "avgLength": 6.7,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "pin_code_like": 1
+     }
+    },
+    {
+     "column": "unit",
+     "nonEmptyInSample": 883,
+     "sampleSize": 1000,
+     "avgLength": 4.6,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "specimen",
+     "nonEmptyInSample": 936,
+     "sampleSize": 1000,
+     "avgLength": 5.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": true,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "loinc",
+     "nonEmptyInSample": 930,
+     "sampleSize": 1000,
+     "avgLength": 6.5,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    }
+   ],
+   "indicators": {
+    "provenanceFieldsFound": [],
+    "narrativeColumns": [],
+    "directIdentifierNameIndicators": [
+     "test_name"
+    ],
+    "quasiIdentifierColumns": [
+     "document_id",
+     "age",
+     "gender",
+     "specimen"
+    ],
+    "patternIndicators": [
+     "date_like",
+     "phone_like_10_digit",
+     "pin_code_like"
+    ]
+   }
+  },
+  {
+   "path": "lab/nidaankosha_part1.parquet",
+   "sizeBytes": 87839466,
+   "sha256": "a55637e03e5960aec43b092efc657f0b91a0e8c16703d7d8bb0349ccdcdc0276",
+   "format": "parquet",
+   "rowCount": 3422152,
+   "rowCountMethod": "parquet footer metadata",
+   "rowGroups": 3423,
+   "columns": [
+    "document_id",
+    "age",
+    "gender",
+    "test_name",
+    "display_ranges",
+    "value",
+    "unit",
+    "specimen",
+    "loinc"
+   ],
+   "schema": {
+    "document_id": "string",
+    "age": "int64",
+    "gender": "string",
+    "test_name": "string",
+    "display_ranges": "string",
+    "value": "string",
+    "unit": "string",
+    "specimen": "string",
+    "loinc": "string"
+   },
+   "embeddedMetadataKeys": [
+    "info"
+   ],
+   "columnIndicators": [
+    {
+     "column": "document_id",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 32.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": true,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "phone_like_10_digit": 48,
+      "pin_code_like": 477
+     }
+    },
+    {
+     "column": "age",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 2.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": true,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "gender",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 4.9,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": true,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "test_name",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 15.2,
+     "narrativeLike": false,
+     "nameIndicator": true,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "display_ranges",
+     "nonEmptyInSample": 1805,
+     "sampleSize": 2000,
+     "avgLength": 15.1,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "date_like": 2,
+      "pin_code_like": 1
+     }
+    },
+    {
+     "column": "value",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 6.8,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "pin_code_like": 1
+     }
+    },
+    {
+     "column": "unit",
+     "nonEmptyInSample": 1692,
+     "sampleSize": 2000,
+     "avgLength": 4.5,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "specimen",
+     "nonEmptyInSample": 1890,
+     "sampleSize": 2000,
+     "avgLength": 5.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": true,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "loinc",
+     "nonEmptyInSample": 1845,
+     "sampleSize": 2000,
+     "avgLength": 6.5,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    }
+   ],
+   "indicators": {
+    "provenanceFieldsFound": [],
+    "narrativeColumns": [],
+    "directIdentifierNameIndicators": [
+     "test_name"
+    ],
+    "quasiIdentifierColumns": [
+     "document_id",
+     "age",
+     "gender",
+     "specimen"
+    ],
+    "patternIndicators": [
+     "date_like",
+     "phone_like_10_digit",
+     "pin_code_like"
+    ]
+   }
+  },
+  {
+   "path": "lab/nidaankosha_part2.parquet",
+   "sizeBytes": 87777017,
+   "sha256": "178bccdcbb56752d371273bd7b88aca9dd35d2291719e2c114ae9e24851a4168",
+   "format": "parquet",
+   "rowCount": 3422152,
+   "rowCountMethod": "parquet footer metadata",
+   "rowGroups": 3423,
+   "columns": [
+    "document_id",
+    "age",
+    "gender",
+    "test_name",
+    "display_ranges",
+    "value",
+    "unit",
+    "specimen",
+    "loinc"
+   ],
+   "schema": {
+    "document_id": "string",
+    "age": "int64",
+    "gender": "string",
+    "test_name": "string",
+    "display_ranges": "string",
+    "value": "string",
+    "unit": "string",
+    "specimen": "string",
+    "loinc": "string"
+   },
+   "embeddedMetadataKeys": [
+    "info"
+   ],
+   "columnIndicators": [
+    {
+     "column": "document_id",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 32.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": true,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "pin_code_like": 235
+     }
+    },
+    {
+     "column": "age",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 2.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": true,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "gender",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 4.9,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": true,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "test_name",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 16.2,
+     "narrativeLike": false,
+     "nameIndicator": true,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "display_ranges",
+     "nonEmptyInSample": 1752,
+     "sampleSize": 2000,
+     "avgLength": 12.1,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "pin_code_like": 2
+     }
+    },
+    {
+     "column": "value",
+     "nonEmptyInSample": 2000,
+     "sampleSize": 2000,
+     "avgLength": 6.8,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "pin_code_like": 2
+     }
+    },
+    {
+     "column": "unit",
+     "nonEmptyInSample": 1710,
+     "sampleSize": 2000,
+     "avgLength": 4.7,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "specimen",
+     "nonEmptyInSample": 1871,
+     "sampleSize": 2000,
+     "avgLength": 5.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": true,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "loinc",
+     "nonEmptyInSample": 1843,
+     "sampleSize": 2000,
+     "avgLength": 6.5,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    }
+   ],
+   "indicators": {
+    "provenanceFieldsFound": [],
+    "narrativeColumns": [],
+    "directIdentifierNameIndicators": [
+     "test_name"
+    ],
+    "quasiIdentifierColumns": [
+     "document_id",
+     "age",
+     "gender",
+     "specimen"
+    ],
+    "patternIndicators": [
+     "pin_code_like"
+    ]
+   }
+  },
+  {
+   "path": "pathology/icmr_pathology_cohorts.json",
+   "sizeBytes": 1573,
+   "sha256": "7ebf8c4a49e05b0921453bd9b1475309299826f8002f89faba859f1afdc83503",
+   "format": "json",
+   "rowCount": null,
+   "rowCountMethod": "top-level object (no row concept)",
+   "columns": [
+    "organization",
+    "datasets"
+   ],
+   "schema": {
+    "organization": "str",
+    "datasets": "list"
+   },
+   "nestedRecordCount": 2,
+   "topLevelScalarFields": {
+    "organization": "Indian Council of Medical Research (ICMR) & IndiaAI"
+   },
+   "columnIndicators": [
+    {
+     "column": "name",
+     "nonEmptyInSample": 2,
+     "sampleSize": 2,
+     "avgLength": 37.5,
+     "narrativeLike": false,
+     "nameIndicator": true,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "slug",
+     "nonEmptyInSample": 2,
+     "sampleSize": 2,
+     "avgLength": 37.5,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": true,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "institution",
+     "nonEmptyInSample": 2,
+     "sampleSize": 2,
+     "avgLength": 17.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": true,
+     "provenanceFieldIndicator": true,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "modality",
+     "nonEmptyInSample": 2,
+     "sampleSize": 2,
+     "avgLength": 72.5,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "key_features",
+     "nonEmptyInSample": 2,
+     "sampleSize": 2,
+     "avgLength": 323.5,
+     "narrativeLike": true,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "access",
+     "nonEmptyInSample": 2,
+     "sampleSize": 2,
+     "avgLength": 60.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": true,
+     "patternHitsInSample": {}
+    }
+   ],
+   "indicators": {
+    "provenanceFieldsFound": [
+     "slug",
+     "institution",
+     "access"
+    ],
+    "narrativeColumns": [
+     "key_features"
+    ],
+    "directIdentifierNameIndicators": [
+     "name"
+    ],
+    "quasiIdentifierColumns": [
+     "institution"
+    ],
+    "patternIndicators": []
+   }
+  },
+  {
+   "path": "pathology/sample_pathology_cases.json",
+   "sizeBytes": 2257,
+   "sha256": "e51efea8407474fd36fdec70063ad4d01cf6e6536632f2882439acb68f8ed56d",
+   "format": "json",
+   "rowCount": 2,
+   "rowCountMethod": "top-level array length",
+   "columns": [
+    "case_id",
+    "specimen",
+    "clinical_history",
+    "gross_description",
+    "microscopic_examination",
+    "histological_type",
+    "histological_grade",
+    "depth_of_invasion_mm",
+    "lymphovascular_invasion",
+    "perineural_invasion",
+    "icd_o_code",
+    "snomed_ct_morphology",
+    "recommendation",
+    "who_grade",
+    "ki67_proliferation_index_percent",
+    "dural_margin",
+    "brain_parenchymal_invasion"
+   ],
+   "schema": {
+    "case_id": "str",
+    "specimen": "str",
+    "clinical_history": "str",
+    "gross_description": "str",
+    "microscopic_examination": "str",
+    "histological_type": "str",
+    "histological_grade": "str",
+    "depth_of_invasion_mm": "float",
+    "lymphovascular_invasion": "str",
+    "perineural_invasion": "str",
+    "icd_o_code": "str",
+    "snomed_ct_morphology": "str",
+    "recommendation": "str",
+    "who_grade": "str",
+    "ki67_proliferation_index_percent": "float",
+    "dural_margin": "str",
+    "brain_parenchymal_invasion": "str"
+   },
+   "columnIndicators": [
+    {
+     "column": "case_id",
+     "nonEmptyInSample": 2,
+     "sampleSize": 2,
+     "avgLength": 13.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": true,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "specimen",
+     "nonEmptyInSample": 2,
+     "sampleSize": 2,
+     "avgLength": 44.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": true,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "clinical_history",
+     "nonEmptyInSample": 2,
+     "sampleSize": 2,
+     "avgLength": 100.5,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "gross_description",
+     "nonEmptyInSample": 2,
+     "sampleSize": 2,
+     "avgLength": 83.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "microscopic_examination",
+     "nonEmptyInSample": 2,
+     "sampleSize": 2,
+     "avgLength": 276.0,
+     "narrativeLike": true,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "histological_type",
+     "nonEmptyInSample": 2,
+     "sampleSize": 2,
+     "avgLength": 28.5,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "histological_grade",
+     "nonEmptyInSample": 1,
+     "sampleSize": 2,
+     "avgLength": 35.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "depth_of_invasion_mm",
+     "nonEmptyInSample": 1,
+     "sampleSize": 2,
+     "avgLength": 3.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "lymphovascular_invasion",
+     "nonEmptyInSample": 1,
+     "sampleSize": 2,
+     "avgLength": 14.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "perineural_invasion",
+     "nonEmptyInSample": 1,
+     "sampleSize": 2,
+     "avgLength": 7.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "icd_o_code",
+     "nonEmptyInSample": 1,
+     "sampleSize": 2,
+     "avgLength": 6.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "snomed_ct_morphology",
+     "nonEmptyInSample": 2,
+     "sampleSize": 2,
+     "avgLength": 54.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "recommendation",
+     "nonEmptyInSample": 2,
+     "sampleSize": 2,
+     "avgLength": 101.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "who_grade",
+     "nonEmptyInSample": 1,
+     "sampleSize": 2,
+     "avgLength": 11.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "ki67_proliferation_index_percent",
+     "nonEmptyInSample": 1,
+     "sampleSize": 2,
+     "avgLength": 3.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "dural_margin",
+     "nonEmptyInSample": 1,
+     "sampleSize": 2,
+     "avgLength": 45.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "brain_parenchymal_invasion",
+     "nonEmptyInSample": 1,
+     "sampleSize": 2,
+     "avgLength": 6.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    }
+   ],
+   "indicators": {
+    "provenanceFieldsFound": [],
+    "narrativeColumns": [
+     "microscopic_examination"
+    ],
+    "directIdentifierNameIndicators": [],
+    "quasiIdentifierColumns": [
+     "case_id",
+     "specimen"
+    ],
+    "patternIndicators": []
+   }
+  },
+  {
+   "path": "pharmacology/eka_nfi_drug_pharmacology.csv",
+   "sizeBytes": 517934,
+   "sha256": "b7658e28c0629cf807ed5bab47ab02fafc4b1bbdfaf12b42de266c4136e15f3e",
+   "format": "csv",
+   "rowCount": 925,
+   "rowCountMethod": "full csv parse",
+   "columns": [
+    "question",
+    "options",
+    "explanation",
+    "question_type",
+    "difficulty",
+    "category",
+    "answer"
+   ],
+   "schema": {
+    "question": "string (csv)",
+    "options": "string (csv)",
+    "explanation": "string (csv)",
+    "question_type": "string (csv)",
+    "difficulty": "string (csv)",
+    "category": "string (csv)",
+    "answer": "string (csv)"
+   },
+   "columnIndicators": [
+    {
+     "column": "question",
+     "nonEmptyInSample": 925,
+     "sampleSize": 925,
+     "avgLength": 55.7,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "options",
+     "nonEmptyInSample": 925,
+     "sampleSize": 925,
+     "avgLength": 139.3,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "pin_code_like": 1
+     }
+    },
+    {
+     "column": "explanation",
+     "nonEmptyInSample": 925,
+     "sampleSize": 925,
+     "avgLength": 299.4,
+     "narrativeLike": true,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "question_type",
+     "nonEmptyInSample": 925,
+     "sampleSize": 925,
+     "avgLength": 16.1,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "difficulty",
+     "nonEmptyInSample": 925,
+     "sampleSize": 925,
+     "avgLength": 6.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "category",
+     "nonEmptyInSample": 925,
+     "sampleSize": 925,
+     "avgLength": 11.7,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "answer",
+     "nonEmptyInSample": 925,
+     "sampleSize": 925,
+     "avgLength": 1.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    }
+   ],
+   "indicators": {
+    "provenanceFieldsFound": [],
+    "narrativeColumns": [
+     "explanation"
+    ],
+    "directIdentifierNameIndicators": [],
+    "quasiIdentifierColumns": [],
+    "patternIndicators": [
+     "pin_code_like"
+    ]
+   }
+  },
+  {
+   "path": "pharmacology/eka_nfi_drug_pharmacology.parquet",
+   "sizeBytes": 172047,
+   "sha256": "c26460db830311c53ce2022f9dcc4723279c7a274c48a869d5e11281834a4511",
+   "format": "parquet",
+   "rowCount": 925,
+   "rowCountMethod": "parquet footer metadata",
+   "rowGroups": 1,
+   "columns": [
+    "question",
+    "options",
+    "explanation",
+    "question_type",
+    "difficulty",
+    "category",
+    "answer"
+   ],
+   "schema": {
+    "question": "string",
+    "options": "string",
+    "explanation": "string",
+    "question_type": "string",
+    "difficulty": "string",
+    "category": "string",
+    "answer": "string"
+   },
+   "embeddedMetadataKeys": [
+    "info"
+   ],
+   "columnIndicators": [
+    {
+     "column": "question",
+     "nonEmptyInSample": 925,
+     "sampleSize": 925,
+     "avgLength": 55.7,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "options",
+     "nonEmptyInSample": 925,
+     "sampleSize": 925,
+     "avgLength": 139.3,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {
+      "pin_code_like": 1
+     }
+    },
+    {
+     "column": "explanation",
+     "nonEmptyInSample": 925,
+     "sampleSize": 925,
+     "avgLength": 299.4,
+     "narrativeLike": true,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "question_type",
+     "nonEmptyInSample": 925,
+     "sampleSize": 925,
+     "avgLength": 16.1,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "difficulty",
+     "nonEmptyInSample": 925,
+     "sampleSize": 925,
+     "avgLength": 6.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "category",
+     "nonEmptyInSample": 925,
+     "sampleSize": 925,
+     "avgLength": 11.7,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "answer",
+     "nonEmptyInSample": 925,
+     "sampleSize": 925,
+     "avgLength": 1.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    }
+   ],
+   "indicators": {
+    "provenanceFieldsFound": [],
+    "narrativeColumns": [
+     "explanation"
+    ],
+    "directIdentifierNameIndicators": [],
+    "quasiIdentifierColumns": [],
+    "patternIndicators": [
+     "pin_code_like"
+    ]
+   }
+  },
+  {
+   "path": "pharmacology/indian_drug_brand_salts.csv",
+   "sizeBytes": 572386,
+   "sha256": "49f4fa5fb2adb49d9a269a50b2856287a904d1459c6bd95b0fa481953365df55",
+   "format": "csv",
+   "rowCount": 1512,
+   "rowCountMethod": "full csv parse",
+   "columns": [
+    "question_id",
+    "question",
+    "option_a",
+    "option_b",
+    "option_c",
+    "option_d",
+    "option_e",
+    "correct_answer",
+    "medication_name",
+    "generic_name",
+    "therapeutic_class",
+    "action_class_name",
+    "stem_format",
+    "phrasing_style",
+    "distractor_strategy",
+    "difficulty_tier",
+    "num_options"
+   ],
+   "schema": {
+    "question_id": "string (csv)",
+    "question": "string (csv)",
+    "option_a": "string (csv)",
+    "option_b": "string (csv)",
+    "option_c": "string (csv)",
+    "option_d": "string (csv)",
+    "option_e": "string (csv)",
+    "correct_answer": "string (csv)",
+    "medication_name": "string (csv)",
+    "generic_name": "string (csv)",
+    "therapeutic_class": "string (csv)",
+    "action_class_name": "string (csv)",
+    "stem_format": "string (csv)",
+    "phrasing_style": "string (csv)",
+    "distractor_strategy": "string (csv)",
+    "difficulty_tier": "string (csv)",
+    "num_options": "string (csv)"
+   },
+   "columnIndicators": [
+    {
+     "column": "question_id",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 4.6,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "question",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 81.7,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "option_a",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 36.7,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "option_b",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 36.8,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "option_c",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 36.2,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "option_d",
+     "nonEmptyInSample": 1252,
+     "sampleSize": 1512,
+     "avgLength": 38.9,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "option_e",
+     "nonEmptyInSample": 797,
+     "sampleSize": 1512,
+     "avgLength": 41.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "correct_answer",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 1.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "medication_name",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 19.4,
+     "narrativeLike": false,
+     "nameIndicator": true,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "generic_name",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 36.8,
+     "narrativeLike": false,
+     "nameIndicator": true,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "therapeutic_class",
+     "nonEmptyInSample": 1023,
+     "sampleSize": 1512,
+     "avgLength": 12.5,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "action_class_name",
+     "nonEmptyInSample": 505,
+     "sampleSize": 1512,
+     "avgLength": 32.9,
+     "narrativeLike": false,
+     "nameIndicator": true,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "stem_format",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 9.8,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "phrasing_style",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 9.5,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "distractor_strategy",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 10.1,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "difficulty_tier",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 4.5,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "num_options",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 1.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    }
+   ],
+   "indicators": {
+    "provenanceFieldsFound": [],
+    "narrativeColumns": [],
+    "directIdentifierNameIndicators": [
+     "medication_name",
+     "generic_name",
+     "action_class_name"
+    ],
+    "quasiIdentifierColumns": [],
+    "patternIndicators": []
+   }
+  },
+  {
+   "path": "pharmacology/indian_drug_brand_salts.parquet",
+   "sizeBytes": 220199,
+   "sha256": "a39b94a52f4849c57e42f68009346f012a7e7e42e8ab5c34e75662c8c987c647",
+   "format": "parquet",
+   "rowCount": 1512,
+   "rowCountMethod": "parquet footer metadata",
+   "rowGroups": 2,
+   "columns": [
+    "question_id",
+    "question",
+    "option_a",
+    "option_b",
+    "option_c",
+    "option_d",
+    "option_e",
+    "correct_answer",
+    "medication_name",
+    "generic_name",
+    "therapeutic_class",
+    "action_class_name",
+    "stem_format",
+    "phrasing_style",
+    "distractor_strategy",
+    "difficulty_tier",
+    "num_options"
+   ],
+   "schema": {
+    "question_id": "string",
+    "question": "string",
+    "option_a": "string",
+    "option_b": "string",
+    "option_c": "string",
+    "option_d": "string",
+    "option_e": "string",
+    "correct_answer": "string",
+    "medication_name": "string",
+    "generic_name": "string",
+    "therapeutic_class": "string",
+    "action_class_name": "string",
+    "stem_format": "string",
+    "phrasing_style": "string",
+    "distractor_strategy": "string",
+    "difficulty_tier": "string",
+    "num_options": "int64"
+   },
+   "embeddedMetadataKeys": [
+    "info"
+   ],
+   "columnIndicators": [
+    {
+     "column": "question_id",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 4.6,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "question",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 81.7,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "option_a",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 36.7,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "option_b",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 36.8,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "option_c",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 36.2,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "option_d",
+     "nonEmptyInSample": 1252,
+     "sampleSize": 1512,
+     "avgLength": 38.9,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "option_e",
+     "nonEmptyInSample": 797,
+     "sampleSize": 1512,
+     "avgLength": 41.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "correct_answer",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 1.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "medication_name",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 19.4,
+     "narrativeLike": false,
+     "nameIndicator": true,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "generic_name",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 36.8,
+     "narrativeLike": false,
+     "nameIndicator": true,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "therapeutic_class",
+     "nonEmptyInSample": 1023,
+     "sampleSize": 1512,
+     "avgLength": 12.5,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "action_class_name",
+     "nonEmptyInSample": 505,
+     "sampleSize": 1512,
+     "avgLength": 32.9,
+     "narrativeLike": false,
+     "nameIndicator": true,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "stem_format",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 9.8,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "phrasing_style",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 9.5,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "distractor_strategy",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 10.1,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "difficulty_tier",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 4.5,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    },
+    {
+     "column": "num_options",
+     "nonEmptyInSample": 1512,
+     "sampleSize": 1512,
+     "avgLength": 1.0,
+     "narrativeLike": false,
+     "nameIndicator": false,
+     "quasiIdentifierIndicator": false,
+     "provenanceFieldIndicator": false,
+     "patternHitsInSample": {}
+    }
+   ],
+   "indicators": {
+    "provenanceFieldsFound": [],
+    "narrativeColumns": [],
+    "directIdentifierNameIndicators": [
+     "medication_name",
+     "generic_name",
+     "action_class_name"
+    ],
+    "quasiIdentifierColumns": [],
+    "patternIndicators": []
+   }
+  }
+ ]
+}

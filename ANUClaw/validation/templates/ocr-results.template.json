@@ -1,0 +1,36 @@
+{
+ "_howTo": [
+  "Results come from the pipeline: for each document list page statuses (ok / ocr_unavailable / failed \u2026) and the candidates it extracted (the review JSON of /v1/documents/:id has these fields).",
+  "Every annotated document must appear, even if every page failed \u2014 omitting one is an input error."
+ ],
+ "schema": "anuclaw-ocr-extraction/v1",
+ "system": {
+  "engine": "",
+  "version": ""
+ },
+ "documents": [
+  {
+   "documentId": "",
+   "pages": [
+    {
+     "page": 1,
+     "status": "ok"
+    }
+   ],
+   "candidates": [
+    {
+     "analyte": "",
+     "valueRaw": "",
+     "comparator": null,
+     "valueNum": null,
+     "unit": null,
+     "refLow": null,
+     "refHigh": null,
+     "page": 1,
+     "flags": [],
+     "ocrConfidence": null
+    }
+   ]
+  }
+ ]
+}

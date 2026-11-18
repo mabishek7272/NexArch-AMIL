@@ -1,0 +1,14 @@
+# OPTIONAL tools — NOT in the full image. Each is listed with the reason the resolver gave (Python 3.12, linux/aarch64, 2026-11-17).
+# They are built into a separate venv by container/Dockerfile.optional; whether that build succeeds is recorded in docs/CONTAINER-CONTRACT.md.
+episcanpy     # no wheels on PyPI (source-only, old); builds from source if at all
+pytdc         # no wheels (source-only)
+medspacy      # needs PyRuSH>=1.0.6, which has no release for this platform/Python
+pyscenic      # depends on multiprocessing-on-dill: no wheels (source-only)
+squidpy       # depends on centrosome/docrep: no wheels (source-only)
+biotite       # depends on biotraj: no wheels (source-only)
+pyranges      # depends on ncls: no wheels (source-only)
+deepchem      # latest (2.8.0) requires Python <3.12; the resolver only finds 2.5.0 (2021), untested with NumPy 2
+# hail: the core lock resolved `hail` to PyPI's 0.2 — a metadata-only placeholder with NO importable code (found by the full-image import test). The real
+# Hail (0.2.133) requires pyspark>=3.5,<3.6, which has no wheel (sdist only) -> excluded by the wheels-only rule (resolver: 'No matching distribution found for pyspark').
+# Needs Java + a source build; not in the core image.
+hail==0.2.133

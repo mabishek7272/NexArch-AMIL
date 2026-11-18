@@ -1,0 +1,41 @@
+{
+ "_howTo": [
+  "Copy this file; do not edit the template in place.",
+  "One entry per value you can read on the page (truth), exactly as printed; page numbers are 1-based.",
+  "valueRaw is the printed text (\"<5\", \"4.1\"); valueNum the number or null; comparator one of <,>,<=,>= or null; unit as printed; refLow/refHigh numbers or null.",
+  "provenance.kind must be human_annotated for real work; double annotation + adjudication is required before any accuracy statement.",
+  "Run: npm run validate -- ocr --annotations your-annotations.json --results your-results.json --out report.json"
+ ],
+ "schema": "anuclaw-ocr-annotation/v1",
+ "provenance": {
+  "kind": "human_annotated",
+  "annotators": [
+   {
+    "id": "",
+    "role": ""
+   }
+  ],
+  "adjudication": "none",
+  "createdAt": "",
+  "notes": ""
+ },
+ "documents": [
+  {
+   "documentId": "",
+   "pages": 1,
+   "truth": [
+    {
+     "id": "t1",
+     "page": 1,
+     "analyte": "",
+     "valueRaw": "",
+     "valueNum": null,
+     "comparator": null,
+     "unit": null,
+     "refLow": null,
+     "refHigh": null
+    }
+   ]
+  }
+ ]
+}

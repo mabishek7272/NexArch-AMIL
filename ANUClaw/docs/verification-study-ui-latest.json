@@ -1,0 +1,97 @@
+{
+ "ranAt": "2026-11-17T17:40:56.181Z",
+ "notice": "Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+ "syntheticDataOnly": true,
+ "outcomes": [
+  {
+   "name": "page shows the study-tooling notice and the synthetic storage status",
+   "status": "pass"
+  },
+  {
+   "name": "owner creates a study and adds one member per role",
+   "status": "pass"
+  },
+  {
+   "name": "owner cannot see custodian, annotation or adjudication controls and has no accept action",
+   "status": "pass"
+  },
+  {
+   "name": "custodian registers the synthetic sample dataset, records the attestation and generates the manifest",
+   "status": "pass"
+  },
+  {
+   "name": "annotator sees only their assigned dataset, its cases, and an upload box — no queue, agreement, audit or manifest",
+   "status": "pass"
+  },
+  {
+   "name": "annotator uploads their own annotations; the page confirms a new immutable version",
+   "status": "pass"
+  },
+  {
+   "name": "the second annotator cannot see the first annotator’s work",
+   "status": "pass"
+  },
+  {
+   "name": "adjudicator reviews the blind queue and adjudicates every item without seeing annotator identities",
+   "status": "pass"
+  },
+  {
+   "name": "adjudicator has no annotation import, manifest or evaluation controls",
+   "status": "pass"
+  },
+  {
+   "name": "custodian builds the truth and locks; the lock digest is shown with the instruction to record it OUTSIDE the system",
+   "status": "pass"
+  },
+  {
+   "name": "verification of a locked dataset demands the external digest; a wrong digest fails; the right one passes",
+   "status": "pass"
+  },
+  {
+   "name": "statistician runs a locked evaluation and exports the report; the page states no acceptance is made",
+   "status": "pass"
+  },
+  {
+   "name": "clinical lead can set severity labels but has no evaluation, lock or accept controls",
+   "status": "pass"
+  },
+  {
+   "name": "auditor reads the audit log (ids/hashes only) and has no write controls",
+   "status": "pass"
+  },
+  {
+   "name": "policy panel: banner, 13 fields all unconfigured, hash-chain integrity, no pre-filled value, no activate/approve/accept/release control",
+   "status": "pass"
+  },
+  {
+   "name": "statistician prepares a draft (value + source reference), saves it and submits it for review",
+   "status": "pass"
+  },
+  {
+   "name": "self-review is refused with a clear message and the policy stays a draft",
+   "status": "pass"
+  },
+  {
+   "name": "a different member records the review (references only); the panel still says draft / ineligible and shows no activation control",
+   "status": "pass"
+  },
+  {
+   "name": "aud: policy panel is visible but read-only (no value inputs, no save, no submit, no review buttons)",
+   "status": "pass"
+  },
+  {
+   "name": "cust: policy panel is visible but read-only (no value inputs, no save, no submit, no review buttons)",
+   "status": "pass"
+  },
+  {
+   "name": "annotator sees no policy panel at all",
+   "status": "pass"
+  },
+  {
+   "name": "an unauthorised viewer account is refused by the API and sees no study data",
+   "status": "pass"
+  }
+ ],
+ "passed": 22,
+ "failed": 0
+}

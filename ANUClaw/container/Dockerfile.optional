@@ -1,0 +1,11 @@
+# OPTIONAL scientific tools that could not be resolved as wheels for Python 3.12 / linux-arm64 (see container/python/optional.in).
+# Built ON TOP of the verified full image into a SEPARATE venv so a failure here can never be mistaken for, or break, the full image.
+#   docker build -t anuclaw-agent-optional:latest -f container/Dockerfile.optional container
+# Source builds need the compilers already present in the base image. Nothing here is pinned or hash-locked; resolution happens at build time.
+ARG BASE=anuclaw-agent:latest
+FROM ${BASE}
+USER root
+RUN python3 -m venv /opt/anuclaw-optional-env --system-site-packages=false
+COPY python/optional.in /tmp/optional.in
+RUN /opt/anuclaw-optional-env/bin/pip install --no-cache-dir --upgrade pip && /opt/anuclaw-optional-env/bin/pip install --no-cache-dir -r /tmp/optional.in
+ENV ANUCLAW_OPTIONAL_PYTHON=/opt/anuclaw-optional-env/bin/python

@@ -1,0 +1,8 @@
+# PaddleOCR 3.x environment (used because paddlepaddle 2.6.2 inference hangs on
+# macOS 27 arm64 — see docs/INTEGRATION-STATUS.md). Official PyPI packages.
+paddlepaddle==3.3.1
+paddleocr==3.7.0
+fastapi==0.110.0
+uvicorn==0.29.0
+python-multipart==0.0.9
+setuptools==69.5.1

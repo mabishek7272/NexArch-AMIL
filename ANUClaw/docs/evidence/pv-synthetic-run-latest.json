@@ -1,0 +1,45 @@
+{
+ "ranAt": "2026-11-17T17:04:57.919Z",
+ "notice": "Synthetic validation tooling only — drawn/parametric fixtures and simulated data do not establish accuracy on humans or devices, clinical validation or release approval. Synthetic monitoring validation only — simulated data and a simulation-only alert workflow. No clinical alert, device or patient-safety claim is made or implied.",
+ "syntheticOnly": true,
+ "posture": {
+  "cases": 48,
+  "lockDigest": "33dd7e5aaea7810058208a3738fb79e74f931480416d992ee0c02bbe0ad428f0",
+  "reportSha256": "9050dde10a6c34e8bab26f77548eac28b7e495e4a16f66cb3979a18a1529e2c8",
+  "configSha256": "772f9e92ad0335f223915bc67d4b7c30d6134302defd24b23a7eee6669da9f48",
+  "runs": 3,
+  "qualityGate": {
+   "measurableCases": 16,
+   "unmeasurableCases": 32,
+   "correctlyUnsupported": 96,
+   "falseRejections": 0,
+   "measurementsWhereUnmeasurable": 0,
+   "unmeasurableWithoutReasonCode": 0,
+   "reasonCodeMismatches": 0
+  },
+  "errorTaxonomy": {
+   "capture_failure": 24,
+   "no_pose": 24,
+   "low_confidence": 48,
+   "occlusion": 24,
+   "calibration": 24,
+   "disagreement": 0,
+   "unsupported_condition": 48,
+   "gate_violation_measurement_where_unmeasurable": 0,
+   "false_rejection": 0,
+   "missing_output": 0,
+   "unclassified": 0
+  },
+  "criticalFindings": 0,
+  "acceptance": "not_assessed_by_this_tool"
+ },
+ "monitoring": {
+  "scenarios": 12,
+  "expectationsCompared": 17,
+  "mismatches": 0,
+  "safetyInvariantViolations": 0,
+  "sourceAndReceiptFreshnessReportedSeparately": true,
+  "alertWorkflowMismatches": 0,
+  "acceptance": "not_assessed_by_this_tool"
+ }
+}

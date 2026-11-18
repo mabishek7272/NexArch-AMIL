@@ -1,0 +1,190 @@
+{
+ "schema": "anuclaw-science-manifest/v1",
+ "generatedAt": "2026-11-17T09:28:10.461Z",
+ "workspace": {
+  "id": "92d659a4-c1d3-4d03-9652-5e272cbc1fb6",
+  "name": "Replay",
+  "purpose": "end-to-end replay of a live-fetched artifact"
+ },
+ "researchOnly": true,
+ "notice": "Public reference data for research use only. It is not clinical evidence, is not part of the approved evidence corpus, and a successful download validates nothing (no prediction, docking, biomarker discovery or clinical validity is implied).",
+ "evidenceCorpus": "These files are NOT part of the approved clinical evidence corpus.",
+ "items": [
+  {
+   "label": "ncbi_datasets:GCF_000819615.1",
+   "attachedAt": 1794907690457,
+   "attachedBy": "replay",
+   "source": {
+    "termsBasis": "provider_policy",
+    "recordSpecificTerms": "Not established: the licence shown is the provider's published provider-wide policy, not terms read from this record. Dataset-, submitter- or entry-specific terms may differ — check the record page before reuse.",
+    "acquisition": "replay_of_live_artifact",
+    "replayNote": "Replay of a live-fetched artifact (recorded sha256 9a24fd06f09cc59ef2e6a3c8c782b12ba20cdee6f9645bd6af15173363832c8c, docs/evidence/science-live-results*.json); no provider request was made in this workflow.",
+    "id": "20834348-478b-48f4-bf91-1739442d9815",
+    "provider": "ncbi_datasets",
+    "accession": "GCF_000819615.1",
+    "kind": "archive",
+    "classification": "curated_reference",
+    "classificationNote": "See the live-fetch record.",
+    "format": "zip",
+    "sourceUrl": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000819615.1/download?include_annotation_type=GENOME_FASTA&include_annotation_type=GENOME_GFF&hydrated=FULLY_HYDRATED",
+    "finalUrl": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000819615.1/download?include_annotation_type=GENOME_FASTA&include_annotation_type=GENOME_GFF&hydrated=FULLY_HYDRATED",
+    "sourceVersion": "GCF_000819615.1",
+    "retrievedAt": 1794900372226,
+    "sha256": "9a24fd06f09cc59ef2e6a3c8c782b12ba20cdee6f9645bd6af15173363832c8c",
+    "bytes": 6348,
+    "license": "No single licence: NCBI data are generally public, but submitters may assert rights (provider-wide policy; see terms URL)",
+    "attribution": "NCBI Datasets / RefSeq, National Center for Biotechnology Information.",
+    "termsUrl": "https://www.ncbi.nlm.nih.gov/home/about/policies/",
+    "restrictions": "Assembly accessions only; genomes above the configured size cap are refused (no bulk downloads). Controlled-access data (dbGaP) is out of scope.",
+    "contentType": null,
+    "etag": null,
+    "parentSourceId": null,
+    "memberPath": null,
+    "researchOnly": true,
+    "localStorage": "content-addressed:9a24fd06f09cc59ef2e6a3c8c782b12ba20cdee6f9645bd6af15173363832c8c",
+    "integrityCheckedAtExport": "ok"
+   },
+   "derived": [
+    {
+     "parser": "zip",
+     "parserVersion": "anuclaw-scidata-parsers/1",
+     "status": "unsupported",
+     "summary": {
+      "reason": "Archive: members are stored and parsed individually."
+     }
+    }
+   ],
+   "newerVersionKnown": null,
+   "attributionRequired": "NCBI Datasets / RefSeq, National Center for Biotechnology Information."
+  },
+  {
+   "label": "ncbi_datasets:GCF_000819615.1",
+   "attachedAt": 1794907690458,
+   "attachedBy": "replay",
+   "source": {
+    "termsBasis": "provider_policy",
+    "recordSpecificTerms": "Not established: the licence shown is the provider's published provider-wide policy, not terms read from this record. Dataset-, submitter- or entry-specific terms may differ — check the record page before reuse.",
+    "acquisition": "replay_of_live_artifact",
+    "replayNote": "Replay of a live-fetched artifact (recorded sha256 9a24fd06f09cc59ef2e6a3c8c782b12ba20cdee6f9645bd6af15173363832c8c, docs/evidence/science-live-results*.json); no provider request was made in this workflow.",
+    "id": "ec058d4e-ecbb-49f4-b728-bc330db4aa76",
+    "provider": "ncbi_datasets",
+    "accession": "GCF_000819615.1",
+    "kind": "sequence_file",
+    "classification": "curated_reference",
+    "classificationNote": "See the live-fetch record.",
+    "format": "fasta",
+    "sourceUrl": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000819615.1/download?include_annotation_type=GENOME_FASTA&include_annotation_type=GENOME_GFF&hydrated=FULLY_HYDRATED",
+    "finalUrl": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000819615.1/download?include_annotation_type=GENOME_FASTA&include_annotation_type=GENOME_GFF&hydrated=FULLY_HYDRATED",
+    "sourceVersion": "GCF_000819615.1",
+    "retrievedAt": 1794900372226,
+    "sha256": "74c1aca649f207a175b7d99e22fe4ef785c88f924aa5a7f5223c07c4e5c2b5aa",
+    "bytes": 5510,
+    "license": "No single licence: NCBI data are generally public, but submitters may assert rights (provider-wide policy; see terms URL)",
+    "attribution": "NCBI Datasets / RefSeq, National Center for Biotechnology Information.",
+    "termsUrl": "https://www.ncbi.nlm.nih.gov/home/about/policies/",
+    "restrictions": "Assembly accessions only; genomes above the configured size cap are refused (no bulk downloads). Controlled-access data (dbGaP) is out of scope.",
+    "contentType": null,
+    "etag": null,
+    "parentSourceId": "20834348-478b-48f4-bf91-1739442d9815",
+    "memberPath": "ncbi_dataset/data/GCF_000819615.1/GCF_000819615.1_ViralProj14015_genomic.fna",
+    "researchOnly": true,
+    "localStorage": "content-addressed:74c1aca649f207a175b7d99e22fe4ef785c88f924aa5a7f5223c07c4e5c2b5aa",
+    "integrityCheckedAtExport": "ok"
+   },
+   "derived": [
+    {
+     "parser": "fasta",
+     "parserVersion": "anuclaw-scidata-parsers/1",
+     "status": "ok",
+     "summary": {
+      "records": 1,
+      "totalResidues": 5386,
+      "kind": "nucleotide",
+      "kindIsInferred": true,
+      "ambiguousResidues": 0,
+      "gcFraction": 0.44764203490531007,
+      "entries": [
+       {
+        "id": "NC_001422.1",
+        "description": "Escherichia phage phiX174, complete genome",
+        "length": 5386
+       }
+      ],
+      "entriesTruncated": false
+     }
+    }
+   ],
+   "newerVersionKnown": null,
+   "attributionRequired": "NCBI Datasets / RefSeq, National Center for Biotechnology Information."
+  },
+  {
+   "label": "ncbi_datasets:GCF_000819615.1",
+   "attachedAt": 1794907690459,
+   "attachedBy": "replay",
+   "source": {
+    "termsBasis": "provider_policy",
+    "recordSpecificTerms": "Not established: the licence shown is the provider's published provider-wide policy, not terms read from this record. Dataset-, submitter- or entry-specific terms may differ — check the record page before reuse.",
+    "acquisition": "replay_of_live_artifact",
+    "replayNote": "Replay of a live-fetched artifact (recorded sha256 9a24fd06f09cc59ef2e6a3c8c782b12ba20cdee6f9645bd6af15173363832c8c, docs/evidence/science-live-results*.json); no provider request was made in this workflow.",
+    "id": "9fd38594-873f-4f76-ae62-b7ceba66c3dd",
+    "provider": "ncbi_datasets",
+    "accession": "GCF_000819615.1",
+    "kind": "annotation_file",
+    "classification": "predicted",
+    "classificationNote": "Gene/feature annotation produced by NCBI/submitter pipelines (computational or curated); not experimental evidence.",
+    "format": "gff3",
+    "sourceUrl": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000819615.1/download?include_annotation_type=GENOME_FASTA&include_annotation_type=GENOME_GFF&hydrated=FULLY_HYDRATED",
+    "finalUrl": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000819615.1/download?include_annotation_type=GENOME_FASTA&include_annotation_type=GENOME_GFF&hydrated=FULLY_HYDRATED",
+    "sourceVersion": "GCF_000819615.1",
+    "retrievedAt": 1794900372226,
+    "sha256": "bdf7fffd02143906ac82a88f4d8e1723af03d57d70d59d0b30ffcd02e599f9b6",
+    "bytes": 6571,
+    "license": "No single licence: NCBI data are generally public, but submitters may assert rights (provider-wide policy; see terms URL)",
+    "attribution": "NCBI Datasets / RefSeq, National Center for Biotechnology Information.",
+    "termsUrl": "https://www.ncbi.nlm.nih.gov/home/about/policies/",
+    "restrictions": "Assembly accessions only; genomes above the configured size cap are refused (no bulk downloads). Controlled-access data (dbGaP) is out of scope.",
+    "contentType": null,
+    "etag": null,
+    "parentSourceId": "20834348-478b-48f4-bf91-1739442d9815",
+    "memberPath": "ncbi_dataset/data/GCF_000819615.1/genomic.gff",
+    "researchOnly": true,
+    "localStorage": "content-addressed:bdf7fffd02143906ac82a88f4d8e1723af03d57d70d59d0b30ffcd02e599f9b6",
+    "integrityCheckedAtExport": "ok"
+   },
+   "derived": [
+    {
+     "parser": "gff3",
+     "parserVersion": "anuclaw-scidata-parsers/1",
+     "status": "ok",
+     "summary": {
+      "version": "3",
+      "features": 34,
+      "byType": {
+       "region": 1,
+       "gene": 11,
+       "CDS": 11,
+       "sequence_alteration": 4,
+       "mRNA": 2,
+       "exon": 2,
+       "sequence_feature": 2,
+       "origin_of_replication": 1
+      },
+      "seqids": [
+       "NC_001422.1"
+      ],
+      "strands": {
+       "+": 34
+      },
+      "minStart": 1,
+      "maxEnd": 5522,
+      "malformedLines": 0,
+      "firstProblems": []
+     }
+    }
+   ],
+   "newerVersionKnown": null,
+   "attributionRequired": "NCBI Datasets / RefSeq, National Center for Biotechnology Information."
+  }
+ ],
+ "manifestSha256": "18b4a97e52ef059f8fa5c17d8b90cd1fe5395d77c2c3e9194904bd6f59c87fa3"
+}

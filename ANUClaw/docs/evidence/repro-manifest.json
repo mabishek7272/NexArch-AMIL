@@ -1,0 +1,118 @@
+{
+ "generatedAt": "2026-11-17T14:49:04.363Z",
+ "image": {
+  "ref": "anuclaw-agent:latest",
+  "id": "sha256:96ce5ee9afe327554ff024ce16fac65e76daca527e5bc41ff8d302bc86450dab",
+  "repoDigests": [
+   "anuclaw-agent@sha256:96ce5ee9afe327554ff024ce16fac65e76daca527e5bc41ff8d302bc86450dab"
+  ],
+  "architecture": "linux/arm64",
+  "created": "2026-11-17T14:30:43.39867055Z",
+  "sizeBytes": 12268264521,
+  "baseImage": "ubuntu:24.04 (tag, not digest-pinned)"
+ },
+ "dependencyInputs": {
+  "container/Dockerfile": "da50525dc1889b2088af71cba821da60f0f325fe6a7337a7caa5e1f0f49981a5",
+  "container/python/core.in": "4261d5a63e28d470dc83e37619492d87ccba7b4e7a3bcd7f6c88e545e2ee7de5",
+  "container/python/core.lock.txt": "ddfd6a0196e2cb7b5ab0d124dd8ed9fd5accc4ff0ddb3dda1543b3574edb74c3",
+  "container/python/optional.in": "8d95a097deb04935f92a9ea505d4134bbd29b3fa2b970808e0f8bfd9ef3b6e71",
+  "container/entrypoint.js": "3d6a5a28ef68910aaf88fd5ffa27e4f7879ae899d3efc07a38132ad0a0dd72ba",
+  "scripts/lock-container-python.sh": "1a7b6937271dabe46707c1ddac33009e430a81aaf1a8a8dd84302d6b9a004937",
+  "lockedDistributions": 362,
+  "lockMode": "wheels only, --require-hashes; resolved inside python:3.12-slim linux/arm64 (python:3.12-slim tag not digest-pinned); torch from the PyTorch CPU index; snakemake in its own venv (NOT hash-locked)"
+ },
+ "gatk": {
+  "version": "4.5.0.0",
+  "localZipSha256": "dc1a4471e8bb566397db9894ca18acbf8f40f3fc312c8fad9a8c5390c218e916",
+  "jarSha256InImage": "7c5505c9ada6a49075635031ff488cf277b1266de57eeffb95a5a30ce0cd39b9",
+  "status": "LOCAL CONSISTENCY CHECK ONLY (the bytes first downloaded are the bytes installed). GATK publishes no checksum; this is NOT publisher-authenticated integrity."
+ },
+ "toolVersions": {
+  "samtools": {
+   "status": 0,
+   "out": "samtools 1.19.2"
+  },
+  "bedtools": {
+   "status": 0,
+   "out": "bedtools v2.31.1"
+  },
+  "blastn": {
+   "status": 0,
+   "out": "blastn: 2.12.0+"
+  },
+  "bwa": {
+   "status": 0,
+   "out": "Version: 0.7.17-r1188"
+  },
+  "minimap2": {
+   "status": 0,
+   "out": "2.26-r1175"
+  },
+  "fastqc": {
+   "status": 0,
+   "out": "FastQC v0.12.1"
+  },
+  "bcftools": {
+   "status": 0,
+   "out": "bcftools 1.19"
+  },
+  "gatk": {
+   "status": 0,
+   "out": "The Genome Analysis Toolkit (GATK) v4.5.0.0"
+  },
+  "vina": {
+   "status": 0,
+   "out": "AutoDock Vina v1.2.5"
+  },
+  "obabel": {
+   "status": 0,
+   "out": "Open Babel 3.1.1 -- Mar 31 2024 -- 06:39:03"
+  },
+  "snakemake": {
+   "status": 0,
+   "out": "9.27.2"
+  },
+  "nextflow": {
+   "status": 0,
+   "out": "version 26.10.6 build 15032"
+  },
+  "java": {
+   "status": 0,
+   "out": "openjdk version \"21.0.13.0.3\" 2026-10-24"
+  },
+  "python": {
+   "status": 0,
+   "out": "Python 3.12.3"
+  },
+  "node": {
+   "status": 0,
+   "out": "v22.23.5"
+  },
+  "claude": {
+   "status": 0,
+   "out": "2.1.326 (Claude Code)"
+  },
+  "rdkit": {
+   "status": 0,
+   "out": "2026.09.2"
+  },
+  "torch": {
+   "status": 0,
+   "out": "2.15.0+cpu"
+  }
+ },
+ "fixtureHashes": {
+  "docs/evidence/live-artifacts/PENDING.json": "4374572c498e52960163c8072e219ac474c8533ffaac0b30b03edc088b916fd1",
+  "docs/evidence/live-artifacts/PROVENANCE.json": "4a2c54e222c33b78288f6e0fed65ef60bfd70bcb559f8fab3cf4ab09a6b0391a",
+  "docs/evidence/live-artifacts/alphafold-P69905-model.pdb": "d9d7ad4607164de17b65767b467d366909d74f96df5176ee368a9a515aaa1911",
+  "docs/evidence/live-artifacts/ncbi-GCF_000819615.1-genome.zip": "9a24fd06f09cc59ef2e6a3c8c782b12ba20cdee6f9645bd6af15173363832c8c",
+  "docs/evidence/live-artifacts/rcsb-4HHB.pdb": "abf382e0fd84b53bd4c08b373d37c0d7fe9fbe1a9a9c3851b2f5f2fbbe627101",
+  "src/validation/validation-vectors.json": "40cfa92b9d0e8266eb4574c996912f9cec7176b20693c31e3b4ad4cb31fc2dc0",
+  "src/research/scipy-vectors.json": "25237d49bd456da43489c2d4b17c964dec12260fac78e159515ca3b37f3807e3",
+  "container/contract/fake-claude.js": "4fe70dbebfa6a72c0d6a8e714e4e75bc0db799b58f95f9569b074ed384eb6340"
+ },
+ "sourceRevision": {
+  "gitHeadOfOuterRepo": "7ac67cf5fc3d627bd91e9d310a7303bacee7c071",
+  "note": "ANUClaw is untracked in the outer repository; the hashes above, not this commit, pin the inputs."
+ }
+}

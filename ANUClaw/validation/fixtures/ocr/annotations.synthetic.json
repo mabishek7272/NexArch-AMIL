@@ -1,0 +1,156 @@
+{
+ "schema": "anuclaw-ocr-annotation/v1",
+ "provenance": {
+  "kind": "synthetic_fixture",
+  "annotators": [
+   {
+    "id": "fixture-generator",
+    "role": "synthetic"
+   }
+  ],
+  "adjudication": "none",
+  "createdAt": "2026-11-17T00:00:00Z",
+  "notes": "SYNTHETIC fixture to test the evaluation tool. No real report."
+ },
+ "documents": [
+  {
+   "documentId": "doc-a",
+   "pages": 2,
+   "truth": [
+    {
+     "id": "a1",
+     "page": 1,
+     "analyte": "Sodium",
+     "valueRaw": "140",
+     "valueNum": 140,
+     "comparator": null,
+     "unit": "mmol/L",
+     "refLow": 135,
+     "refHigh": 145
+    },
+    {
+     "id": "a2",
+     "page": 1,
+     "analyte": "Potassium",
+     "valueRaw": "4.1",
+     "valueNum": 4.1,
+     "comparator": null,
+     "unit": "mmol/L",
+     "refLow": 3.5,
+     "refHigh": 5.1
+    },
+    {
+     "id": "a3",
+     "page": 1,
+     "analyte": "Glucose",
+     "valueRaw": "5.2",
+     "valueNum": 5.2,
+     "comparator": null,
+     "unit": "mmol/L",
+     "refLow": 3.9,
+     "refHigh": 5.6
+    },
+    {
+     "id": "a4",
+     "page": 2,
+     "analyte": "Creatinine",
+     "valueRaw": "88",
+     "valueNum": 88,
+     "comparator": null,
+     "unit": "umol/L",
+     "refLow": 60,
+     "refHigh": 110
+    },
+    {
+     "id": "a5",
+     "page": 2,
+     "analyte": "CRP",
+     "valueRaw": "<5",
+     "valueNum": 5,
+     "comparator": "<",
+     "unit": "mg/L",
+     "refLow": 0,
+     "refHigh": 5
+    }
+   ]
+  },
+  {
+   "documentId": "doc-b",
+   "pages": 2,
+   "truth": [
+    {
+     "id": "b1",
+     "page": 1,
+     "analyte": "Hemoglobin",
+     "valueRaw": "13.8",
+     "valueNum": 13.8,
+     "comparator": null,
+     "unit": "g/dL",
+     "refLow": 12,
+     "refHigh": 16
+    },
+    {
+     "id": "b2",
+     "page": 1,
+     "analyte": "WBC",
+     "valueRaw": "6.4",
+     "valueNum": 6.4,
+     "comparator": null,
+     "unit": "10^9/L",
+     "refLow": 4,
+     "refHigh": 11
+    },
+    {
+     "id": "b3",
+     "page": 2,
+     "analyte": "Platelets",
+     "valueRaw": "250",
+     "valueNum": 250,
+     "comparator": null,
+     "unit": "10^9/L",
+     "refLow": 150,
+     "refHigh": 400
+    },
+    {
+     "id": "b4",
+     "page": 2,
+     "analyte": "Ferritin",
+     "valueRaw": "45",
+     "valueNum": 45,
+     "comparator": null,
+     "unit": "ug/L",
+     "refLow": 30,
+     "refHigh": 400
+    }
+   ]
+  },
+  {
+   "documentId": "doc-c",
+   "pages": 1,
+   "truth": [
+    {
+     "id": "c1",
+     "page": 1,
+     "analyte": "ALT",
+     "valueRaw": "32",
+     "valueNum": 32,
+     "comparator": null,
+     "unit": "U/L",
+     "refLow": 0,
+     "refHigh": 40
+    },
+    {
+     "id": "c2",
+     "page": 1,
+     "analyte": "AST",
+     "valueRaw": "28",
+     "valueNum": 28,
+     "comparator": null,
+     "unit": "U/L",
+     "refLow": 0,
+     "refHigh": 40
+    }
+   ]
+  }
+ ]
+}

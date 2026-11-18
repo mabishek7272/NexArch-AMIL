@@ -1,0 +1,23 @@
+{
+  "schema": "anuclaw-rule-approval/v1",
+  "rule": { "id": "fixture.synthetic-range-check", "version": "1.0.0", "title": "SYNTHETIC fixture: value against an invented range (NOT a clinical rule)", "category": "clinical" },
+  "intendedUse": "Test fixture for the dossier checker only; it describes no clinical decision and must never be released.",
+  "population": { "included": ["synthetic adults (fixture)"], "excluded": ["children", "pregnancy"] },
+  "source": { "citation": "Invented for testing — not a real source", "version": "0", "license": "n/a (synthetic)" },
+  "thresholds": [{ "name": "synthetic_value", "lower": 10, "upper": 20, "unit": "unit", "lowerInclusive": true, "upperInclusive": true }],
+  "inputs": [{ "name": "value", "unit": "unit" }],
+  "boundaryCases": [
+    { "id": "c1", "kind": "below_lower", "input": { "value": 9.99, "unit": "unit" }, "expected": "low", "rationale": "just below the lower bound" },
+    { "id": "c2", "kind": "at_lower", "input": { "value": 10, "unit": "unit" }, "expected": "within", "rationale": "lower bound is inclusive" },
+    { "id": "c3", "kind": "inside", "input": { "value": 15, "unit": "unit" }, "expected": "within", "rationale": "mid-range" },
+    { "id": "c4", "kind": "at_upper", "input": { "value": 20, "unit": "unit" }, "expected": "within", "rationale": "upper bound is inclusive" },
+    { "id": "c5", "kind": "above_upper", "input": { "value": 20.01, "unit": "unit" }, "expected": "high", "rationale": "just above the upper bound" },
+    { "id": "c6", "kind": "missing_input", "input": { "unit": "unit" }, "expected": "insufficient_data", "rationale": "no value must never be read as normal" },
+    { "id": "c7", "kind": "unit_mismatch", "input": { "value": 15, "unit": "other" }, "expected": "not_comparable", "rationale": "a value in another unit is not compared" },
+    { "id": "c8", "kind": "outside_population", "input": { "value": 15, "unit": "unit", "ageYears": 6 }, "expected": "not_applicable", "rationale": "children are excluded" }
+  ],
+  "evaluationPlan": { "documentRef": "synthetic-evaluation-plan-001 (fixture)", "acceptanceTargets": { "boundaryCasesPassed": 1.0 } },
+  "reviewer": null,
+  "signature": null,
+  "changeControl": { "previousVersion": null, "changeSummary": "Initial synthetic fixture." }
+}

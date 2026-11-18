@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "purpose": "Register of clinically released rules. A rule may appear in CLINICAL_RULES (src/documents/rules.ts) only if it has an entry here, and vice versa (enforced by src/documents/clinical-release-register.test.ts). The register records WHO approved WHAT; the software cannot verify a person's identity or authority — the pull request that adds an entry must attach the approver's own signed record (recordRef).",
+  "releases": []
+}

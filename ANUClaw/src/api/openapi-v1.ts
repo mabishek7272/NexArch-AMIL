@@ -1,0 +1,73 @@
+/**
+ * OpenAPI 3.1 contract for /v1. Kept in code so a contract test can assert that
+ * every implemented route is documented and every documented route exists.
+ * `npm run openapi:v1` writes docs/openapi-v1.json.
+ */
+const Err = { $ref: '#/components/schemas/Error' };
+const json = (schema: object) => ({ 'application/json': { schema } });
+const errs = {
+  401: { description: 'Missing/invalid API key or token', content: json(Err) },
+  404: { description: 'Not found or not owned by this tenant', content: json(Err) },
+  429: { description: 'Rate limit, quota or concurrency limit', content: json(Err) },
+  503: { description: 'Limits store or auth not configured', content: json(Err) },
+};
+const idem = { name: 'Idempotency-Key', in: 'header', required: false, schema: { type: 'string', minLength: 8, maxLength: 200 } };
+const p = (name: string) => ({ name, in: 'path', required: true, schema: { type: 'string' } });
+const op = (summary: string, extra: Record<string, unknown> = {}, responses: Record<string, unknown> = { 200: { description: 'OK' } }) =>
+  ({ summary, security: [{ ApiKey: [] }, { Bearer: [] }], ...extra, responses: { ...responses, ...errs } });
+
+export function buildOpenApiV1() {
+  return {
+    openapi: '3.1.0',
+    info: {
+      title: 'ANUClaw BaaS API', version: '1.0.0',
+      description: 'Document → observation → analysis → report workflow. Engineering contract only; outputs are drafts for qualified review, not diagnoses. Clinical sign-off is not available via the API.',
+    },
+    servers: [{ url: 'http://127.0.0.1:4000' }],
+    components: {
+      securitySchemes: {
+        ApiKey: { type: 'apiKey', in: 'header', name: 'X-API-Key' },
+        Bearer: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      },
+      schemas: {
+        Error: { type: 'object', required: ['error'], properties: { error: { type: 'object', required: ['code', 'message'], properties: { code: { type: 'string' }, message: { type: 'string' }, details: {} } } } },
+        Correction: { type: 'object', properties: { analyte: { type: 'string' }, valueRaw: { type: 'string' }, unit: { type: ['string', 'null'] }, refLow: { type: ['number', 'null'] }, refHigh: { type: ['number', 'null'] } } },
+      },
+    },
+    paths: {
+      '/v1/openapi.json': { get: { summary: 'This contract', responses: { 200: { description: 'OpenAPI document' } } } },
+      '/v1/engines': { get: op('Enabled engines, rule release state and model roles') },
+      '/v1/spend': { get: op('This tenant\'s model spend: provider-reported cost only; unknown cost is counted separately and totals are marked as lower bounds', { parameters: [{ name: 'from', in: 'query', schema: { type: 'string', format: 'date' } }, { name: 'to', in: 'query', schema: { type: 'string', format: 'date' } }] }) },
+      '/v1/specialties': { get: op('Specialty modules: what is implemented, release state, approval status and open external requirements') },
+      '/v1/patients': { post: op('Create a tenant-owned patient subject', { parameters: [idem], requestBody: { required: true, content: json({ type: 'object', required: ['display_name'], properties: { display_name: { type: 'string', maxLength: 200 }, external_ref: { type: 'string' } } }) } }, { 201: { description: 'Created' }, 400: { description: 'Validation', content: json(Err) } }) },
+      '/v1/patients/{patientId}/documents': {
+        get: op('List documents', { parameters: [p('patientId')] }),
+        post: op('Upload a document (PDF/PNG/JPEG/text; content-sniffed)', { parameters: [p('patientId'), idem], requestBody: { required: true, content: { 'multipart/form-data': { schema: { type: 'object', required: ['file', 'purpose'], properties: { file: { type: 'string', format: 'binary' }, purpose: { type: 'string' } } } } } } },
+          { 201: { description: 'Ingested; per-page extraction status' }, 409: { description: 'Duplicate', content: json(Err) }, 413: { description: 'Too large', content: json(Err) }, 415: { description: 'Unsupported type', content: json(Err) } }),
+      },
+      '/v1/patients/{patientId}/observations': { get: op('Confirmed/corrected observations', { parameters: [p('patientId')] }) },
+      '/v1/documents/{documentId}': { get: op('Document review: pages, candidates (with uncertainty flags), observations', { parameters: [p('documentId')] }) },
+      '/v1/candidates/{candidateId}/decision': { post: op('Confirm / correct (reason required) / reject an extracted candidate', { parameters: [p('candidateId'), idem], requestBody: { required: true, content: json({ type: 'object', required: ['action'], properties: { action: { enum: ['confirm', 'correct', 'reject'] }, correction: { $ref: '#/components/schemas/Correction' }, reason: { type: 'string' } } }) } }, { 200: { description: 'Decided' }, 409: { description: 'Already decided', content: json(Err) } }) },
+      '/v1/observations/{observationId}/correction': { post: op('Correct an observation (new revision; supersedes dependent snapshots/reports)', { parameters: [p('observationId'), idem], requestBody: { required: true, content: json({ type: 'object', required: ['correction', 'reason'], properties: { correction: { $ref: '#/components/schemas/Correction' }, reason: { type: 'string' } } }) } }) },
+      '/v1/documents/{documentId}/snapshots': { post: op('Create an immutable hashed case snapshot (blocked while candidates are pending)', { parameters: [p('documentId'), idem] }, { 201: { description: 'Created' }, 409: { description: 'Confirmation pending / extraction failed', content: json(Err) } }) },
+      '/v1/snapshots/{snapshotId}/analyses': { post: op('Run released rules; returns a server-owned execution record', { parameters: [p('snapshotId'), idem] }, { 201: { description: 'Execution record' }, 409: { description: 'Snapshot superseded', content: json(Err) } }) },
+      '/v1/jobs/{jobId}': { get: op('Execution record status', { parameters: [p('jobId')] }) },
+      '/v1/snapshots/{snapshotId}/reports': { post: op('Create a draft report from a verified analysis of this snapshot', { parameters: [p('snapshotId'), idem], requestBody: { required: true, content: json({ type: 'object', required: ['analysis_id'], properties: { analysis_id: { type: 'string' } } }) } }, { 201: { description: 'Draft report' }, 409: { description: 'Analysis not for this snapshot / integrity failure', content: json(Err) } }) },
+      '/v1/reports/{reportId}': { get: op('Structured report (SOAP + plain language + provenance)', { parameters: [p('reportId')] }) },
+      '/v1/reports/{reportId}/review': { post: op('Not available via API (clinician sign-off is dashboard-only)', { parameters: [p('reportId')] }, { 403: { description: 'Always', content: json(Err) } }) },
+      '/v1/reports/{reportId}/export.html': { get: op('HTML export (X-Content-SHA256, X-Report-Status)', { parameters: [p('reportId')] }, { 200: { description: 'HTML', content: { 'text/html': {} } } }) },
+      '/v1/reports/{reportId}/export.pdf': { get: op('PDF export (X-Content-SHA256, X-Report-Status)', { parameters: [p('reportId')] }, { 200: { description: 'PDF', content: { 'application/pdf': {} } } }) },
+      '/v1/science': { get: op('Public scientific-data connectors (AlphaFold DB, RCSB PDB, NCBI Datasets, GEO): limits, terms and classifications. RESEARCH-ONLY; not clinical evidence.') },
+      '/v1/science/search': { post: op('Search a public provider (RCSB, NCBI genomes by taxon, GEO). Private to the tenant; the text is sent to the provider — never include identifiers', { requestBody: { required: true, content: json({ type: 'object', required: ['provider', 'query'], properties: { provider: { enum: ['rcsb', 'ncbi_datasets', 'geo'] }, query: { type: 'string', maxLength: 200 } } }) } }) },
+      '/v1/science/describe': { post: op('Describe a public record by accession: metadata, classification (experimental / predicted / author_supplied / curated_reference), version, terms, available files', { requestBody: { required: true, content: json({ type: 'object', required: ['provider', 'accession'], properties: { provider: { enum: ['alphafold', 'rcsb', 'ncbi_datasets', 'geo'] }, accession: { type: 'string' } } }) } }) },
+      '/v1/science/retrieve': { post: op('Retrieve selected files of a public record: stored immutably with checksum, URL, retrieval time, licence and attribution; parsed summaries are kept separately', { requestBody: { required: true, content: json({ type: 'object', required: ['provider', 'accession', 'files'], properties: { provider: { type: 'string' }, accession: { type: 'string' }, files: { type: 'array', items: { type: 'string' } }, refresh: { type: 'boolean', description: 'Bypass the cache for this call; a changed file becomes a new immutable version' } } }) } }, { 201: { description: 'Sources (provenance records) and per-file problems' } }) },
+      '/v1/science/sources/{sourceId}': { get: op('Provenance, integrity status and parser summaries of a source this tenant retrieved', { parameters: [p('sourceId')] }) },
+      '/v1/science/sources/{sourceId}/content': { get: op('The stored bytes (re-hashed before serving; a mismatch is refused)', { parameters: [p('sourceId')] }, { 200: { description: 'Bytes with X-Content-SHA256' } }) },
+      '/v1/science/workspaces': { get: op('This tenant\'s research workspaces'), post: op('Create a research workspace (name + purpose)', { requestBody: { required: true, content: json({ type: 'object', required: ['name', 'purpose'], properties: { name: { type: 'string' }, purpose: { type: 'string' } } }) } }, { 201: { description: 'Created' } }) },
+      '/v1/science/workspaces/{workspaceId}': { get: op('A workspace with its pinned source items', { parameters: [p('workspaceId')] }) },
+      '/v1/science/workspaces/{workspaceId}/items': { post: op('Pin a retrieved source version to a workspace', { parameters: [p('workspaceId')], requestBody: { required: true, content: json({ type: 'object', required: ['sourceId'], properties: { sourceId: { type: 'string' }, label: { type: 'string' } } }) } }, { 201: { description: 'Attached' }, 409: { description: 'Already attached', content: json(Err) } }) },
+      '/v1/science/workspaces/{workspaceId}/manifest': { get: op('Manifest of the workspace: sources, checksums (re-verified at export), provenance, licences, derived summaries, research-only notice', { parameters: [p('workspaceId')] }) },
+      '/v1/evidence/search': { get: op('Search approved reference content (global + this tenant); explicit no_evidence', { parameters: [{ name: 'q', in: 'query', required: true, schema: { type: 'string', maxLength: 1000 } }, { name: 'k', in: 'query', schema: { type: 'integer', minimum: 1, maximum: 20 } }] }) },
+    },
+  };
+}

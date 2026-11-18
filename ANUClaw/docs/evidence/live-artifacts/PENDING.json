@@ -1,0 +1,30 @@
+{
+ "note": "PENDING live request. The real GSE2 series matrix was fetched live once (docs/evidence/science-live-geo-matrix.json) but its BYTES WERE NOT RETAINED (only the hash and parsed summary), so it cannot be replayed. The 20-file/100-MiB live allowance is exhausted (docs/evidence/science-live-ledger.json: 20/20 files). Retrieving the file again is a NEW live request and needs the allowance to be raised by an explicit decision; the ledger is not reset here.",
+ "exactRequest": {
+  "method": "GET",
+  "url": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSEnnn/GSE2/matrix/GSE2_series_matrix.txt.gz",
+  "headers": {
+   "Accept": "*/*",
+   "Accept-Encoding": "identity",
+   "User-Agent": "anuclaw-research-connector/1.0"
+  },
+  "expectedBytes": 14878,
+  "expectedSha256": "9fcf768cbf8322f4b821a006a380833e3ba55242cc676912cc08cbc7b86ebadb",
+  "filesCounted": 1
+ },
+ "afterFetch": "save the bytes to a file, then: npx tsx scripts/replay-science-artifact.ts --pending docs/evidence/live-artifacts/PENDING.json --file <that file>   (verifies the recorded SHA-256 before storing anything)",
+ "entry": {
+  "provider": "geo",
+  "accession": "GSE2",
+  "kind": "expression_matrix",
+  "format": "series_matrix",
+  "classification": "author_supplied",
+  "classificationNote": "Processed values supplied by the submitting authors; not re-processed or validated here.",
+  "sourceUrl": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSEnnn/GSE2/matrix/GSE2_series_matrix.txt.gz",
+  "sourceVersion": "unknown (version label not recorded at the live fetch)",
+  "sha256": "9fcf768cbf8322f4b821a006a380833e3ba55242cc676912cc08cbc7b86ebadb",
+  "bytes": 14878,
+  "retrievedAt": "2026-11-17T09:13:05.906054Z",
+  "ledgerRef": "science-live-ledger.json file #20"
+ }
+}

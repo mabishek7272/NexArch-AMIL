@@ -1,0 +1,182 @@
+{
+ "label": "SYNTHETIC mannequin video through the real PosturePulse pipeline (technical operation only; NOT accuracy evidence)",
+ "ranAt": "2026-11-17",
+ "chain": [
+  "upload (real NestJS, multipart)",
+  "PyAV decode (real ml-service)",
+  "MediaPipe pose_landmarker_full (real model)",
+  "quality gate",
+  "metrics/v2",
+  "report-builder/v1",
+  "clinician sign-off (real bcrypt/JWT)",
+  "report-access token",
+  "ANUClaw importer (hash re-verified)"
+ ],
+ "seededMetrics": false,
+ "video": {
+  "generator": "scripts/posturepulse-e2e/render_clip.py",
+  "frames": 60,
+  "fps": 30,
+  "size": "540x960",
+  "content": "drawn mannequin, not a person"
+ },
+ "runs": [
+  {
+   "shoulderTiltPx": 0,
+   "rows": [
+    {
+     "metricKey": "static.head_lateral_tilt",
+     "tier": "estimate",
+     "estimate": {
+      "value": -3.323,
+      "uncertainty": 10.88
+     },
+     "position": "indeterminate",
+     "method": "mediapipe_2d_image_plane"
+    },
+    {
+     "metricKey": "static.shoulder_line_tilt",
+     "tier": "proxy",
+     "estimate": {
+      "value": -0.669,
+      "uncertainty": 3.75
+     },
+     "position": "indeterminate",
+     "method": "mediapipe_2d_image_plane"
+    },
+    {
+     "metricKey": "static.hip_line_tilt",
+     "tier": "proxy",
+     "estimate": {
+      "value": -0.701,
+      "uncertainty": 6.77
+     },
+     "position": "indeterminate",
+     "method": "mediapipe_2d_image_plane"
+    },
+    {
+     "metricKey": "static.trunk_lateral_lean",
+     "tier": "estimate",
+     "estimate": {
+      "value": -0.213,
+      "uncertainty": 1.79
+     },
+     "position": "indeterminate",
+     "method": "mediapipe_2d_image_plane"
+    },
+    {
+     "metricKey": "static.lateral_body_shift",
+     "tier": "estimate",
+     "estimate": {
+      "value": -0.074,
+      "uncertainty": 1.03
+     },
+     "position": "indeterminate",
+     "method": "mediapipe_2d_image_plane"
+    },
+    {
+     "metricKey": "static.knee_frontal_alignment",
+     "tier": "proxy",
+     "estimate": {
+      "value": 1.198,
+      "uncertainty": 4.48
+     },
+     "position": "no_reference",
+     "method": "mediapipe_2d_image_plane"
+    },
+    {
+     "metricKey": "static.knee_frontal_alignment",
+     "tier": "proxy",
+     "estimate": {
+      "value": -0.983,
+      "uncertainty": 4.57
+     },
+     "position": "no_reference",
+     "method": "mediapipe_2d_image_plane"
+    }
+   ]
+  },
+  {
+   "shoulderTiltPx": 30,
+   "rows": [
+    {
+     "metricKey": "static.head_lateral_tilt",
+     "tier": "estimate",
+     "estimate": {
+      "value": -3.658,
+      "uncertainty": 11.4
+     },
+     "position": "indeterminate",
+     "method": "mediapipe_2d_image_plane"
+    },
+    {
+     "metricKey": "static.shoulder_line_tilt",
+     "tier": "proxy",
+     "estimate": {
+      "value": -13.761,
+      "uncertainty": 3.85
+     },
+     "position": "below",
+     "method": "mediapipe_2d_image_plane"
+    },
+    {
+     "metricKey": "static.hip_line_tilt",
+     "tier": "proxy",
+     "estimate": {
+      "value": -3.299,
+      "uncertainty": 6.88
+     },
+     "position": "indeterminate",
+     "method": "mediapipe_2d_image_plane"
+    },
+    {
+     "metricKey": "static.trunk_lateral_lean",
+     "tier": "estimate",
+     "estimate": {
+      "value": -1.476,
+      "uncertainty": 1.83
+     },
+     "position": "indeterminate",
+     "method": "mediapipe_2d_image_plane"
+    },
+    {
+     "metricKey": "static.lateral_body_shift",
+     "tier": "estimate",
+     "estimate": {
+      "value": -0.871,
+      "uncertainty": 1.05
+     },
+     "position": "indeterminate",
+     "method": "mediapipe_2d_image_plane"
+    },
+    {
+     "metricKey": "static.knee_frontal_alignment",
+     "tier": "proxy",
+     "estimate": {
+      "value": 0.439,
+      "uncertainty": 4.47
+     },
+     "position": "no_reference",
+     "method": "mediapipe_2d_image_plane"
+    },
+    {
+     "metricKey": "static.knee_frontal_alignment",
+     "tier": "proxy",
+     "estimate": {
+      "value": -1.566,
+      "uncertainty": 4.6
+     },
+     "position": "no_reference",
+     "method": "mediapipe_2d_image_plane"
+    }
+   ]
+  }
+ ],
+ "sanity": "the shoulder-line row moved from -0.67 deg (level) to -13.76 deg when the drawn shoulders were tilted: the measurement responds to the input. Nothing here establishes agreement with a reference standard.",
+ "limits": [
+  "mannequin is not a person; pose model confidence/landmark placement differ on real people",
+  "head/hip uncertainties are large (reports show them); positions are mostly \"indeterminate\"",
+  "single synthetic subject and view; no repeatability study",
+  "2D image-plane method only"
+ ]
+}

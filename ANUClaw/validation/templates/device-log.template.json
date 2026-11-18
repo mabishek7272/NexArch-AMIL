@@ -1,0 +1,29 @@
+{
+ "_howTo": [
+  "Export observations from the device/gateway in ARRIVAL order with BOTH timestamps. Record known outages you induced, to check detection.",
+  "Record at least one full session per device model/firmware/site you intend to support; one session proves nothing about others.",
+  "Run: npm run validate -- device --log your-log.json --out report.json"
+ ],
+ "schema": "anuclaw-device-log/v1",
+ "provenance": {
+  "kind": "human_annotated",
+  "device": {
+   "kind": "",
+   "model": "",
+   "firmware": ""
+  },
+  "recordedBy": "",
+  "referenceClock": ""
+ },
+ "metric": "heart_rate",
+ "windowStart": "",
+ "windowEnd": "",
+ "observations": [
+  {
+   "sourceTime": "",
+   "receivedTime": "",
+   "value": 0
+  }
+ ],
+ "knownOutages": []
+}

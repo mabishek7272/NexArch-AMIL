@@ -1,0 +1,120 @@
+{
+  "ranAt": "2026-11-17T09:19:22.835Z",
+  "syntheticDataOnly": true,
+  "ocr": "real PaddleOCR service",
+  "liveModels": "live OpenRouter (bounded)",
+  "summary": {
+    "pass": 26,
+    "fail": 0,
+    "skipped": 0
+  },
+  "outcomes": [
+    {
+      "name": "unauthenticated clinical API → 401",
+      "status": "pass"
+    },
+    {
+      "name": "operator without a grant cannot see the patient (404) or upload (404)",
+      "status": "pass"
+    },
+    {
+      "name": "read-only viewer cannot upload (403)",
+      "status": "pass"
+    },
+    {
+      "name": "unauthenticated browser visit is redirected to login",
+      "status": "pass"
+    },
+    {
+      "name": "upload mixed PDF; source pages shown with per-page method (native + OCR)",
+      "status": "pass",
+      "detail": "page 1 native text, page 2 read by real PaddleOCR"
+    },
+    {
+      "name": "extracted values show source page/line and uncertainty flags",
+      "status": "pass"
+    },
+    {
+      "name": "snapshot is blocked while values are unconfirmed",
+      "status": "pass"
+    },
+    {
+      "name": "confirm one value, correct another (reason required), confirm the rest",
+      "status": "pass"
+    },
+    {
+      "name": "snapshot → released rules → draft report (SOAP with explicit missing sections)",
+      "status": "pass"
+    },
+    {
+      "name": "AI review over the verified stored run: labelled, validated or explicitly non-completed (live, synthetic)",
+      "status": "pass",
+      "detail": "live status=completed (http 201); problems=[]"
+    },
+    {
+      "name": "provider outage during AI review → explicit decision_* status, no review content, nothing fabricated",
+      "status": "pass",
+      "detail": "status=decision_http_error"
+    },
+    {
+      "name": "HTML + PDF export of the DRAFT report carry status and hash; PDF text matches",
+      "status": "pass"
+    },
+    {
+      "name": "operator cannot sign off (API 403; UI sign-off button disabled)",
+      "status": "pass"
+    },
+    {
+      "name": "another operator (no grant) and unauthenticated callers cannot read the report or exports",
+      "status": "pass"
+    },
+    {
+      "name": "provisioned clinician opens the report from the list and signs off → new reviewed version",
+      "status": "pass"
+    },
+    {
+      "name": "reviewed exports: HTML and PDF show reviewer; old draft is superseded",
+      "status": "pass"
+    },
+    {
+      "name": "correcting a confirmed value in the UI supersedes the snapshot and the reviewed report",
+      "status": "pass"
+    },
+    {
+      "name": "operator without a grant sees no patients in the UI",
+      "status": "pass"
+    },
+    {
+      "name": "read-only viewer sees the patient but the server refuses upload; sign-off control is disabled",
+      "status": "pass"
+    },
+    {
+      "name": "OCR service down → upload reports partial extraction, page marked ocr_unavailable, no invented text",
+      "status": "pass"
+    },
+    {
+      "name": "monitoring: pair a simulator, synthetic stream labelled SIMULATION, stale values hidden, alert gated for real devices",
+      "status": "pass"
+    },
+    {
+      "name": "research: dataset governance in the UI, gated analysis needs acknowledgement, run labelled research-only and reproducible",
+      "status": "pass"
+    },
+    {
+      "name": "science: accession → classification & metadata → retrieve → provenance + separate derived summary → workspace → manifest; a second user sees nothing",
+      "status": "pass"
+    },
+    {
+      "name": "/v1 OpenAPI served; auth required; rate-limit headers present",
+      "status": "pass"
+    },
+    {
+      "name": "/v1 full workflow incl. PDF export; the second tenant is isolated at every step",
+      "status": "pass"
+    },
+    {
+      "name": "spend reports: dashboard report limited to admin/auditor/compliance; /v1/spend is tenant-scoped; no raw content in reports",
+      "status": "pass"
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "probedAt": "2026-11-16T20:34:15.158Z",
+  "records": [
+    {
+      "role": "ocr",
+      "requestedModel": "google/gemini-3.8-flash",
+      "status": "ok",
+      "httpStatus": 200,
+      "returnedModel": "google/gemini-3.8-flash",
+      "latencyMs": 5766,
+      "attempts": 1,
+      "reasoningRequested": "medium",
+      "reasoningObserved": "reasoning_tokens_reported",
+      "usage": {
+        "prompt_tokens": 1124,
+        "completion_tokens": 371,
+        "reasoning_tokens": 317,
+        "total_tokens": 1495
+      },
+      "detail": "content_chars=121"
+    },
+    {
+      "role": "embedding",
+      "requestedModel": "google/gemini-embedding-2",
+      "status": "ok",
+      "httpStatus": 200,
+      "returnedModel": "gemini-embedding-2",
+      "latencyMs": 673,
+      "attempts": 1,
+      "reasoningObserved": "not_reported",
+      "usage": {
+        "prompt_tokens": 17,
+        "total_tokens": 17
+      },
+      "detail": "dims=3072 vectors=2"
+    },
+    {
+      "role": "decision",
+      "requestedModel": "google/gemini-decision-1",
+      "status": "ok",
+      "httpStatus": 200,
+      "returnedModel": "google/gemini-decision-1-20261111",
+      "latencyMs": 553,
+      "attempts": 1,
+      "reasoningObserved": "not_reported",
+      "usage": {},
+      "detail": "answers=engine_evidence"
+    },
+    {
+      "role": "review",
+      "requestedModel": "google/gemma-4-26b-a4b-it",
+      "status": "ok",
+      "httpStatus": 200,
+      "returnedModel": "google/gemma-4-26b-a4b-it",
+      "latencyMs": 1433,
+      "attempts": 1,
+      "reasoningRequested": "medium",
+      "reasoningObserved": "reasoning_tokens_reported",
+      "usage": {
+        "prompt_tokens": 39,
+        "completion_tokens": 197,
+        "reasoning_tokens": 181,
+        "total_tokens": 236
+      },
+      "detail": "content_chars=42"
+    }
+  ]
+}

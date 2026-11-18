@@ -1,0 +1,11 @@
+# Thin image that carries ONLY the container contract (entrypoint, working directories, test double CLI).
+# It lets the contract be tested in minutes; the FULL image (container/Dockerfile) adds the scientific tool stack on top of
+# the same entrypoint. Tool-presence checks therefore need the full image (see docs/CONTAINER-CONTRACT.md).
+FROM node:22-slim
+RUN mkdir -p /workspace/group /workspace/output /workspace/skills /workspace/media /opt/contract-tools \
+    && chmod 1777 /workspace/group /workspace/output
+COPY entrypoint.js /usr/local/bin/anuclaw-entrypoint
+COPY contract/fake-claude.js /opt/contract-tools/fake-claude
+RUN chmod 755 /usr/local/bin/anuclaw-entrypoint /opt/contract-tools/fake-claude
+WORKDIR /workspace
+ENTRYPOINT ["node", "/usr/local/bin/anuclaw-entrypoint"]

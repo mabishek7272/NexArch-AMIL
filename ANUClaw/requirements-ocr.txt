@@ -1,0 +1,9 @@
+# Pinned OCR service environment (UNVERIFIED here: not installed in this checkout).
+# Verify on the target platform; Paddle wheels are platform-specific.
+paddleocr==2.7.3
+paddlepaddle==2.6.2   # 2.6.1 has no macOS arm64 cp312 wheel on PyPI (checked 2026-11-17)
+fastapi==0.110.0
+uvicorn==0.29.0
+python-multipart==0.0.9
+setuptools==69.5.1     # paddle imports setuptools; not bundled in py3.12 venvs
+numpy==1.26.4          # paddle 2.6 / opencv 4.6 built against numpy 1.x

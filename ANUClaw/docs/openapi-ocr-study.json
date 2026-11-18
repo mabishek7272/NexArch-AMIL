@@ -1,0 +1,4565 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ANUClaw OCR study workspace API",
+    "version": "1.0.0",
+    "description": "Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval. Identity, tenant, study role and lock state are derived by the server from the dashboard session and database membership, never from request bodies. Storage fails closed unless configured; only a synthetic local adapter exists."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:4100/api/ocr-study"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "DashboardSession": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "dash_token"
+      },
+      "Bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "error",
+          "code"
+        ],
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "notice": {
+            "type": "string"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Overview: notice, storage status (fail-closed reasons), roles, permission matrix, my studies",
+        "description": "Allowed study roles: any authenticated dashboard user (admin, operator, clinician, auditor, compliance). Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies": {
+      "post": {
+        "summary": "Create a study; the signed-in user becomes study_owner (tenant derived from the session)",
+        "description": "Allowed study roles: any authenticated dashboard user (admin, operator, clinician, auditor, compliance). Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Fields (the body may NOT carry userId, tenantId, role or lockState; such requests get 400 forbidden_field).",
+                "properties": {
+                  "name": {
+                    "description": "string"
+                  },
+                  "purpose": {
+                    "description": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}": {
+      "get": {
+        "summary": "Study summary (members and annotator identities are shown only to roles that need them; annotators see only assigned datasets)",
+        "description": "Allowed study roles: study_owner, dataset_custodian, annotator, adjudicator, statistician, clinical_lead, auditor. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/members": {
+      "post": {
+        "summary": "Add a member by email with ONE study role (cannot be combined)",
+        "description": "Allowed study roles: study_owner. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Fields (the body may NOT carry userId, tenantId, role or lockState; such requests get 400 forbidden_field).",
+                "properties": {
+                  "memberEmail": {
+                    "description": "string"
+                  },
+                  "studyRole": {
+                    "description": "enum StudyRole"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "All members with status (active/suspended/removed) and open two-person requests; paginated (limit<=200)",
+        "description": "Allowed study roles: study_owner, clinical_lead, auditor. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/members/{uid}/suspend": {
+      "post": {
+        "summary": "Suspend a member immediately (reason required; only its hash and length are audited). Custodians and clinical leads need the two-person flow (409 second_authorization_required). The last active study owner cannot be suspended. Nothing is deleted",
+        "description": "Allowed study roles: study_owner. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Fields (the body may NOT carry userId, tenantId, role or lockState; such requests get 400 forbidden_field).",
+                "properties": {
+                  "reason": {
+                    "description": "string"
+                  },
+                  "reauthPassword": {
+                    "description": "string (policy)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/members/{uid}/remove": {
+      "post": {
+        "summary": "Remove a member immediately and permanently for this study (history stays attributable; a removed member cannot be re-added). Same rules as suspend",
+        "description": "Allowed study roles: study_owner. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Fields (the body may NOT carry userId, tenantId, role or lockState; such requests get 400 forbidden_field).",
+                "properties": {
+                  "reason": {
+                    "description": "string"
+                  },
+                  "reauthPassword": {
+                    "description": "string (policy)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/members/{uid}/reinstate": {
+      "post": {
+        "summary": "Reinstate a SUSPENDED member",
+        "description": "Allowed study roles: study_owner. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Fields (the body may NOT carry userId, tenantId, role or lockState; such requests get 400 forbidden_field).",
+                "properties": {
+                  "reason": {
+                    "description": "string"
+                  },
+                  "reauthPassword": {
+                    "description": "string (policy)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/members/{uid}/requests": {
+      "post": {
+        "summary": "Request suspension/removal of a dataset custodian or clinical lead (first of two people)",
+        "description": "Allowed study roles: study_owner. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Fields (the body may NOT carry userId, tenantId, role or lockState; such requests get 400 forbidden_field).",
+                "properties": {
+                  "action": {
+                    "description": "suspend|remove"
+                  },
+                  "reason": {
+                    "description": "string"
+                  },
+                  "reauthPassword": {
+                    "description": "string (policy)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/members/{uid}/requests/{rid}/approve": {
+      "post": {
+        "summary": "Approve a request: a study owner or clinical lead who is neither the requester nor the member concerned",
+        "description": "Allowed study roles: study_owner, clinical_lead. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "rid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Fields (the body may NOT carry userId, tenantId, role or lockState; such requests get 400 forbidden_field).",
+                "properties": {
+                  "reason": {
+                    "description": "string"
+                  },
+                  "reauthPassword": {
+                    "description": "string (policy)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/members/{uid}/requests/{rid}/execute": {
+      "post": {
+        "summary": "Execute an approved request (the requester); single use",
+        "description": "Allowed study roles: study_owner. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "rid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Fields (the body may NOT carry userId, tenantId, role or lockState; such requests get 400 forbidden_field).",
+                "properties": {
+                  "reauthPassword": {
+                    "description": "string (policy)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/policy": {
+      "get": {
+        "summary": "The OCR study policy record (?kind=real_study|synthetic_test): fields with configuration status, version history with chain verification, effective state. A real-study policy is NEVER effective in this build",
+        "description": "Allowed study roles: study_owner, clinical_lead, statistician, auditor, dataset_custodian. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Save a new immutable DRAFT version of a policy: fields {value, sourceRef} (real-study fields need a source reference; presence is not verification) or null to un-configure. Cannot activate anything",
+        "description": "Allowed study roles: study_owner, clinical_lead, statistician. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Fields (the body may NOT carry userId, tenantId, role or lockState; such requests get 400 forbidden_field).",
+                "properties": {
+                  "kind": {
+                    "description": "real_study|synthetic_test"
+                  },
+                  "fields": {
+                    "description": "object"
+                  },
+                  "clinicalLeadDecisionRef": {
+                    "description": "string"
+                  },
+                  "independentReviewRef": {
+                    "description": "string"
+                  },
+                  "reauthPassword": {
+                    "description": "string (policy)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/policy/activate": {
+      "post": {
+        "summary": "Request activation of the real-study policy. ALWAYS refused in this build (409 activation_blocked): needs an external authorization reference, an independent-review reference and an approved-protocol gate that does not exist; the refusal is audited",
+        "description": "Allowed study roles: study_owner, clinical_lead, statistician. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Fields (the body may NOT carry userId, tenantId, role or lockState; such requests get 400 forbidden_field).",
+                "properties": {
+                  "authorizationRef": {
+                    "description": "string"
+                  },
+                  "independentReviewRef": {
+                    "description": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/policy/reviews": {
+      "get": {
+        "summary": "Draft-policy review submissions and decisions (metadata and external references only; references are never treated as verification)",
+        "description": "Allowed study roles: study_owner, clinical_lead, statistician, auditor, dataset_custodian. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Submit the CURRENT real-study draft policy version for two-person review (never activates anything)",
+        "description": "Allowed study roles: study_owner, clinical_lead, statistician. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Fields (the body may NOT carry userId, tenantId, role or lockState; such requests get 400 forbidden_field).",
+                "properties": {
+                  "note": {
+                    "description": "string (only a hash and length are stored in audit)"
+                  },
+                  "reauthPassword": {
+                    "description": "string (policy)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/policy/reviews/{rid}/decision": {
+      "post": {
+        "summary": "Record a review (reviewed | changes_requested) with EXTERNAL decision and signature references. Refused: self-review, stale version, replay, tampered chain. Does not activate or approve; cannot enable real data",
+        "description": "Allowed study roles: study_owner, clinical_lead, statistician. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "rid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Fields (the body may NOT carry userId, tenantId, role or lockState; such requests get 400 forbidden_field).",
+                "properties": {
+                  "decision": {
+                    "description": "reviewed|changes_requested"
+                  },
+                  "externalDecisionRef": {
+                    "description": "string"
+                  },
+                  "externalSignatureRef": {
+                    "description": "string"
+                  },
+                  "note": {
+                    "description": "string"
+                  },
+                  "reauthPassword": {
+                    "description": "string (policy)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/policy/readiness": {
+      "get": {
+        "summary": "Readiness report: missing fields, source references, external decision/review references and unavailable infrastructure gates, each linked to its owning document. Always \"not eligible for activation\"",
+        "description": "Allowed study roles: study_owner, clinical_lead, statistician, auditor, dataset_custodian. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/policy/report": {
+      "get": {
+        "summary": "Policy comparison / audit report: every field, configuration status, source-reference presence (not verification), affected code paths, and the policy version used by each run",
+        "description": "Allowed study roles: study_owner, clinical_lead, statistician, auditor, dataset_custodian. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/severity-map": {
+      "put": {
+        "summary": "Set descriptive severity labels per error type: writes a new version of the SYNTHETIC test policy chain (cannot accept a study)",
+        "description": "Allowed study roles: clinical_lead. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Fields (the body may NOT carry userId, tenantId, role or lockState; such requests get 400 forbidden_field).",
+                "properties": {
+                  "map": {
+                    "description": "object errorType→label"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/acceptance": {
+      "post": {
+        "summary": "Always 403: no role can mark a study accepted in this software",
+        "description": "Allowed study roles: no role. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/datasets": {
+      "post": {
+        "summary": "Register a SYNTHETIC dataset (real data refused by the synthetic-only storage adapter); assigns two annotators blind to each other",
+        "description": "Allowed study roles: dataset_custodian. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Fields (the body may NOT carry userId, tenantId, role or lockState; such requests get 400 forbidden_field).",
+                "properties": {
+                  "name": {
+                    "description": "string"
+                  },
+                  "studyRef": {
+                    "description": "string"
+                  },
+                  "provenanceKind": {
+                    "description": "synthetic_fixture"
+                  },
+                  "split": {
+                    "description": "enum Split"
+                  },
+                  "origin": {
+                    "description": "string"
+                  },
+                  "annotatorEmails": {
+                    "description": "string[2]"
+                  },
+                  "sources": {
+                    "description": "array of {contentBase64,pages,mediaType}"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/datasets/{ds}/attestation": {
+      "post": {
+        "summary": "Record a human-supplied de-identification attestation (hashed; not verified by the software)",
+        "description": "Allowed study roles: dataset_custodian. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "ds",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Fields (the body may NOT carry userId, tenantId, role or lockState; such requests get 400 forbidden_field).",
+                "properties": {
+                  "record": {
+                    "description": "AttestationRecord"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/datasets/{ds}/manifest": {
+      "post": {
+        "summary": "Generate the manifest (requires the attestation)",
+        "description": "Allowed study roles: dataset_custodian. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "ds",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Manifest and server-derived lock state",
+        "description": "Allowed study roles: study_owner, dataset_custodian, statistician, clinical_lead, auditor. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "ds",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/datasets/{ds}/verify": {
+      "post": {
+        "summary": "Verify integrity; a locked dataset REQUIRES expectedLockDigest recorded outside this system",
+        "description": "Allowed study roles: study_owner, dataset_custodian, statistician, clinical_lead, auditor. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "ds",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Fields (the body may NOT carry userId, tenantId, role or lockState; such requests get 400 forbidden_field).",
+                "properties": {
+                  "expectedLockDigest": {
+                    "description": "hex64 (required when locked)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/datasets/{ds}/cases": {
+      "get": {
+        "summary": "Cases (opaque ids, pages, media type); annotators only for datasets assigned to them",
+        "description": "Allowed study roles: annotator, dataset_custodian. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "ds",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/datasets/{ds}/cases/{caseId}/source": {
+      "get": {
+        "summary": "Source bytes (hash re-checked); assigned annotators and the custodian only",
+        "description": "Allowed study roles: annotator, dataset_custodian. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "ds",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "caseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/datasets/{ds}/annotations": {
+      "post": {
+        "summary": "Import the signed-in annotator's own annotation file as a new immutable version",
+        "description": "Allowed study roles: annotator. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "ds",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Fields (the body may NOT carry userId, tenantId, role or lockState; such requests get 400 forbidden_field).",
+                "properties": {
+                  "file": {
+                    "description": "AnnotatorFile"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/datasets/{ds}/my-annotations": {
+      "get": {
+        "summary": "The signed-in annotator's OWN versions only",
+        "description": "Allowed study roles: annotator. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "ds",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/datasets/{ds}/agreement": {
+      "get": {
+        "summary": "Aggregate agreement and missingness; no item-level disagreement content",
+        "description": "Allowed study roles: statistician, clinical_lead, study_owner. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "ds",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/datasets/{ds}/queue": {
+      "get": {
+        "summary": "Disagreement queue with annotator identities replaced by A/B",
+        "description": "Allowed study roles: adjudicator. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "ds",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/datasets/{ds}/adjudications": {
+      "post": {
+        "summary": "Submit an adjudication; both original annotations are preserved; annotation files are never altered",
+        "description": "Allowed study roles: adjudicator. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "ds",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Fields (the body may NOT carry userId, tenantId, role or lockState; such requests get 400 forbidden_field).",
+                "properties": {
+                  "queueId": {
+                    "description": "string"
+                  },
+                  "source": {
+                    "description": "A|B|other|ambiguous"
+                  },
+                  "finalValue": {
+                    "description": "any (source other)"
+                  },
+                  "reason": {
+                    "description": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Adjudication records (annotator identities hidden)",
+        "description": "Allowed study roles: adjudicator. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "ds",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/datasets/{ds}/truth": {
+      "post": {
+        "summary": "Build the adjudicated truth (refused while disagreements are unresolved)",
+        "description": "Allowed study roles: dataset_custodian. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "ds",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/datasets/{ds}/lock": {
+      "post": {
+        "summary": "Lock the dataset; returns the lock digest to record OUTSIDE this system",
+        "description": "Allowed study roles: dataset_custodian. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "ds",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/datasets/{ds}/unlock-requests": {
+      "post": {
+        "summary": "Request an unlock (custodian); bound to the current manifest hash and lock digest",
+        "description": "Allowed study roles: dataset_custodian. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "ds",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Fields (the body may NOT carry userId, tenantId, role or lockState; such requests get 400 forbidden_field).",
+                "properties": {
+                  "reason": {
+                    "description": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Unlock requests and their status",
+        "description": "Allowed study roles: study_owner, dataset_custodian, statistician, clinical_lead, auditor. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "ds",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/datasets/{ds}/unlock-requests/{rid}/authorize": {
+      "post": {
+        "summary": "Authorize an unlock (study owner / clinical lead); must be a different authenticated user from the requester; single use",
+        "description": "Allowed study roles: study_owner, clinical_lead. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "ds",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "rid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Fields (the body may NOT carry userId, tenantId, role or lockState; such requests get 400 forbidden_field).",
+                "properties": {
+                  "reason": {
+                    "description": "string"
+                  },
+                  "protocolDeviationRef": {
+                    "description": "string"
+                  },
+                  "credentialRef": {
+                    "description": "string"
+                  },
+                  "roleClaim": {
+                    "description": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/datasets/{ds}/unlock-requests/{rid}/execute": {
+      "post": {
+        "summary": "Execute an authorized unlock (the requester); refused on replay, manifest/lock-digest mismatch or tenant mismatch",
+        "description": "Allowed study roles: dataset_custodian. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "ds",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "rid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/datasets/{ds}/evaluations": {
+      "post": {
+        "summary": "Run an evaluation (development only on the development split; locked mode requires the lock and expectedLockDigest); severity labels come from the study, not the body",
+        "description": "Allowed study roles: statistician. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "ds",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Fields (the body may NOT carry userId, tenantId, role or lockState; such requests get 400 forbidden_field).",
+                "properties": {
+                  "runId": {
+                    "description": "string"
+                  },
+                  "mode": {
+                    "description": "development|locked"
+                  },
+                  "results": {
+                    "description": "anuclaw-ocr-extraction/v1 (locked mode: must carry the policy stamp it was produced under)"
+                  },
+                  "expectedLockDigest": {
+                    "description": "hex64 (locked)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/datasets/{ds}/evaluations/{runId}/export": {
+      "post": {
+        "summary": "Export the evaluation report (POST so a re-authentication password can be supplied; hash in X-Report-SHA256; states clinicalAcceptance not assessed). Sensitive: re-authentication policy applies",
+        "description": "Allowed study roles: statistician, clinical_lead, study_owner, auditor. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          },
+          {
+            "name": "ds",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Fields (the body may NOT carry userId, tenantId, role or lockState; such requests get 400 forbidden_field).",
+                "properties": {
+                  "reauthPassword": {
+                    "description": "string (when the policy requires it)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/studies/{id}/audit": {
+      "get": {
+        "summary": "Audit events (identifiers, hashes, counts only) and the file-store audit chain check",
+        "description": "Allowed study roles: auditor, study_owner. Study tooling only — synthetic data does not establish OCR accuracy, clinical validation or release approval.",
+        "security": [
+          {
+            "DashboardSession": []
+          },
+          {
+            "Bearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^w-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad input / forbidden_field / expected_lock_digest_required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated, or re-authentication required (reauth_required/reauth_failed)"
+          },
+          "403": {
+            "description": "Study role does not permit this; csrf_refused",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not a member (same answer)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "State conflict (locked, integrity, mismatch, replay, last_owner)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "too_large: body or file exceeds study limits"
+          },
+          "429": {
+            "description": "rate_limited (Retry-After set)"
+          },
+          "503": {
+            "description": "study_storage_unavailable (fails closed) or authentication not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

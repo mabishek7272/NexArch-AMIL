@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+<!--
+  Local, offline simulated AI-provider drafting page (M3 test fixture — NOT a real provider, NOT loaded from any
+  network). Exercises BrowserResearchAdapter against realistic failure modes: partial replies, duplicate-submission
+  uncertainty, session expiry, quota errors, UI drift, and cancellation. The "Test controls" panel is driven by the
+  TEST itself (never by the adapter under test) to inject these conditions deterministically.
+-->
+<head><meta charset="utf-8"><title>Simulated provider (test fixture)</title></head>
+<body>
+  <div data-testid="rs-sim-provider">
+    <div data-testid="status-banner" data-status="idle">idle</div>
+    <textarea data-testid="prompt-input"></textarea>
+    <button data-testid="submit-btn">Submit</button>
+    <button data-testid="cancel-btn">Cancel</button>
+    <button data-testid="continue-btn" style="display:none">Continue</button>
+    <div data-testid="reply-output"></div>
+    <div data-testid="submission-id"></div>
+  </div>
+
+  <div data-testid="test-controls">
+    <button data-testid="ctl-partial-mode">Enable partial-reply mode</button>
+    <button data-testid="ctl-quota">Simulate quota exceeded</button>
+    <button data-testid="ctl-expire">Simulate session expiry</button>
+    <button data-testid="ctl-drift">Simulate UI drift</button>
+    <button data-testid="ctl-slow">Enable slow/ambiguous mode (for duplicate-submit test)</button>
+  </div>
+
+  <script>
+    // Session state survives a page reload within the SAME persistent browser profile (mirrors a real provider's
+    // own session persistence, e.g. via its own localStorage/cookies) — this is what lets a reconnected adapter
+    // resume rather than lose track of an in-progress submission after closing and reopening the browser context.
+    const STORE_KEY = 'rs-sim-provider-state';
+    const loadState = () => { try { return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch { return {}; } };
+    const saved = loadState();
+    let submissionCounter = saved.submissionCounter ?? 0;
+    let currentSubmissionId = saved.currentSubmissionId ?? null;
+    let partialMode = false;
+    let slowMode = false;
+    let pendingTimer = null;
+    let inFlight = false; // true while a submission is being processed server-side (simulated) — a second submit during this window is the "duplicate/uncertain" case
+
+    const $ = (id) => document.querySelector(`[data-testid="${id}"]`);
+    const persist = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify({ submissionCounter, currentSubmissionId, status: $('status-banner')?.getAttribute('data-status'), reply: $('reply-output')?.textContent })); } catch { /* ignore */ } };
+    const setStatus = (status, text) => { const el = $('status-banner'); if (el) { el.setAttribute('data-status', status); el.textContent = text ?? status; } persist(); };
+
+    // Restore on load: if a submission was in flight when the page was last closed, it is honestly reported as
+    // 'pending' forever (there is no real backend continuing the work while the tab was closed) — a caller must
+    // treat that as "still waiting", never as silently completed.
+    if (saved.currentSubmissionId) {
+      $('submission-id').textContent = saved.currentSubmissionId;
+      if (saved.reply) $('reply-output').textContent = saved.reply;
+    }
+    // Status (including a quota/session-expiry condition set before any submission existed) always survives a reload.
+    if (saved.status) { const el = $('status-banner'); if (el) { el.setAttribute('data-status', saved.status); el.textContent = saved.status; } }
+
+    $('ctl-partial-mode')?.addEventListener('click', () => { partialMode = true; });
+    $('ctl-slow')?.addEventListener('click', () => { slowMode = true; });
+    $('ctl-quota')?.addEventListener('click', () => setStatus('quota_exceeded', 'Quota exceeded'));
+    $('ctl-expire')?.addEventListener('click', () => setStatus('session_expired', 'Session expired'));
+    $('ctl-drift')?.addEventListener('click', () => {
+      // Simulate a provider changing their page: the known controls lose their stable test ids, but the outer
+      // container stays, so an adapter that checks for the container first and the inner controls second gets a
+      // clear, honest "I don't recognise this page" signal instead of silently misreading something else.
+      ['prompt-input', 'submit-btn', 'cancel-btn', 'continue-btn'].forEach((id) => { const el = $(id); if (el) el.removeAttribute('data-testid'); });
+    });
+
+    $('submit-btn')?.addEventListener('click', () => {
+      const banner = $('status-banner');
+      if (banner && banner.getAttribute('data-status') === 'quota_exceeded') return; // provider refuses new submissions once quota is exceeded
+      if (banner && banner.getAttribute('data-status') === 'session_expired') return;
+      if (inFlight) {
+        // A submission is already being processed: this second click is exactly the "duplicate submission while
+        // uncertain" scenario. The page reports this explicitly rather than silently queuing or ignoring it.
+        setStatus('duplicate_uncertain', 'A submission is already in flight; this click is ambiguous.');
+        return;
+      }
+      inFlight = true;
+      submissionCounter += 1; currentSubmissionId = `sub-${submissionCounter}`;
+      $('submission-id').textContent = currentSubmissionId;
+      $('reply-output').textContent = '';
+      setStatus('pending', 'thinking…'); persist();
+      const delay = slowMode ? 2500 : 300;
+      pendingTimer = setTimeout(() => {
+        inFlight = false;
+        if (partialMode) {
+          $('reply-output').textContent = 'This is the first half of a long reply...';
+          setStatus('partial', 'partial');
+          $('continue-btn').style.display = '';
+        } else {
+          $('reply-output').textContent = 'This is the complete simulated reply.';
+          setStatus('completed', 'completed');
+        }
+      }, delay);
+    });
+
+    $('continue-btn')?.addEventListener('click', () => {
+      setStatus('pending', 'continuing…');
+      setTimeout(() => {
+        $('reply-output').textContent += ' ...and this is the rest of the reply.';
+        setStatus('completed', 'completed');
+        $('continue-btn').style.display = 'none';
+      }, 200);
+    });
+
+    $('cancel-btn')?.addEventListener('click', () => {
+      if (pendingTimer) clearTimeout(pendingTimer);
+      inFlight = false;
+      setStatus('cancelled', 'cancelled');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+{
+ "files": 20,
+ "bytes": 735970,
+ "requests": 34,
+ "log": [
+  {
+   "url": "https://alphafold.ebi.ac.uk/api/prediction/P69905",
+   "bytes": 1987,
+   "status": 200
+  },
+  {
+   "url": "https://alphafold.ebi.ac.uk/files/AF-P69905-F1-model_v6.pdb",
+   "bytes": 92096,
+   "status": 200
+  },
+  {
+   "url": "https://data.rcsb.org/rest/v1/core/entry/4HHB",
+   "bytes": 26055,
+   "status": 200
+  },
+  {
+   "url": "https://files.rcsb.org/download/4HHB.pdb",
+   "bytes": 473850,
+   "status": 200
+  },
+  {
+   "url": "https://search.rcsb.org/rcsbsearch/v2/query",
+   "bytes": 784,
+   "status": 200
+  },
+  {
+   "url": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000819615.1/dataset_report",
+   "bytes": 1102,
+   "status": 200
+  },
+  {
+   "url": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000819615.1/download?include_annotation_type=GENOME_FASTA&include_annotation_type=GENOME_GFF&hydrated=FULLY_HYDRATED",
+   "bytes": 6348,
+   "status": 200
+  },
+  {
+   "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=gds&retmode=json&retmax=5&term=yeast%20cell%20cycle%20AND%20gse%5BETYP%5D",
+   "bytes": 1320,
+   "status": 200
+  },
+  {
+   "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=gds&retmode=json&id=200346184,200346163,200336480,200350949,200327180",
+   "bytes": 23883,
+   "status": 200
+  },
+  {
+   "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE346184&targ=self&form=text&view=brief",
+   "bytes": 11772,
+   "status": 200
+  },
+  {
+   "url": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE346nnn/GSE346184/matrix/GSE346184_series_matrix.txt.gz",
+   "bytes": 0,
+   "status": 403
+  },
+  {
+   "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE346184&targ=self&form=text&view=brief",
+   "bytes": 11772,
+   "status": 200
+  },
+  {
+   "url": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE346nnn/GSE346184/matrix/GSE346184_series_matrix.txt.gz",
+   "bytes": 0,
+   "status": 403
+  },
+  {
+   "url": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE346nnn/GSE346184/matrix/GSE346184_series_matrix.txt.gz",
+   "bytes": 980,
+   "status": 403
+  },
+  {
+   "url": "MANUAL PROBE HEAD matrix (curl default UA)",
+   "bytes": 0,
+   "status": null
+  },
+  {
+   "url": "MANUAL PROBE HEAD matrix (connector UA)",
+   "bytes": 0,
+   "status": null
+  },
+  {
+   "url": "MANUAL PROBE HEAD series dir",
+   "bytes": 0,
+   "status": null
+  },
+  {
+   "url": "MANUAL HEAD probe of series matrix GSE1",
+   "bytes": 0,
+   "status": null
+  },
+  {
+   "url": "MANUAL HEAD probe of series matrix GSE2",
+   "bytes": 0,
+   "status": null
+  },
+  {
+   "url": "MANUAL HEAD probe of series matrix GSE10",
+   "bytes": 0,
+   "status": null
+  },
+  {
+   "url": "MANUAL HEAD probe of series matrix GSE20",
+   "bytes": 0,
+   "status": null
+  },
+  {
+   "url": "MANUAL HEAD probe of series matrix GSE100",
+   "bytes": 0,
+   "status": null
+  },
+  {
+   "url": "MANUAL HEAD probe of series matrix GSE346163",
+   "bytes": 0,
+   "status": null
+  },
+  {
+   "url": "MANUAL HEAD probe of series matrix GSE327180",
+   "bytes": 0,
+   "status": null
+  },
+  {
+   "url": "MANUAL HEAD probe of series matrix GSE350949",
+   "bytes": 0,
+   "status": null
+  },
+  {
+   "url": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000819615.1/dataset_report",
+   "bytes": 1102,
+   "status": 200
+  },
+  {
+   "url": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000819615.1/download?include_annotation_type=GENOME_FASTA&include_annotation_type=GENOME_GFF&hydrated=FULLY_HYDRATED",
+   "bytes": 6348,
+   "status": 200
+  },
+  {
+   "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE2&targ=self&form=text&view=brief",
+   "bytes": 2181,
+   "status": 200
+  },
+  {
+   "url": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSEnnn/GSE2/matrix/GSE2_series_matrix.txt.gz",
+   "bytes": 0,
+   "status": 200
+  },
+  {
+   "url": "MANUAL diagnostic GET (axios stream) GSE2 matrix",
+   "bytes": 14878,
+   "status": null
+  },
+  {
+   "url": "MANUAL diagnostic GET curl identity+connector UA GSE2 matrix",
+   "bytes": 14878,
+   "status": null
+  },
+  {
+   "url": "MANUAL diagnostic GET curl default GSE2 matrix",
+   "bytes": 14878,
+   "status": null
+  },
+  {
+   "url": "MANUAL diagnostic GET (axios stream, Accept */*) GSE2 matrix",
+   "bytes": 14878,
+   "status": null
+  },
+  {
+   "url": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSEnnn/GSE2/matrix/GSE2_series_matrix.txt.gz",
+   "bytes": 14878,
+   "status": 200
+  }
+ ]
+}

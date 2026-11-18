@@ -1,0 +1,104 @@
+{
+ "schema": "anuclaw-ocr-extraction/v1",
+ "system": {
+  "engine": "FIXTURE-SYSTEM (not a real engine)",
+  "version": "0"
+ },
+ "documents": [
+  {
+   "documentId": "@1",
+   "pages": [
+    {
+     "page": 1,
+     "status": "ok"
+    }
+   ],
+   "candidates": [
+    {
+     "analyte": "Sodium",
+     "valueRaw": "140",
+     "valueNum": 140,
+     "comparator": null,
+     "unit": "mmol/L",
+     "refLow": 135,
+     "refHigh": 145,
+     "page": 1,
+     "flags": [],
+     "ocrConfidence": 0.97
+    },
+    {
+     "analyte": "Potassium",
+     "valueRaw": "4.7",
+     "valueNum": 4.7,
+     "comparator": null,
+     "unit": "mmol/L",
+     "refLow": 3.5,
+     "refHigh": 5.1,
+     "page": 1,
+     "flags": [
+      "low_ocr_confidence"
+     ],
+     "ocrConfidence": 0.55
+    }
+   ]
+  },
+  {
+   "documentId": "@2",
+   "pages": [
+    {
+     "page": 1,
+     "status": "ok"
+    }
+   ],
+   "candidates": [
+    {
+     "analyte": "Glucose",
+     "valueRaw": "5.2",
+     "valueNum": 5.2,
+     "comparator": null,
+     "unit": "mmol/L",
+     "refLow": 3.9,
+     "refHigh": 5.6,
+     "page": 1,
+     "flags": [],
+     "ocrConfidence": 0.96
+    },
+    {
+     "analyte": "CRP",
+     "valueRaw": "<5",
+     "valueNum": 5,
+     "comparator": "<",
+     "unit": "mg/L",
+     "refLow": 0,
+     "refHigh": 5,
+     "page": 1,
+     "flags": [],
+     "ocrConfidence": 0.94
+    }
+   ]
+  },
+  {
+   "documentId": "@3",
+   "pages": [
+    {
+     "page": 1,
+     "status": "ok"
+    }
+   ],
+   "candidates": [
+    {
+     "analyte": "Creatinine",
+     "valueRaw": "88",
+     "valueNum": 88,
+     "comparator": null,
+     "unit": "mmol/L",
+     "refLow": 60,
+     "refHigh": 110,
+     "page": 1,
+     "flags": [],
+     "ocrConfidence": 0.93
+    }
+   ]
+  }
+ ]
+}

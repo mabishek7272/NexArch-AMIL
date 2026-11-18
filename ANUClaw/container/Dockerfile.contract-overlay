@@ -1,0 +1,7 @@
+# TEST OVERLAY: the full image plus the agent test double, so the double-agent contract suite can run against the ACTUAL full image.
+# The full image itself deliberately ships no test doubles.   docker build -t anuclaw-agent-contract-overlay:latest -f container/Dockerfile.contract-overlay container
+ARG BASE=anuclaw-agent:latest
+FROM ${BASE}
+USER root
+COPY contract/fake-claude.js /opt/contract-tools/fake-claude
+RUN chmod 755 /opt/contract-tools/fake-claude

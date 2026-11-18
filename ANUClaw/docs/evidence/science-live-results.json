@@ -1,0 +1,405 @@
+{
+ "ranAt": "2026-11-17T07:21:25.029Z",
+ "limits": {
+  "maxFiles": 20,
+  "maxBytes": 104857600
+ },
+ "label": "LIVE retrieval of public reference records. A successful download validates nothing about any model, analysis or clinical use.",
+ "steps": [
+  {
+   "name": "AlphaFold DB: P69905 (human hemoglobin alpha) — existing prediction, PDB file",
+   "ok": true,
+   "ms": 3631,
+   "record": {
+    "provider": "alphafold",
+    "accession": "P69905",
+    "title": "Hemoglobin subunit alpha",
+    "classification": "predicted",
+    "classificationNote": "AlphaFold DB models are computational predictions. They are not experimental structures and are not validated for any clinical or ligand-binding use.",
+    "sourceVersion": "v6"
+   },
+   "problems": [],
+   "sources": [
+    {
+     "id": "db84d8ea-c280-42a8-9551-2a47bd461b8c",
+     "kind": "structure_file",
+     "format": "pdb",
+     "memberPath": null,
+     "classification": "predicted",
+     "sourceVersion": "6",
+     "sha256": "d9d7ad4607164de17b65767b467d366909d74f96df5176ee368a9a515aaa1911",
+     "bytes": 92096,
+     "sourceUrl": "https://alphafold.ebi.ac.uk/files/AF-P69905-F1-model_v6.pdb",
+     "license": "CC BY 4.0",
+     "retrievedAt": "2026-11-17T07:21:29.240Z"
+    }
+   ],
+   "derived": [
+    {
+     "parser": "pdb",
+     "status": "ok",
+     "summary": {
+      "format": "pdb",
+      "models": 1,
+      "chains": [
+       {
+        "id": "A",
+        "residues": 142,
+        "atoms": 1077,
+        "hetatmAtoms": 0
+       }
+      ],
+      "atoms": 1077,
+      "residues": 142,
+      "elements": {
+       "N": 188,
+       "C": 690,
+       "O": 195,
+       "S": 4
+      },
+      "coordinateRange": {
+       "min": [
+        -19.915,
+        -10.085,
+        -21.741
+       ],
+       "max": [
+        24.484,
+        16.782,
+        20
+       ]
+      },
+      "bFactor": {
+       "n": 1077,
+       "min": 65.38,
+       "max": 98.88,
+       "mean": 98.04426183844014
+      },
+      "plddt": {
+       "residuesScored": 142,
+       "mean": 98.0637323943662,
+       "fractionVeryHigh": 0.9929577464788732,
+       "fractionConfident": 0,
+       "fractionLow": 0.007042253521126761,
+       "fractionVeryLow": 0
+      },
+      "headerTitle": "ALPHAFOLD MONOMER V2.0 PREDICTION FOR HEMOGLOBIN SUBUNIT ALPHA (P69905)",
+      "experimentalMethod": null,
+      "resolutionAngstrom": null
+     }
+    }
+   ]
+  },
+  {
+   "name": "RCSB PDB: 4HHB (human deoxyhaemoglobin, experimental) — entry + PDB file",
+   "ok": true,
+   "ms": 13937,
+   "record": {
+    "provider": "rcsb",
+    "accession": "4HHB",
+    "title": "THE CRYSTAL STRUCTURE OF HUMAN DEOXYHAEMOGLOBIN AT 1.74 ANGSTROMS RESOLUTION",
+    "classification": "experimental",
+    "classificationNote": "Experimental structure determined by X-RAY DIFFRACTION.",
+    "sourceVersion": "2026-08-12T00:00:00.000+00:00 (rev 4.3)"
+   },
+   "problems": [],
+   "sources": [
+    {
+     "id": "57eb5a4d-6c33-45b3-957f-95f23d7e1179",
+     "kind": "structure_file",
+     "format": "pdb",
+     "memberPath": null,
+     "classification": "experimental",
+     "sourceVersion": "2026-08-12T00:00:00.000+00:00 (rev 4.3)",
+     "sha256": "abf382e0fd84b53bd4c08b373d37c0d7fe9fbe1a9a9c3851b2f5f2fbbe627101",
+     "bytes": 473850,
+     "sourceUrl": "https://files.rcsb.org/download/4HHB.pdb",
+     "license": "CC0 1.0 (core archive data)",
+     "retrievedAt": "2026-11-17T07:21:43.175Z"
+    }
+   ],
+   "derived": [
+    {
+     "parser": "pdb",
+     "status": "ok",
+     "summary": {
+      "format": "pdb",
+      "models": 1,
+      "chains": [
+       {
+        "id": "A",
+        "residues": 141,
+        "atoms": 1168,
+        "hetatmAtoms": 99
+       },
+       {
+        "id": "B",
+        "residues": 146,
+        "atoms": 1224,
+        "hetatmAtoms": 101
+       },
+       {
+        "id": "C",
+        "residues": 141,
+        "atoms": 1171,
+        "hetatmAtoms": 102
+       },
+       {
+        "id": "D",
+        "residues": 146,
+        "atoms": 1216,
+        "hetatmAtoms": 93
+       }
+      ],
+      "atoms": 4779,
+      "residues": 574,
+      "elements": {
+       "N": 780,
+       "C": 2954,
+       "O": 1027,
+       "S": 12,
+       "FE": 4,
+       "P": 2
+      },
+      "coordinateRange": {
+       "min": [
+        -24.242,
+        -15.297,
+        10.19
+       ],
+       "max": [
+        46.081,
+        41.915,
+        70.977
+       ]
+      },
+      "bFactor": {
+       "n": 4779,
+       "min": 4.91,
+       "max": 80.12,
+       "mean": 24.79611215735517
+      },
+      "plddt": null,
+      "headerTitle": "THE CRYSTAL STRUCTURE OF HUMAN DEOXYHAEMOGLOBIN AT 1.74 ANGSTROMS RESOLUTION",
+      "experimentalMethod": "X-RAY DIFFRACTION",
+      "resolutionAngstrom": 1.74
+     }
+    }
+   ]
+  },
+  {
+   "name": "RCSB PDB: full-text search \"hemoglobin\"",
+   "ok": true,
+   "ms": 4834,
+   "results": [
+    {
+     "accession": "2PGH",
+     "score": 1
+    },
+    {
+     "accession": "3PEL",
+     "score": 0.9993476531036848
+    },
+    {
+     "accession": "3GOU",
+     "score": 0.9990062952156846
+    },
+    {
+     "accession": "6IHX",
+     "score": 0.9986992969896361
+    },
+    {
+     "accession": "20YJ",
+     "score": 0.9983541429916754
+    }
+   ]
+  },
+  {
+   "name": "NCBI Datasets: GCF_000819615.1 (phage phiX174 RefSeq, ~5.4 kb) — FASTA + GFF3",
+   "ok": true,
+   "ms": 2573,
+   "record": {
+    "provider": "ncbi_datasets",
+    "accession": "GCF_000819615.1",
+    "title": "Escherichia phage phiX174 — ViralProj14015",
+    "classification": "curated_reference",
+    "classificationNote": "RefSeq reference assembly (NCBI-curated). Gene annotation in it is computational/curated by NCBI, not experimental evidence.",
+    "sourceVersion": "GCF_000819615.1 (1993-04-28)"
+   },
+   "problems": [
+    {
+     "key": "genome_zip",
+     "code": "too_large",
+     "message": "Archive member 'ncbi_dataset/data/GCF_000819615.1/GCF_000819615.1_ViralProj14015_genomic.fna' is too large or compresses suspiciously well."
+    }
+   ],
+   "sources": []
+  },
+  {
+   "name": "GEO: search small open expression series",
+   "ok": true,
+   "ms": 1306,
+   "results": [
+    {
+     "accession": "GSE346184",
+     "title": "Transcription directs the migration of meiotic recombination intermediates [CC-Seq]",
+     "taxon": "Saccharomyces cerevisiae",
+     "samples": 114
+    },
+    {
+     "accession": "GSE346163",
+     "title": "Transcription directs the migration of meiotic recombination intermediates",
+     "taxon": "Saccharomyces cerevisiae SK1",
+     "samples": 13
+    },
+    {
+     "accession": "GSE336480",
+     "title": "A TORC1-regulated H3K4me reader preserves promoter chromatin stability, and its degradation promotes meiotic remodeling(ChIP-Seq)",
+     "taxon": "Schizosaccharomyces pombe",
+     "samples": 32
+    },
+    {
+     "accession": "GSE350949",
+     "title": "Thermoregulation network governing virulence of a critical human fungal pathogen",
+     "taxon": "Cryptococcus neoformans H99",
+     "samples": 24
+    },
+    {
+     "accession": "GSE327180",
+     "title": "Transcriptome analysis of yeasts under high-glucose conditions",
+     "taxon": "Saccharomyces cerevisiae; Zygosaccharomyces mellis",
+     "samples": 18
+    }
+   ],
+   "chosen": "GSE346184"
+  },
+  {
+   "name": "GEO: describe GSE346184",
+   "ok": true,
+   "ms": 4639,
+   "title": "Transcription directs the migration of meiotic recombination intermediates [CC-Seq]",
+   "classification": "author_supplied",
+   "files": [
+    {
+     "key": "series_matrix"
+    }
+   ],
+   "refused": [],
+   "warnings": [
+    "10 supplementary file(s) are listed by the submitter; they are not fetched (arbitrary formats, often raw/large)."
+   ]
+  },
+  {
+   "name": "GEO: retrieve GSE346184 series matrix (only if within the size cap)",
+   "ok": true,
+   "ms": 7571,
+   "record": {
+    "provider": "geo",
+    "accession": "GSE346184",
+    "title": "Transcription directs the migration of meiotic recombination intermediates [CC-Seq]",
+    "classification": "author_supplied",
+    "classificationNote": "GEO series data are submitter-supplied; the connector does not re-process or validate them.",
+    "sourceVersion": "last update Oct 31 2026"
+   },
+   "problems": [
+    {
+     "key": "series_matrix",
+     "code": "unavailable",
+     "message": "The provider rejected the request (HTTP 403)."
+    }
+   ],
+   "sources": []
+  },
+  {
+   "name": "workspace: attach all retrieved sources and export the manifest",
+   "ok": true,
+   "ms": 16,
+   "items": 3,
+   "manifestSha256": "78f72af2a6538786d99b617389c12c953b8b5f6baffa2ed9c91c1a70349a5bd1",
+   "allIntegrityOk": true
+  }
+ ],
+ "ledger": {
+  "files": 12,
+  "bytes": 651949,
+  "requests": 14,
+  "withinLimits": true,
+  "urls": [
+   {
+    "url": "https://alphafold.ebi.ac.uk/api/prediction/P69905",
+    "bytes": 1987,
+    "status": 200
+   },
+   {
+    "url": "https://alphafold.ebi.ac.uk/files/AF-P69905-F1-model_v6.pdb",
+    "bytes": 92096,
+    "status": 200
+   },
+   {
+    "url": "https://data.rcsb.org/rest/v1/core/entry/4HHB",
+    "bytes": 26055,
+    "status": 200
+   },
+   {
+    "url": "https://files.rcsb.org/download/4HHB.pdb",
+    "bytes": 473850,
+    "status": 200
+   },
+   {
+    "url": "https://search.rcsb.org/rcsbsearch/v2/query",
+    "bytes": 784,
+    "status": 200
+   },
+   {
+    "url": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000819615.1/dataset_report",
+    "bytes": 1102,
+    "status": 200
+   },
+   {
+    "url": "https://api.ncbi.nlm.nih.gov/datasets/v2/genome/accession/GCF_000819615.1/download?include_annotation_type=GENOME_FASTA&include_annotation_type=GENOME_GFF&hydrated=FULLY_HYDRATED",
+    "bytes": 6348,
+    "status": 200
+   },
+   {
+    "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=gds&retmode=json&retmax=5&term=yeast%20cell%20cycle%20AND%20gse%5BETYP%5D",
+    "bytes": 1320,
+    "status": 200
+   },
+   {
+    "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=gds&retmode=json&id=200346184,200346163,200336480,200350949,200327180",
+    "bytes": 23883,
+    "status": 200
+   },
+   {
+    "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE346184&targ=self&form=text&view=brief",
+    "bytes": 11772,
+    "status": 200
+   },
+   {
+    "url": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE346nnn/GSE346184/matrix/GSE346184_series_matrix.txt.gz",
+    "bytes": 0,
+    "status": 403
+   },
+   {
+    "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE346184&targ=self&form=text&view=brief",
+    "bytes": 11772,
+    "status": 200
+   },
+   {
+    "url": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE346nnn/GSE346184/matrix/GSE346184_series_matrix.txt.gz",
+    "bytes": 0,
+    "status": 403
+   },
+   {
+    "url": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE346nnn/GSE346184/matrix/GSE346184_series_matrix.txt.gz",
+    "bytes": 980,
+    "status": 403
+   }
+  ]
+ },
+ "summary": {
+  "steps": 8,
+  "ok": 8,
+  "failed": 0
+ }
+}

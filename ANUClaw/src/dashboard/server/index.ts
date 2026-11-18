@@ -1,0 +1,92 @@
+import express from 'express';
+import cookieParser from 'cookie-parser';
+import * as path from 'path';
+import { requireDashAuth, assertDashboardAuthConfigured } from './auth';
+import { sseHandler } from './sse';
+
+import homeRouter        from './routes/home';
+import conversationsRouter from './routes/conversations';
+import skillsRouter      from './routes/skills';
+import hooksRouter       from './routes/hooks';
+import tasksRouter       from './routes/tasks';
+import channelsRouter    from './routes/channels';
+import auditRouter       from './routes/audit';
+import usersRouter       from './routes/users';
+import settingsRouter    from './routes/settings';
+import apiKeysRouter     from './routes/api-keys';
+import elabRouter        from './routes/elab';
+import elabEngineRouter, { ensureMfaSchema } from './routes/elab-engine';
+import pipelinesRouter   from './routes/pipelines';
+import patientsRouter    from './routes/patients';
+import documentsRouter   from './routes/documents';
+import researchRouter    from './routes/research';
+import scienceRouter     from './routes/science';
+import ocrStudyRouter    from './routes/ocr-study';
+import aikoshRouter      from './routes/aikosh';
+import researchStudioRouter from './routes/research-studio';
+import { registerAllResearchStudioAgents } from '../../research-studio/register-all-agents';
+import { enableSpendTracking } from '../../ai/spend';
+import { runStartupChecks } from '../../startup-checks';
+import { mountDashboardCds } from './routes/cds';
+
+export function mountDashboard(): void {
+  // Fail closed at startup if the dashboard signing secret is missing/unsafe (F02).
+  assertDashboardAuthConfigured();
+  runStartupChecks();
+  enableSpendTracking();
+
+  const dash = express.Router();
+
+  dash.use(cookieParser());
+  dash.use(express.json({ limit: '4mb' }));
+
+  // Auth routes (login/logout/refresh — no auth required)
+  dash.use('/auth', usersRouter);
+
+  // Protected API routes
+  dash.use('/api/home',          homeRouter);
+  dash.use('/api/conversations', conversationsRouter);
+  dash.use('/api/skills',        skillsRouter);
+  dash.use('/api/hooks',         hooksRouter);
+  dash.use('/api/tasks',         tasksRouter);
+  dash.use('/api/channels',      channelsRouter);
+  dash.use('/api/audit',         auditRouter);
+  dash.use('/api/users',         usersRouter);
+  dash.use('/api/settings',      settingsRouter);
+  dash.use('/api/keys',          apiKeysRouter);
+  dash.use('/api/elab',         elabRouter);
+  dash.use('/api/elab-engine',  elabEngineRouter);   // native engine console + TOTP 2FA
+  dash.use('/api/pipelines',    pipelinesRouter);
+  dash.use('/api/patients',     patientsRouter);
+  dash.use('/api/clinical',     documentsRouter);   // document → observation → report workflow
+  dash.use('/api/research',     researchRouter);    // governed, reproducible research (research-only)
+  dash.use('/api/science',      scienceRouter);     // public scientific data connectors (research-only; user-scoped)
+  dash.use('/api/aikosh',       aikoshRouter);      // AIKosh data registry (local governance only; nothing approved by default)
+  dash.use('/api/ocr-study',    ocrStudyRouter);    // OCR validation-study workspaces (study tooling only; synthetic data; storage fails closed)
+  registerAllResearchStudioAgents();
+  dash.use('/api/research-studio', researchStudioRouter);   // ANUClaw Research Studio (M1 foundation + M2 evidence graph: durable project/task graph, literature/evidence agents)
+
+  // CDS v3 — clinician review console + endpoints (cookie-auth, shared audit log)
+  mountDashboardCds(dash);
+
+  // SSE stream
+  dash.get('/api/stream', requireDashAuth, sseHandler);
+
+  // Serve React SPA static files
+  const spaDir = path.resolve(__dirname, '../../../dashboard/dist');
+  dash.use(express.static(spaDir));
+  dash.get('*', (_req, res) => {
+    const index = path.join(spaDir, 'index.html');
+    res.sendFile(index);
+  });
+
+  // Ensure the E-LAB TOTP columns exist (idempotent; DB is ready before mount).
+  void ensureMfaSchema().catch((e) => console.error('[Dashboard] MFA schema:', e?.message ?? e));
+
+  const port = Number(process.env.DASHBOARD_PORT ?? 3722);
+  const dashApp = express();
+  dashApp.use(dash);
+  dashApp.listen(port, '127.0.0.1', () => {
+    console.log(`[Dashboard] Running at http://127.0.0.1:${port}`);
+  });
+}

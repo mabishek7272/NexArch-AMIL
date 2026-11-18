@@ -1,0 +1,29 @@
+{
+ "_howTo": [
+  "reference.items: one per (clip, metric) measured by an INDEPENDENT reference method (e.g. calibrated goniometer / photogrammetry on a marker set). Say which in provenance.referenceMethod.",
+  "referenceIndependentOfSystem must be true only if the reference does not use the pose model.",
+  "Run: npm run validate -- pose --reference ref.json --results results.json [--tolerances '{\"static.shoulder_line_tilt\":2}'] --out report.json"
+ ],
+ "schema": "anuclaw-pose-reference/v1",
+ "provenance": {
+  "kind": "human_annotated",
+  "referenceMethod": "",
+  "referenceIndependentOfSystem": false,
+  "annotators": [
+   {
+    "id": "",
+    "role": ""
+   }
+  ]
+ },
+ "items": [
+  {
+   "clipId": "",
+   "subjectId": "",
+   "metricKey": "static.shoulder_line_tilt",
+   "unit": "deg",
+   "referenceValue": 0,
+   "referenceUncertainty": 0
+  }
+ ]
+}

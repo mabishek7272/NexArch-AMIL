@@ -1,0 +1,9 @@
+# Probe image: ONLY Node + the real Claude Code CLI + the contract entrypoint (no scientific tools). Used to test the real CLI's startup
+# and credential path quickly while the full image (container/Dockerfile) builds. It proves nothing about the scientific tools.
+FROM node:22-slim
+RUN npm install -g @anthropic-ai/claude-code && npm cache clean --force
+RUN mkdir -p /workspace/group /workspace/output /workspace/skills /workspace/media && chmod 1777 /workspace/group /workspace/output
+COPY entrypoint.js /usr/local/bin/anuclaw-entrypoint
+RUN chmod 755 /usr/local/bin/anuclaw-entrypoint
+WORKDIR /workspace
+ENTRYPOINT ["node", "/usr/local/bin/anuclaw-entrypoint"]

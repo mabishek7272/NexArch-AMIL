@@ -1,0 +1,108 @@
+{
+ "schema": "anuclaw-science-manifest/v1",
+ "generatedAt": "2026-11-17T09:28:11.259Z",
+ "workspace": {
+  "id": "6782b3d8-74f4-4562-9612-4a22f1885a15",
+  "name": "Replay",
+  "purpose": "end-to-end replay of a live-fetched artifact"
+ },
+ "researchOnly": true,
+ "notice": "Public reference data for research use only. It is not clinical evidence, is not part of the approved evidence corpus, and a successful download validates nothing (no prediction, docking, biomarker discovery or clinical validity is implied).",
+ "evidenceCorpus": "These files are NOT part of the approved clinical evidence corpus.",
+ "items": [
+  {
+   "label": "alphafold:P69905",
+   "attachedAt": 1794907691258,
+   "attachedBy": "replay",
+   "source": {
+    "termsBasis": "provider_policy",
+    "recordSpecificTerms": "Not established: the licence shown is the provider's published provider-wide policy, not terms read from this record. Dataset-, submitter- or entry-specific terms may differ — check the record page before reuse.",
+    "acquisition": "replay_of_live_artifact",
+    "replayNote": "Replay of a live-fetched artifact (recorded sha256 d9d7ad4607164de17b65767b467d366909d74f96df5176ee368a9a515aaa1911, docs/evidence/science-live-results*.json); no provider request was made in this workflow.",
+    "id": "37d8ac2f-b124-4997-bda2-8c3d4881382b",
+    "provider": "alphafold",
+    "accession": "P69905",
+    "kind": "structure_file",
+    "classification": "predicted",
+    "classificationNote": "See the live-fetch record.",
+    "format": "pdb",
+    "sourceUrl": "https://alphafold.ebi.ac.uk/files/AF-P69905-F1-model_v6.pdb",
+    "finalUrl": "https://alphafold.ebi.ac.uk/files/AF-P69905-F1-model_v6.pdb",
+    "sourceVersion": "6",
+    "retrievedAt": 1794900089240,
+    "sha256": "d9d7ad4607164de17b65767b467d366909d74f96df5176ee368a9a515aaa1911",
+    "bytes": 92096,
+    "license": "CC BY 4.0 (provider-wide policy; see terms URL)",
+    "attribution": "AlphaFold Protein Structure Database, EMBL-EBI; models by Google DeepMind. Cite Jumper et al. 2021 (Nature) and Varadi et al. 2022 (NAR).",
+    "termsUrl": "https://alphafold.ebi.ac.uk/faq",
+    "restrictions": "Computationally PREDICTED models. Retrieving an existing prediction is not running AlphaFold. Search by UniProt accession only.",
+    "contentType": null,
+    "etag": null,
+    "parentSourceId": null,
+    "memberPath": null,
+    "researchOnly": true,
+    "localStorage": "content-addressed:d9d7ad4607164de17b65767b467d366909d74f96df5176ee368a9a515aaa1911",
+    "integrityCheckedAtExport": "ok"
+   },
+   "derived": [
+    {
+     "parser": "pdb",
+     "parserVersion": "anuclaw-scidata-parsers/1",
+     "status": "ok",
+     "summary": {
+      "format": "pdb",
+      "models": 1,
+      "chains": [
+       {
+        "id": "A",
+        "residues": 142,
+        "atoms": 1077,
+        "hetatmAtoms": 0
+       }
+      ],
+      "atoms": 1077,
+      "residues": 142,
+      "elements": {
+       "N": 188,
+       "C": 690,
+       "O": 195,
+       "S": 4
+      },
+      "coordinateRange": {
+       "min": [
+        -19.915,
+        -10.085,
+        -21.741
+       ],
+       "max": [
+        24.484,
+        16.782,
+        20
+       ]
+      },
+      "bFactor": {
+       "n": 1077,
+       "min": 65.38,
+       "max": 98.88,
+       "mean": 98.04426183844014
+      },
+      "plddt": {
+       "residuesScored": 142,
+       "mean": 98.0637323943662,
+       "fractionVeryHigh": 0.9929577464788732,
+       "fractionConfident": 0,
+       "fractionLow": 0.007042253521126761,
+       "fractionVeryLow": 0
+      },
+      "headerTitle": "ALPHAFOLD MONOMER V2.0 PREDICTION FOR HEMOGLOBIN SUBUNIT ALPHA (P69905)",
+      "experimentalMethod": null,
+      "resolutionAngstrom": null
+     }
+    }
+   ],
+   "newerVersionKnown": null,
+   "attributionRequired": "AlphaFold Protein Structure Database, EMBL-EBI; models by Google DeepMind. Cite Jumper et al. 2021 (Nature) and Varadi et al. 2022 (NAR)."
+  }
+ ],
+ "manifestSha256": "0c7fd61c09c35da53cca460eec3b336c582c20a2278e57c29f7ca632d85c2fdf"
+}

@@ -1,0 +1,536 @@
+diff --git a/services/backend-api/prisma/migrations/20261117120000_clinician_session_grant/migration.sql b/services/backend-api/prisma/migrations/20261117120000_clinician_session_grant/migration.sql
+new file mode 100644
+index 0000000..dd78fbb
+--- /dev/null
++++ b/services/backend-api/prisma/migrations/20261117120000_clinician_session_grant/migration.sql
+@@ -0,0 +1,16 @@
++-- Explicit clinician -> session access grants (used by the signed export; see docs/proposals/posturepulse-signed-export.md).
++-- NO backfill, on purpose: every existing session starts with NO grants, so nothing becomes exportable by assumption.
++-- A grant is created only by an operator (scripts/grant-session.ts) and is revocable; the clinician who SIGNED a report
++-- for a session is separately authorised for that session by the server-recorded sign-off, not by this table.
++CREATE TABLE "ClinicianSessionGrant" (
++    "id" TEXT NOT NULL,
++    "clinicianId" TEXT NOT NULL,
++    "sessionId" TEXT NOT NULL,
++    "grantedBy" TEXT NOT NULL,
++    "grantedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
++    "revokedAt" TIMESTAMP(3),
++    CONSTRAINT "ClinicianSessionGrant_pkey" PRIMARY KEY ("id")
++);
++CREATE INDEX "ClinicianSessionGrant_clinicianId_sessionId_idx" ON "ClinicianSessionGrant"("clinicianId", "sessionId");
++ALTER TABLE "ClinicianSessionGrant" ADD CONSTRAINT "ClinicianSessionGrant_clinicianId_fkey" FOREIGN KEY ("clinicianId") REFERENCES "Clinician"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
++ALTER TABLE "ClinicianSessionGrant" ADD CONSTRAINT "ClinicianSessionGrant_sessionId_fkey" FOREIGN KEY ("sessionId") REFERENCES "Session"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+diff --git a/services/backend-api/prisma/schema.prisma b/services/backend-api/prisma/schema.prisma
+index 9074975..8dcd199 100644
+--- a/services/backend-api/prisma/schema.prisma
++++ b/services/backend-api/prisma/schema.prisma
+@@ -36,6 +36,7 @@ model Session {
+   events  Event[]
+   clips   Clip[]
+   reports AssessmentReport[]
++  grants  ClinicianSessionGrant[]
+ 
+   @@index([subjectPseudoId])
+ }
+@@ -91,6 +92,22 @@ model Clinician {
+   passwordHash String
+   role         String   @default("clinician")
+   createdAt    DateTime @default(now())
++  grants       ClinicianSessionGrant[]
++}
++
++// Explicit, revocable clinician -> session access. No row = no access (fail closed). Created only by an operator
++// (scripts/grant-session.ts); there is deliberately no API to grant, and nothing is inferred from names or caller-supplied ids.
++model ClinicianSessionGrant {
++  id          String    @id @default(uuid())
++  clinicianId String
++  clinician   Clinician @relation(fields: [clinicianId], references: [id])
++  sessionId   String
++  session     Session   @relation(fields: [sessionId], references: [id])
++  grantedBy   String
++  grantedAt   DateTime  @default(now())
++  revokedAt   DateTime?
++
++  @@index([clinicianId, sessionId])
+ }
+ 
+ // Who looked at which subject's data, and when (docs/adr/010's named
+diff --git a/services/backend-api/scripts/grant-session.ts b/services/backend-api/scripts/grant-session.ts
+new file mode 100644
+index 0000000..a7875da
+--- /dev/null
++++ b/services/backend-api/scripts/grant-session.ts
+@@ -0,0 +1,34 @@
++/**
++ * Operator tool: grant (or revoke) a clinician's access to ONE session for exports that require an explicit grant.
++ * Usage: npx ts-node scripts/grant-session.ts <clinician-username> <sessionId> [--revoke] --by <operator-name>
++ * There is intentionally no HTTP route that grants access. Every change is written to the audit log.
++ */
++import { PrismaClient } from "@prisma/client";
++
++async function main() {
++  const args = process.argv.slice(2);
++  const revoke = args.includes("--revoke");
++  const byIdx = args.indexOf("--by");
++  const by = byIdx >= 0 ? args[byIdx + 1] : undefined;
++  const [username, sessionId] = args.filter((a, i) => !a.startsWith("--") && args[i - 1] !== "--by");
++  if (!username || !sessionId || !by?.trim()) {
++    console.error("Usage: npx ts-node scripts/grant-session.ts <clinician-username> <sessionId> [--revoke] --by <operator-name>");
++    process.exit(1);
++  }
++  const prisma = new PrismaClient();
++  try {
++    const clinician = await prisma.clinician.findUnique({ where: { username } });
++    const session = await prisma.session.findUnique({ where: { id: sessionId } });
++    if (!clinician || !session) { console.error("Unknown clinician or session; nothing changed."); process.exit(2); }
++    if (revoke) {
++      const r = await prisma.clinicianSessionGrant.updateMany({ where: { clinicianId: clinician.id, sessionId, revokedAt: null }, data: { revokedAt: new Date() } });
++      console.log(`Revoked ${r.count} grant(s).`);
++    } else {
++      const existing = await prisma.clinicianSessionGrant.findFirst({ where: { clinicianId: clinician.id, sessionId, revokedAt: null } });
++      if (existing) console.log("Already granted.");
++      else { await prisma.clinicianSessionGrant.create({ data: { clinicianId: clinician.id, sessionId, grantedBy: by.trim() } }); console.log("Granted."); }
++    }
++    await prisma.auditLogEntry.create({ data: { clinicianId: clinician.id, clinicianUsername: clinician.username, action: revoke ? "revoke_session_access" : "grant_session_access", sessionId } });
++  } finally { await prisma.$disconnect(); }
++}
++main();
+diff --git a/services/backend-api/src/app.module.ts b/services/backend-api/src/app.module.ts
+index ddc4d18..5b76c36 100644
+--- a/services/backend-api/src/app.module.ts
++++ b/services/backend-api/src/app.module.ts
+@@ -18,6 +18,7 @@ import { PilotMetricsModule } from "./pilot-metrics/pilot-metrics.module";
+ import { ProtocolsModule } from "./protocols/protocols.module";
+ import { ReportsModule } from "./reports/reports.module";
+ import { ResearchExportModule } from "./research-export/research-export.module";
++import { SignedExportModule } from "./signed-export/signed-export.module";
+ import { SafetyModule } from "./safety/safety.module";
+ import { SpotterModule } from "./spotter/spotter.module";
+ import { SensorsModule } from "./sensors/sensors.module";
+@@ -51,6 +52,7 @@ import { WsModule } from "./ws/ws.module";
+     AuditLogModule,
+     AdverseEventsModule,
+     ResearchExportModule,
++    SignedExportModule,
+     PilotMetricsModule,
+   ],
+ })
+diff --git a/services/backend-api/src/reports/reports.service.ts b/services/backend-api/src/reports/reports.service.ts
+index 81849b2..b5f5c96 100644
+--- a/services/backend-api/src/reports/reports.service.ts
++++ b/services/backend-api/src/reports/reports.service.ts
+@@ -204,6 +204,18 @@ export class ReportsService implements OnApplicationBootstrap {
+     return { ...body, rows: body.rows.filter((r) => !r.excluded) };
+   }
+ 
++  /**
++   * The subject-AUTHORISED view of the latest released report (withdrawn rows omitted - exactly what latestReleased serves) plus
++   * how many rows were withheld. The stored body, which signOff.contentSha256 covers, is deliberately NOT returned.
++   */
++  async latestReleasedView(sessionId: string): Promise<{ view: AssessmentReportBody; rowsWithheld: number } | null> {
++    const row = await this.prisma.assessmentReport.findFirst({ where: { sessionId, status: "released" }, orderBy: { reportVersion: "desc" } });
++    if (!row) return null;
++    const body = row.body as unknown as AssessmentReportBody;
++    const rows = body.rows.filter((r) => !r.excluded);
++    return { view: { ...body, rows }, rowsWithheld: body.rows.length - rows.length };
++  }
++
+   async excludeRow(reportId: string, clinicianId: string, selector: RowSelector): Promise<AssessmentReportBody> {
+     const reason = typeof selector.reason === "string" ? selector.reason.trim() : "";
+     if (!reason) throw new BadRequestException("A reason is required to exclude a row.");
+diff --git a/services/backend-api/src/signed-export/session-access.service.spec.ts b/services/backend-api/src/signed-export/session-access.service.spec.ts
+new file mode 100644
+index 0000000..2db357a
+--- /dev/null
++++ b/services/backend-api/src/signed-export/session-access.service.spec.ts
+@@ -0,0 +1,75 @@
++import { ForbiddenException } from "@nestjs/common";
++import { SessionAccessService } from "./session-access.service";
++import { SignedExportController } from "./signed-export.controller";
++
++type Grant = { clinicianId: string; sessionId: string; revokedAt: Date | null };
++type Report = { sessionId: string; status: string; signedBy: string | null };
++
++function world(opts: { clinicians?: string[]; grants?: Grant[]; reports?: Report[] }) {
++  const clinicians = new Set(opts.clinicians ?? ["A", "B"]);
++  const grants = opts.grants ?? [], reports = opts.reports ?? [];
++  const prisma = {
++    clinician: { findUnique: jest.fn(async ({ where }: any) => (clinicians.has(where.id) ? { id: where.id } : null)) },
++    clinicianSessionGrant: { findFirst: jest.fn(async ({ where }: any) => grants.find((g) => g.clinicianId === where.clinicianId && g.sessionId === where.sessionId && (where.revokedAt === null ? g.revokedAt === null : true)) ?? null) },
++    assessmentReport: { findFirst: jest.fn(async ({ where }: any) => reports.find((r) => r.sessionId === where.sessionId && r.status === where.status && r.signedBy === where.signedBy) ?? null) },
++  };
++  return new SessionAccessService(prisma as never);
++}
++const g = (clinicianId: string, sessionId: string, revokedAt: Date | null = null): Grant => ({ clinicianId, sessionId, revokedAt });
++const ok = (p: Promise<void>) => expect(p).resolves.toBeUndefined();
++const denied = (p: Promise<void>) => expect(p).rejects.toBeInstanceOf(ForbiddenException);
++
++describe("SessionAccessService: the clinician role alone is never enough", () => {
++  it("clinician A cannot access clinician B's session", async () => {
++    const w = world({ grants: [g("B", "s-B")] });
++    await denied(w.assertClinicianMayAccess("A", "s-B"));
++    await ok(w.assertClinicianMayAccess("B", "s-B"));
++  });
++  it("an explicit grant authorises exactly that session and no other", async () => {
++    const w = world({ grants: [g("A", "s1")] });
++    await ok(w.assertClinicianMayAccess("A", "s1")); await denied(w.assertClinicianMayAccess("A", "s2"));
++  });
++  it("SIGNING IS NOT AUTHORISATION: a clinician who signed (or drafted) a session's report through the role-only route gets no export access without a grant", async () => {
++    // sign-off is role-only upstream, so any clinician can create exactly this state for any session; it must confer nothing
++    for (const status of ["released", "draft", "rejected"]) await denied(world({ reports: [{ sessionId: "s1", status, signedBy: "A" }] }).assertClinicianMayAccess("A", "s1"));
++  });
++  it("a revoked grant no longer authorises", async () => {
++    await denied(world({ grants: [g("A", "s1", new Date())] }).assertClinicianMayAccess("A", "s1"));
++  });
++  it("FAIL CLOSED: no grants (every pre-existing session after migration, signed or not) → denied for everyone", async () => {
++    const w = world({}); await denied(w.assertClinicianMayAccess("A", "s1")); await denied(w.assertClinicianMayAccess("B", "s1"));
++  });
++  it("FAIL CLOSED: missing / malformed identity is denied before any lookup", async () => {
++    const w = world({ grants: [g("A", "s1")] });
++    for (const id of [undefined, null, "", 0, {}, ["A"]]) await denied(w.assertClinicianMayAccess(id, "s1"));
++    await denied(w.assertClinicianMayAccess("A", ""));
++  });
++  it("FAIL CLOSED: a valid-looking token for a clinician account that no longer exists is denied even with a grant row", async () => {
++    await denied(world({ clinicians: ["B"], grants: [g("A", "s1")] }).assertClinicianMayAccess("A", "s1"));
++  });
++  it("a non-existent session is indistinguishable from an unauthorised one (same 403 message; no existence oracle)", async () => {
++    const w = world({ grants: [g("A", "real")] });
++    const msg = async (id: string) => (await w.assertClinicianMayAccess("A", id).catch((e) => e)).message;
++    expect(await msg("does-not-exist")).toBe(await msg("someone-elses"));
++  });
++  it("caller-supplied hints are ignored: only the verified id and the route's session id are consulted", async () => {
++    const w = world({ grants: [g("B", "s1")] });
++    // the controller passes req.user.sub and the route param only; an attacker-controlled body/header never reaches the service
++    expect(SignedExportController.prototype.export.length).toBeLessThanOrEqual(2);
++    await denied(w.assertClinicianMayAccess("A", "s1"));
++  });
++});
++
++describe("controller: authorisation runs BEFORE anything is built or read", () => {
++  it("a denied clinician never reaches the export builder; an authorised one does; missing req.user fails closed", async () => {
++    const build = jest.fn(async () => ({ payload: {}, signature: "s" }));
++    const access = world({ grants: [g("A", "s1")] });
++    const c = new SignedExportController({ build } as never, access);
++    await expect(c.export("s1", { user: { sub: "B" } })).rejects.toBeInstanceOf(ForbiddenException);
++    await expect(c.export("s1", {})).rejects.toBeInstanceOf(ForbiddenException);
++    await expect(c.export("s1", { user: {} })).rejects.toBeInstanceOf(ForbiddenException);
++    expect(build).not.toHaveBeenCalled();
++    await expect(c.export("s1", { user: { sub: "A" } })).resolves.toMatchObject({ signature: "s" });
++    expect(build).toHaveBeenCalledWith("s1");
++  });
++});
+diff --git a/services/backend-api/src/signed-export/session-access.service.ts b/services/backend-api/src/signed-export/session-access.service.ts
+new file mode 100644
+index 0000000..42aa9e1
+--- /dev/null
++++ b/services/backend-api/src/signed-export/session-access.service.ts
+@@ -0,0 +1,30 @@
++import { ForbiddenException, Injectable, Logger } from "@nestjs/common";
++import { PrismaService } from "../common/prisma.service";
++
++/**
++ * Server-verified authorisation of ONE clinician for ONE session. The clinician role alone is never enough, and neither is anything
++ * a role-only route lets a clinician do to themselves. A clinician is authorised iff, in the database:
++ *   (a) the clinician account exists (the token's subject is looked up; a deleted account's still-valid token fails), AND
++ *   (b) there is a non-revoked ClinicianSessionGrant for exactly (clinicianId, sessionId), created by an operator.
++ * There is deliberately NO other path. In particular "signed the report" is NOT accepted: POST /reports/:id/sign-off is guarded by role
++ * only, so any clinician could sign any draft and thereby award themselves export access to a session they were never given.
++ * Nothing is inferred from caller-supplied tenant ids, patient names or model output. No grant = denied (fail closed), and "no such
++ * session" is indistinguishable from "not yours" (same 403) so the route is not an existence oracle.
++ */
++@Injectable()
++export class SessionAccessService {
++  private readonly logger = new Logger(SessionAccessService.name);
++  constructor(private readonly prisma: PrismaService) {}
++
++  async assertClinicianMayAccess(clinicianId: unknown, sessionId: string): Promise<void> {
++    const deny = (why: string): never => {
++      this.logger.warn(`session access denied (${why})`);       // no ids, names or content in the log
++      throw new ForbiddenException("You are not authorised for this session.");
++    };
++    if (typeof clinicianId !== "string" || !clinicianId || typeof sessionId !== "string" || !sessionId) return deny("missing identity");
++    const clinician = await this.prisma.clinician.findUnique({ where: { id: clinicianId } });
++    if (!clinician) return deny("unknown clinician");
++    const grant = await this.prisma.clinicianSessionGrant.findFirst({ where: { clinicianId, sessionId, revokedAt: null } });
++    if (!grant) return deny("no explicit grant");
++  }
++}
+diff --git a/services/backend-api/src/signed-export/signed-export.controller.spec.ts b/services/backend-api/src/signed-export/signed-export.controller.spec.ts
+new file mode 100644
+index 0000000..f60d4fe
+--- /dev/null
++++ b/services/backend-api/src/signed-export/signed-export.controller.spec.ts
+@@ -0,0 +1,18 @@
++import "reflect-metadata";
++import { JwtAuthGuard } from "../auth/jwt-auth.guard";
++import { ROLES_KEY } from "../auth/roles.decorator";
++import { RolesGuard } from "../auth/roles.guard";
++import { SignedExportController } from "./signed-export.controller";
++
++describe("SignedExportController access control", () => {
++  const handler = SignedExportController.prototype.export;
++  it("requires a verified token AND the clinician role (subject and report-access tokens are not clinicians)", () => {
++    const guards = Reflect.getMetadata("__guards__", handler) as unknown[];
++    expect(guards).toEqual([JwtAuthGuard, RolesGuard]);                           // order matters: JwtAuthGuard populates request.user first
++    expect(Reflect.getMetadata(ROLES_KEY, handler)).toEqual(["clinician"]);
++  });
++  it("is audited and never cached", () => {
++    expect(Reflect.getMetadata("__interceptors__", handler)).toHaveLength(1);
++    expect(Reflect.getMetadata("__headers__", handler)).toEqual([{ name: "Cache-Control", value: "no-store" }]);
++  });
++});
+diff --git a/services/backend-api/src/signed-export/signed-export.controller.ts b/services/backend-api/src/signed-export/signed-export.controller.ts
+new file mode 100644
+index 0000000..9660a9a
+--- /dev/null
++++ b/services/backend-api/src/signed-export/signed-export.controller.ts
+@@ -0,0 +1,26 @@
++import { Controller, Get, Header, Param, Req, UseGuards, UseInterceptors } from "@nestjs/common";
++import { AuditAction } from "../audit/audit-action.decorator";
++import { AuditLogInterceptor } from "../audit/audit-log.interceptor";
++import { JwtAuthGuard } from "../auth/jwt-auth.guard";
++import { Roles } from "../auth/roles.decorator";
++import { RolesGuard } from "../auth/roles.guard";
++import { SessionAccessService } from "./session-access.service";
++import { SignedExportService } from "./signed-export.service";
++
++/** Clinician-only, audited. One bundle per session, for the latest RELEASED report only. */
++@Controller("sessions/:sessionId/signed-export")
++export class SignedExportController {
++  constructor(private readonly signedExport: SignedExportService, private readonly access: SessionAccessService) {}
++
++  @UseGuards(JwtAuthGuard, RolesGuard)
++  @Roles("clinician")
++  @UseInterceptors(AuditLogInterceptor)
++  @AuditAction("export_signed_bundle")
++  @Header("Cache-Control", "no-store")
++  @Get()
++  async export(@Param("sessionId") sessionId: string, @Req() req: { user?: { sub?: unknown } }) {
++    // Authorisation for THIS session comes before anything else is read: role alone is insufficient.
++    await this.access.assertClinicianMayAccess(req.user?.sub, sessionId);
++    return this.signedExport.build(sessionId);
++  }
++}
+diff --git a/services/backend-api/src/signed-export/signed-export.module.ts b/services/backend-api/src/signed-export/signed-export.module.ts
+new file mode 100644
+index 0000000..60e4847
+--- /dev/null
++++ b/services/backend-api/src/signed-export/signed-export.module.ts
+@@ -0,0 +1,17 @@
++import { Module } from "@nestjs/common";
++import { AuthModule } from "../auth/auth.module";
++import { ConsentModule } from "../consent/consent.module";
++import { EventsModule } from "../events/events.module";
++import { ReportsModule } from "../reports/reports.module";
++import { SessionsModule } from "../sessions/sessions.module";
++import { PrismaService } from "../common/prisma.service";
++import { SessionAccessService } from "./session-access.service";
++import { SignedExportController } from "./signed-export.controller";
++import { SignedExportService } from "./signed-export.service";
++
++@Module({
++  imports: [SessionsModule, EventsModule, ConsentModule, ReportsModule, AuthModule],
++  controllers: [SignedExportController],
++  providers: [SignedExportService, SessionAccessService, PrismaService],
++})
++export class SignedExportModule {}
+diff --git a/services/backend-api/src/signed-export/signed-export.service.spec.ts b/services/backend-api/src/signed-export/signed-export.service.spec.ts
+new file mode 100644
+index 0000000..6dc3a88
+--- /dev/null
++++ b/services/backend-api/src/signed-export/signed-export.service.spec.ts
+@@ -0,0 +1,97 @@
++import { createHash, createHmac } from "node:crypto";
++import { ForbiddenException, NotFoundException, ServiceUnavailableException } from "@nestjs/common";
++import { canonicalJson } from "../reports/canonical-json";
++import { SignedExportService } from "./signed-export.service";
++
++const SECRET = "x".repeat(40);
++const NOW = new Date("2026-11-17T10:00:00.000Z");
++const ENV = { EXPORT_SIGNING_SECRET: SECRET };
++const WITHHELD_REASON = "patient John Doe mentioned in the note";
++
++// The authorised view: the withheld row (and its free-text reason) is NOT in it. Only the count is.
++const view = {
++  reportId: "r1", sessionId: "s1", reportVersion: 1, status: "released",
++  rows: [{ metricKey: "a", excluded: null, estimate: { value: 1.2, uncertainty: 0.8 } }],
++  signOff: { clinicianId: "c1", signedAt: "2026-11-17T09:00:00.000Z", contentSha256: "d".repeat(64) },
++};
++
++function build(over: { released?: unknown; consent?: Record<string, unknown> } = {}) {
++  const sessions = { get: jest.fn().mockResolvedValue({ id: "s1", subjectPseudoId: "subj", protocolId: "p", protocolVersion: "v", deploymentContext: "clinic_supervised", consentRecordId: "c1", retentionPolicy: { x: 1 }, calibrationRef: null, state: "ClinicianReview", createdAt: new Date("2026-11-17T08:00:00Z"), safetySnapshot: { secret: "must-not-leak" } }) };
++  const consent = { get: jest.fn().mockResolvedValue({ id: "c1", subjectPseudoId: "subj", scopes: ["derived_events"], grantedAt: new Date("2026-11-17T07:00:00Z"), revokedAt: null, withdrawalRequestedAt: null, ...over.consent }) };
++  const events = { listForSessionByType: jest.fn().mockResolvedValue([{ payload: { symptomReportId: "sr1", sessionId: "s1" } }]) };
++  const reports = { latestReleasedView: jest.fn().mockResolvedValue("released" in over ? over.released : { view, rowsWithheld: 1 }) };
++  return new SignedExportService(sessions as never, consent as never, events as never, reports as never);
++}
++
++describe("SignedExportService", () => {
++  it("signs canonical JSON of the payload with HMAC-SHA256 (independently re-computable, also after a JSON round trip)", async () => {
++    const b = await build().build("s1", NOW, ENV);
++    expect(b.signature).toBe(createHmac("sha256", SECRET).update(canonicalJson(b.payload)).digest("hex"));
++    const overTheWire = JSON.parse(JSON.stringify(b));                         // what the consumer actually parses
++    expect(createHmac("sha256", SECRET).update(canonicalJson(overTheWire.payload)).digest("hex")).toBe(b.signature);
++  });
++
++  it("exports ONLY the subject-authorised view: withheld rows and their reasons are absent, the count is stated", async () => {
++    const b = await build().build("s1", NOW, ENV);
++    expect(JSON.stringify(b)).not.toContain(WITHHELD_REASON);
++    expect((b.payload.report as any).rows).toHaveLength(1);
++    expect(b.payload.view).toEqual({ kind: "subject_authorized", rowsWithheld: 1, viewSha256: createHash("sha256").update(canonicalJson(view)).digest("hex") });
++    expect((b.payload.report as any).signOff.contentSha256).toBe("d".repeat(64));      // carried as a signed claim, not recomputable from the view
++  });
++
++  it("states the signature scheme honestly and carries key id, bundle id and issue time", async () => {
++    const a = await build().build("s1", NOW, { ...ENV, EXPORT_SIGNING_KEY_ID: "2026-11" });
++    const b = await build().build("s1", NOW, ENV);
++    expect(a.payload).toMatchObject({ signatureScheme: "hmac-sha256/shared-secret", keyId: "2026-11", issuedAt: NOW.toISOString(), issuer: "posturepulse-backend-api" });
++    expect(b.payload.keyId).toBe("v1");
++    expect(a.payload.bundleId).not.toBe(b.payload.bundleId);                              // unique per export
++  });
++
++  it("maps consent/session to the schema shapes and leaks no internal fields", async () => {
++    const b = await build().build("s1", NOW, ENV);
++    expect(b.payload.consentRecord).toEqual({ consentRecordId: "c1", subjectPseudoId: "subj", scopes: ["derived_events"], grantedAt: "2026-11-17T07:00:00.000Z", revokedAt: null, withdrawalRequestedAt: null });
++    expect(Object.keys(b.payload.session).sort()).toEqual(["calibrationRef", "consentRecordId", "createdAt", "deploymentContext", "protocolId", "protocolVersion", "retentionPolicy", "sessionId", "state", "subjectPseudoId"]);
++    expect(JSON.stringify(b)).not.toContain("must-not-leak");
++  });
++
++  it("refuses when consent is revoked, withdrawal was requested, or the derived_events scope is missing — nothing is signed", async () => {
++    for (const consent of [{ revokedAt: new Date() }, { withdrawalRequestedAt: new Date() }, { scopes: ["raw_video"] }]) {
++      await expect(build({ consent }).build("s1", NOW, ENV)).rejects.toBeInstanceOf(ForbiddenException);
++    }
++  });
++
++  it("any change to the payload changes the signature", async () => {
++    const a = await build().build("s1", NOW, ENV);
++    const b = await build({ released: { view, rowsWithheld: 0 } }).build("s1", NOW, ENV);
++    expect(a.payload.view).not.toEqual(b.payload.view);
++    expect(createHmac("sha256", SECRET).update(canonicalJson({ ...a.payload, keyId: "other" })).digest("hex")).not.toBe(a.signature);
++  });
++
++  it("refuses (503) without a secret, with a short one or with a malformed key id; never signs with a guessable key", async () => {
++    for (const env of [{}, { EXPORT_SIGNING_SECRET: "" }, { EXPORT_SIGNING_SECRET: "short" }, { EXPORT_SIGNING_SECRET: "y".repeat(31) }, { ...ENV, EXPORT_SIGNING_KEY_ID: "../x" }]) {
++      await expect(build().build("s1", NOW, env)).rejects.toBeInstanceOf(ServiceUnavailableException);
++    }
++  });
++
++  it("404 pending_review when nothing is released (drafts are never exported)", async () => {
++    await expect(build({ released: null }).build("s1", NOW, ENV)).rejects.toBeInstanceOf(NotFoundException);
++  });
++
++  it("key rotation: the key id is part of the signed payload, a new secret/key id yields an independent valid signature, and any tampering is detectable", async () => {
++    const old = await build().build("s1", NOW, { EXPORT_SIGNING_SECRET: SECRET, EXPORT_SIGNING_KEY_ID: "old" });
++    const next = await build().build("s1", NOW, { EXPORT_SIGNING_SECRET: "z".repeat(40), EXPORT_SIGNING_KEY_ID: "new" });
++    const mac = (secret: string, payload: unknown) => createHmac("sha256", secret).update(canonicalJson(payload)).digest("hex");
++    expect(old.signature).toBe(mac(SECRET, old.payload)); expect(next.signature).toBe(mac("z".repeat(40), next.payload));
++    expect(old.payload.keyId).toBe("old"); expect(next.payload.keyId).toBe("new");
++    expect(mac("z".repeat(40), old.payload)).not.toBe(old.signature);                    // the old bundle does not verify under the new key
++    const tampered = JSON.parse(JSON.stringify(old)); tampered.payload.report.rows[0].estimate.value = 0;
++    expect(mac(SECRET, tampered.payload)).not.toBe(old.signature);                        // value tamper
++    const swapped = JSON.parse(JSON.stringify(old)); swapped.payload.keyId = "new";
++    expect(mac(SECRET, swapped.payload)).not.toBe(old.signature);                         // key-id swap
++  });
++
++  it("an unreleased report and revoked consent yield nothing to sign (no bundle object exists to leak)", async () => {
++    await expect(build({ released: null }).build("s1", NOW, ENV)).rejects.toBeInstanceOf(NotFoundException);
++    await expect(build({ consent: { revokedAt: new Date() } }).build("s1", NOW, ENV)).rejects.toBeInstanceOf(ForbiddenException);
++  });
++});
+diff --git a/services/backend-api/src/signed-export/signed-export.service.ts b/services/backend-api/src/signed-export/signed-export.service.ts
+new file mode 100644
+index 0000000..36cc264
+--- /dev/null
++++ b/services/backend-api/src/signed-export/signed-export.service.ts
+@@ -0,0 +1,91 @@
++import { ForbiddenException, Injectable, NotFoundException, ServiceUnavailableException } from "@nestjs/common";
++import { createHash, createHmac, randomUUID } from "node:crypto";
++import { ConsentService } from "../consent/consent.service";
++import { EventsService } from "../events/events.service";
++import { canonicalJson } from "../reports/canonical-json";
++import { ReportsService } from "../reports/reports.service";
++import { SessionsService } from "../sessions/sessions.service";
++
++export const MIN_SIGNING_SECRET_CHARS = 32;
++export const SIGNATURE_SCHEME = "hmac-sha256/shared-secret";
++const KEY_ID = /^[A-Za-z0-9_.-]{1,64}$/;
++
++export interface SignedExportPayload {
++  consentRecord: Record<string, unknown>;
++  session: Record<string, unknown>;
++  /** The subject-AUTHORISED view: rows a clinician withheld are NOT included. */
++  report: Record<string, unknown>;
++  symptomReports: Array<Record<string, unknown>>;
++  issuedAt: string;
++  issuer: string;
++  /** Which secret signed (non-secret; lets the verifier rotate keys). */
++  keyId: string;
++  /** Unique per export (audit trail / replay evidence). */
++  bundleId: string;
++  /** HMAC with a SHARED secret: anyone who can verify can also forge. This is service attribution, not independent clinician attribution. */
++  signatureScheme: typeof SIGNATURE_SCHEME;
++  /** viewSha256 = sha256(canonicalJson(report)) of the report AS EXPORTED, so a consumer can check the view independently of signOff.contentSha256 (which covers withheld rows and is only an upstream claim when rowsWithheld > 0). */
++  view: { kind: "subject_authorized"; rowsWithheld: number; viewSha256: string };
++}
++export interface SignedExportBundle {
++  payload: SignedExportPayload;
++  /** hex HMAC-SHA256 over canonicalJson(payload). */
++  signature: string;
++}
++
++const iso = (v: Date | string | null | undefined): string | null => (v ? new Date(v).toISOString() : null);
++
++/**
++ * A bundle a downstream system (ANUClaw) can verify OFFLINE with a shared secret. It carries ONLY what the report's own subject
++ * would be shown: the subject-authorised view of the latest RELEASED report, consent + session, symptom reports. Withheld rows and
++ * their free-text reasons are never exported - a valid signature is not permission to disclose them. Because the sign-off digest
++ * covers the withheld rows, the digest cannot be recomputed from this view; it is carried as a SIGNED CLAIM
++ * (`report.signOff.contentSha256`), and `view.rowsWithheld` says whether that gap exists.
++ *
++ * Refused (403) when consent is revoked or a withdrawal was requested, or the consent lacks the derived_events scope.
++ */
++@Injectable()
++export class SignedExportService {
++  constructor(
++    private readonly sessions: SessionsService,
++    private readonly consent: ConsentService,
++    private readonly events: EventsService,
++    private readonly reports: ReportsService
++  ) {}
++
++  async build(sessionId: string, now: Date = new Date(), env: NodeJS.ProcessEnv = process.env): Promise<SignedExportBundle> {
++    const secret = env.EXPORT_SIGNING_SECRET;
++    if (!secret || secret.length < MIN_SIGNING_SECRET_CHARS) {
++      throw new ServiceUnavailableException(`Signed export is not configured (EXPORT_SIGNING_SECRET must be at least ${MIN_SIGNING_SECRET_CHARS} characters).`);
++    }
++    const keyId = env.EXPORT_SIGNING_KEY_ID ?? "v1";
++    if (!KEY_ID.test(keyId)) throw new ServiceUnavailableException("EXPORT_SIGNING_KEY_ID is not a valid identifier.");
++
++    const session = await this.sessions.get(sessionId);
++    const released = await this.reports.latestReleasedView(sessionId);
++    if (!released) throw new NotFoundException({ status: "pending_review" });
++    const consent = await this.consent.get(session.consentRecordId);
++    if (consent.revokedAt || consent.withdrawalRequestedAt) throw new ForbiddenException("Consent was revoked or withdrawal was requested; nothing is exported.");
++    if (!(consent.scopes as unknown as string[]).includes("derived_events")) throw new ForbiddenException("The consent record lacks the 'derived_events' scope.");
++    const symptoms = await this.events.listForSessionByType(sessionId, "symptom-report");
++
++    const payload: SignedExportPayload = {
++      consentRecord: {
++        consentRecordId: consent.id, subjectPseudoId: consent.subjectPseudoId, scopes: consent.scopes,
++        grantedAt: iso(consent.grantedAt), revokedAt: iso(consent.revokedAt), withdrawalRequestedAt: iso(consent.withdrawalRequestedAt),
++      },
++      session: {
++        sessionId: session.id, subjectPseudoId: session.subjectPseudoId, protocolId: session.protocolId, protocolVersion: session.protocolVersion,
++        deploymentContext: session.deploymentContext, consentRecordId: session.consentRecordId, retentionPolicy: session.retentionPolicy,
++        calibrationRef: session.calibrationRef, state: session.state, createdAt: iso(session.createdAt),
++      },
++      report: released.view as unknown as Record<string, unknown>,
++      symptomReports: symptoms.map((e) => e.payload as Record<string, unknown>),
++      issuedAt: now.toISOString(),
++      issuer: "posturepulse-backend-api",
++      keyId, bundleId: randomUUID(), signatureScheme: SIGNATURE_SCHEME,
++      view: { kind: "subject_authorized", rowsWithheld: released.rowsWithheld, viewSha256: createHash("sha256").update(canonicalJson(released.view)).digest("hex") },
++    };
++    return { payload, signature: createHmac("sha256", secret).update(canonicalJson(payload)).digest("hex") };
++  }
++}
