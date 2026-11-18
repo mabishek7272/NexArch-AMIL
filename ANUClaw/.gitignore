@@ -19,4 +19,14 @@ Thumbs.db
 .venv-ocr/
 .venv-ocr3/
 .venv-chem/
-ANUClaw/dashboard/projecr_recap.txt
+dashboard/projecr_recap.txt
+.env.dev-nexarch
+
+# Playwright e2e suite (dashboard/e2e) — generated test output, never evidence fixtures
+dashboard/e2e/.auth-state.json
+dashboard/e2e/.fixture.json
+dashboard/e2e/.test-results/
+dashboard/e2e/.playwright-report/
+dashboard/test-results/
+dashboard/playwright-report/
+dashboard/playwright/.cache/
