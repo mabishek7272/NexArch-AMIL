@@ -1,0 +1,377 @@
+# Anukla (ANUClaw) — Multi-Tenant Medical-AI Interpretation & Reporting Engine: Architecture
+
+**Version:** 0.1 (P0) · **Status: proposed architecture, awaiting owner review.** This document records no clinical validation, no regulatory clearance, no approved reference range and no deployment approval. Nothing here changes the existing release gates in [`PRODUCTION-READINESS-PLAN.md`](PRODUCTION-READINESS-PLAN.md) and [`CLINICAL-CONTENT-RELEASE.md`](CLINICAL-CONTENT-RELEASE.md). Build and test with **synthetic fixtures only** until those gates and the data-processing agreements are cleared.
+
+"Anukla", "NexArc" and "ANUClaw" are the same product; this document uses ANUClaw.
+
+Companion files: [`contracts/interpretation-request.v1.schema.json`](contracts/interpretation-request.v1.schema.json), [`contracts/normalized-findings.v1.schema.json`](contracts/normalized-findings.v1.schema.json), and synthetic examples under [`contracts/examples/`](contracts/examples/) (both examples validate against the request schema; the schemas compile in strict mode).
+
+---
+
+## 1. Concept analysis
+
+**What it is.** Third-party health apps (tenants) run their own detection AI. They POST that structured output to ANUClaw. ANUClaw (a) validates and normalises it, (b) applies deterministic, LLM-independent governance, (c) uses Gemini only to *explain* the validated findings, and (d) produces two reports from the same finding set: a **Clinical Report** and a **Layman Report**.
+
+**What it is not.** It does not re-detect anything, does not diagnose, does not replace a clinician, and does not let any model invent a measurement, a range or a diagnosis.
+
+**Deliberate refinements to the brief** (each is a safety decision, flagged for your approval):
+
+| Brief wording | Refinement | Why |
+|---|---|---|
+| Layman report states "which parameters are normal or abnormal, where validated reference ranges exist" | The layman layer says *inside / outside the range this app uses* for **tenant-supplied** ranges, and uses the words *normal / abnormal* only for ranges **released through the ANUClaw register** (none exist today) | The repo ships zero released clinical content; "no threshold may be taken from model output" (`CLINICAL-CONTENT-RELEASE.md`). A tenant's own range is relayed and labelled as theirs, never endorsed. |
+| Clinical report includes "clinical significance" and "abnormal findings" | Phrased as *position relative to the stated reference* plus a **clinician-approved note** for any named clinical category (e.g. a named blood-pressure stage). The LLM may *draft* that note for a clinician to edit and approve; nothing reaches a released report without that sign-off. | The prohibited-claims rule in [`CLINICAL-CONTENT-RELEASE.md`](CLINICAL-CONTENT-RELEASE.md) and the clinician-only sign-off already in `src/documents/workflow.ts`. (The PosturePulse repo's own `docs/claims-and-scope.md` is stricter still and applies to PosturePulse's own copy.) |
+| Clinical review and sign-off are done by ANUClaw | ANUClaw runs an **automatic AI clinical review** on every report (no human in the loop). The result is labelled `ai_reviewed` on every page, in the API and in webhooks. The words *signed*, *clinician-reviewed* and *approved by a clinician* are reserved for `clinician_signed`, which only a named licensed clinician can set in the dashboard; the public API and the AI can never set it (`POST /v1/reports/:id/review` already returns 403). | An AI cannot hold a licence or accept clinical responsibility, and the existing rule (`src/documents/workflow.ts`, `CLINICAL-CONTENT-RELEASE.md`) is clinician-only sign-off. Mislabelling an AI review as a signature would be a false claim. |
+| High-risk findings (your brief, section 6, and your instruction that the patient be told to see a clinician or expert) | Any high-risk finding produces a **mandatory referral advisory** in both reports telling the patient to see a clinician or other expert. The report is still delivered immediately as `ai_reviewed`. Jobs with a `blocking` **data-quality** flag (contradiction, implausible value) are instead held in `awaiting_clinician`, because the narrative itself could be wrong. High-risk jobs also add a non-blocking follow-up item to the clinician queue. | Directing the patient to professional review is the protective action and needs no threshold from a model. The advisory wording is static, clinician-authored text, never LLM output. The beAIve sample (high blood-pressure, HbA1c and glucose risk markers) is exactly this case. |
+
+## 2. Gaps and risks (from the code audit)
+
+| # | Finding | Where | Consequence |
+|---|---|---|---|
+| G1 | Registration is public self-service; no admin tenant create/suspend; one key per tenant; no revoke / regenerate / expiry for tenant keys | `src/api/routes/tenants.ts`, `tenant-store.ts` | Cannot onboard or cut off a medical tenant safely. |
+| G2 | **Security defect:** any tenant can change its own plan (`PUT /account/plan`); `PLAN_LIMITS` stored as zeros | `routes/tenants.ts`, `tenant-store.ts:35` | Tenants can raise their own limits. Fix in P1. |
+| G3 | Intake exists only for documents/PDFs; no generic JSON ingest. *(Correction to the first audit:)* a PosturePulse-specific importer **does** exist at `src/integrations/posturepulse/` — it validates against PosturePulse's own JSON schemas (assessment-report, consent-record, session, symptom-report, metric-result) and tags data `upstream_verified`, `signed_bundle_verified` or `unverified_payload`. No beAIve code exists. | `src/api/routes/baas-v1.ts`, `src/integrations/posturepulse/*` | New generic ingest path required; the PosturePulse adapter must build on the existing importer and **preserve its verification tier** rather than re-implement it. |
+| G4 | Skills are files mounted into every container; any tenant can run any skill | `src/container-runner.ts:293-312`, `src/api/routes/skills.ts` | No per-tenant skill control. |
+| G5 | Fully synchronous; webhook URL stored but never called; job runtime is in-memory | `routes/tenants.ts:102`, `src/engines/jobs/*` | Need persistent jobs, 202 + polling, signed webhook sender. |
+| G6 | Model config is global; new Gemini ids rejected by `checkModelIdentity` until registered | `src/ai/openrouter.ts` | Per-tenant model allow-list + identity registration. |
+| G7 | `audit_events` has no `tenant_id`; API activity and admin changes are not tamper-evident per tenant | `db/connection.ts:160` | Extend, reuse `src/cds/audit/*`. |
+| G8 | No vitals/posture reference ranges are released | `docs/clinical-release-register.json` (`releases: []`) | Ranges can only be tenant-supplied until released. |
+| G9 | No structured per-scan findings or comparison | `patient_analyses.result` is free text | New findings tables for longitudinal use. |
+| G10 | beAIve payloads carry name/email/phone | sample report | Identity must be split off before any LLM stage. |
+| G11 | Several shared files are being edited by another session (AlphaFold) | `baas-v1.ts`, `openapi-v1.ts`, `db/connection.ts`, `shared-limits.ts` | New code in new modules; shared-file edits wait for confirmation. |
+| G12 | A model-key probe showed `google/gemini-4-hydrogen` and `-argon` usable and `-neon` / `-carbon` refused by OpenRouter for the current key | probe, Nov 2026 | Model selection must be an admin-validated allow-list, tested per key, never free text. |
+
+## 3. System architecture
+
+```mermaid
+flowchart TD
+    T[Tenant app: beAIve / PosturePulse / ...] -->|POST /v1/interpretations<br/>X-API-Key + Idempotency-Key| E
+
+    subgraph E[Edge]
+      A1[Auth + key scope] --> A2[Tenant status / rate limit / quota]
+      A2 --> A3[Skill gate: skill assigned?]
+      A3 --> A4[Schema validate: interpretation-request/v1]
+    end
+
+    E -->|202 + jobId| Q[(interpretation_jobs)]
+    Q --> W[Worker]
+
+    subgraph P[Processing pipeline]
+      W --> I1[Intake: split identity to vault<br/>freeze original payload + hash]
+      I1 --> I2[Tenant adapter -> Normalized Findings v1]
+      I2 --> G[Governance - deterministic, no LLM<br/>missing / contradiction / range position / quality / flags]
+      G --> L[Gemini stage - de-identified findings only<br/>structured JSON narratives]
+      L --> V[Fidelity + consistency guards<br/>numbers exist - no invented range - no diagnosis - layers agree]
+      V -->|pass| R[Report assembler: 2 layers + tenant template]
+      V -->|fail| F[Deterministic fallback text + review flag]
+      F --> R
+    end
+
+    R --> RV{Flags or high risk?}
+    RV -->|yes| C[Clinician review queue<br/>existing sign-off path]
+    RV -->|no| D[Draft report ready]
+    C --> D
+    D --> OUT[GET result / PDF export / signed webhook]
+    OUT --> T
+```
+
+**Invariants (enforced by code, not by the prompt):**
+
+1. **Original preservation.** The tenant's payload is stored immutably with its SHA-256 before anything else runs.
+2. **No identity downstream of intake.** Direct identifiers live only in the encrypted identity vault; findings, prompts and reports reference `subjectRef`.
+3. **LLM-independent governance.** Every flag, range position and review decision is computed by deterministic code *before* the LLM runs; the LLM output can add prose but cannot change a finding, a position or a flag (same principle as `src/cds/clinical/arbitrate.ts`: no recommendation originates from the LLM).
+4. **One finding set, two layers.** Both reports are rendered from the same `normalized-findings/v1` document and both stamp its `findingsSha256`.
+5. **Three-way labelling** in every report: *source AI finding* / *ANUClaw interpretation (draft)* / *confirmed clinical diagnosis (only a signed clinician note)*.
+6. **Fail closed.** Any validation or guard failure yields no LLM text (deterministic template instead) plus a review flag; it never yields "best effort" prose.
+
+## 4. Component architecture
+
+| Component | Responsibility | Module (new unless stated) | Reuses |
+|---|---|---|---|
+| Edge / auth | Key check, tenant status, scope, rate, quota, skill gate, validation | `src/interpretation/edge/*` | `requireAuth`, `perTenantRateLimit`, `quotaCheck`, `usageMeter`, `idempotent()` (`baas-v1.ts`), `shared-limits.ts` |
+| Tenant admin | Tenant CRUD, suspend, keys, config | `src/interpretation/admin/*` + dashboard routes | `requireDashAuth`, `requireRole` |
+| Skill registry | Skill manifests, tenant assignment, gate | `src/interpretation/skills/*` | manifest idea from `anuclaw-medical-report-analyzer` skill |
+| Intake | Identity split, immutable payload, hash | `src/interpretation/intake/*` | AES-256-GCM helper pattern (`src/research-studio/ai-settings-crypto.ts`), content hashing (`src/cds/hashing`) |
+| Adapters | Source format -> Normalized Findings | `src/interpretation/adapters/{beaive,posturepulse}.ts` | schemas in `src/interpretation/contracts` |
+| Governance | Deterministic checks and flags | `src/interpretation/governance/*` | `src/cds/safety/missing-data.ts`, `src/cds/explanation/consistency-guard.ts` |
+| LLM stage | Prompts, schema, call, retry | `src/interpretation/llm/*` | `modelCall()` (`src/ai/openrouter.ts`), `src/ai/spend.ts`, pattern of `src/ai/engine-review-service.ts` |
+| Report assembler | Two layers, templates, PDF | `src/interpretation/reports/*` | `StructuredReport` ideas (`src/documents/report.ts`), Playwright (already a dependency) |
+| Review | Flag queue, clinician sign-off | `src/interpretation/review/*` | `reviewReport` gate (`src/documents/workflow.ts`) |
+| Delivery | Job status, signed webhooks | `src/interpretation/delivery/*` | `idempotency_keys` |
+| Audit | Tenant-scoped hash-chained events | `src/interpretation/audit/*` | `src/cds/audit/{hash-chain,per-tenant}.ts` |
+| Longitudinal | Timeline and compare | `src/interpretation/longitudinal/*` | the minimal-detectable-change idea from the **PosturePulse repo's** `services/ml-service/app/analysis/mdc.py` (a reference to port from, not an ANUClaw dependency) |
+
+## 5. Multi-tenant data model
+
+All new tables carry `tenant_id` (NOT NULL unless stated), are created idempotently, and are accessed only through functions that take the authenticated tenant (cross-tenant lookups return 404, matching `owned()` in `baas-v1.ts`).
+
+```mermaid
+erDiagram
+    tenants ||--o{ tenant_api_keys : has
+    tenants ||--|| tenant_config : configures
+    tenants ||--o{ tenant_skills : assigned
+    skills  ||--o{ tenant_skills : "assigned to"
+    tenants ||--o{ interpretation_jobs : submits
+    interpretation_jobs ||--|| source_payloads : preserves
+    interpretation_jobs ||--o| identity_vault : "identity (encrypted)"
+    interpretation_jobs ||--o{ normalized_findings : produces
+    interpretation_jobs ||--o{ governance_flags : raises
+    interpretation_jobs ||--o{ interpretation_reports : renders
+    interpretation_jobs ||--o{ webhook_deliveries : notifies
+    interpretation_jobs ||--o| patient_scans : "timeline entry"
+    report_templates ||--o{ interpretation_reports : "layout for"
+```
+
+| Table | Key columns | Notes |
+|---|---|---|
+| `tenants` (existing) | + `status` values `pending/active/suspended/revoked` | admin-created only for clinical tenants |
+| `tenant_api_keys` | id, tenant_id, key_hash, key_prefix, label, scopes, expires_at, revoked_at, last_used_at, created_by | replaces the single `tenants.api_key_hash`; many keys, rotate/revoke |
+| `skills` | id, version, manifest_json, risk_tier, requires_release, enabled | registry |
+| `tenant_skills` | tenant_id, skill_id, enabled, config_json | assignment |
+| `tenant_config` | tenant_id, gemini_model, llm_daily_budget_usd, report_template_id, de_id_required, adapter_id, input_schema_id, webhook_secret_ref, restrictions_json | per-tenant behaviour |
+| `interpretation_jobs` | id, tenant_id, skill_id, status, idempotency_key, tenant_request_id, subject_ref, attempts, error_code, created/started/finished_at | status: `queued processing completed completed_with_flags failed cancelled` |
+| `source_payloads` | job_id, payload_json (immutable), payload_sha256, schema_version | trigger blocks update/delete (pattern used by research-studio tables) |
+| `identity_vault` | job_id, tenant_id, ciphertext, iv, auth_tag | AES-256-GCM, key from env, fail closed when unset |
+| `normalized_findings` | job_id, finding_key, source_key, value_json, unit, value_status, derivation_json, uncertainty_json, confidence, reference_json, position, source_flag, under_research | the single source of truth for both layers |
+| `governance_flags` | job_id, type, severity, finding_keys, detail, resolved_by, resolved_at | |
+| `interpretation_reports` | id, job_id, tenant_id, layer (`clinical`/`layman`), template_id, template_version, llm_model, prompt_version, findings_sha256, status (`draft released rejected`), **review_state** (`ai_reviewed awaiting_clinician clinician_signed clinician_rejected`), ai_review_json (checks run, guard results, model + prompt version), referral_json (level, reasons, advisory text id + version), content_json, content_sha256, supersedes_id, reviewed_by (only for `clinician_signed` / `clinician_rejected`) | versioned, superseding, never overwritten |
+| `report_templates` | id, tenant_id (null = global), layer, version, definition_json | tenant can change name/brand only; governance block is fixed |
+| `webhook_deliveries` | id, tenant_id, job_id, event, attempt, status, response_code, next_attempt_at, signed_at | tenant-visible delivery log |
+| `patient_scans` | tenant_id, subject_ref, job_id, captured_at, skill_id, analysis_type | longitudinal index |
+| `audit_events` (existing) | + `tenant_id` | plus a per-tenant hash chain for tenant / key / skill / config changes and processing events |
+
+## 6. Tenant authentication and authorisation
+
+- **Credentials.** One tenant, many keys: `amgi_live_` + 48 hex (existing format), SHA-256 hashed with a prefix, shown once. Admin can create, rotate (grace window for overlap), revoke and set expiry; `last_used_at` is updated. A revoked/expired key returns 401 `key_revoked` / `key_expired`.
+- **Token exchange.** Keep `POST /v1/token` (1-hour JWT) for production use.
+- **Authorisation layers (all must pass):** (1) tenant `status = active`; (2) key not revoked/expired and has scope `interpret`; (3) rate and quota; (4) **skill gate**: `tenant_skills` row present and enabled, else 403 `skill_not_assigned`; (5) `analysisType` is accepted by the skill manifest; (6) tenant clinical scope / BAA / allowed domains for skills whose `risk_tier` requires it (existing `tenants.scopes`, `baa_status`, `allowed_clinical_domains`).
+- **Admin plane.** Dashboard auth with roles `admin` and `compliance`; every admin change is audited. **The tenant-side `PUT /account/plan` is removed** (G2); plan changes are admin-only.
+- **Public registration.** Closed for clinical use; tenants are created by an administrator (decision recorded).
+
+## 7. Modular skill registry
+
+A skill is a DB row plus a code-registered adapter and prompt set, referenced by manifest:
+
+```json
+{
+  "id": "physiological-signal-interpretation",
+  "version": "1.0.0",
+  "acceptsAnalysisTypes": ["face_scan_vitals"],
+  "adapterId": "beaive-v1",
+  "inputSchema": "interpretation-request/v1",
+  "prompts": { "clinical": "clinical-vitals/v1", "layman": "layman-vitals/v1" },
+  "riskTier": "ruo",
+  "requiresRelease": false
+}
+```
+
+Initial skills: Physiological Signal Interpretation (beAIve), Posture Analysis Interpretation (PosturePulse), Clinical Report Generation, Patient-Friendly Explanation. ECG, Medical Imaging, Biosensor and Medical Report Interpretation are **registry slots only** until a real adapter exists (no pretending). Assigning or removing a skill is an admin action with no deploy. The existing `container/skills/*` agent skills stay as agent tooling and are not the interpretation registry.
+
+## 8. Normalisation layer
+
+- Input: `interpretation-request/v1` (tenant format already wrapped in the common envelope) -> adapter -> `normalized-findings/v1`.
+- The adapter is the **only** tenant-specific code. It maps keys to canonical keys, parses ranges, and applies deterministic *derivations* (never inferences).
+
+**beAIve adapter (examples from the real sample layout)**
+
+| Source row | Canonical findings | Status |
+|---|---|---|
+| `Blood Pressure 154/94 mmHg`, desired `<129/90` | `bp_systolic_mmhg = 154`, `bp_diastolic_mmhg = 94` (reference upper 129 / 90) | `derived` (rule `split_bp`), reference `tenant_supplied` |
+| `Heart Rate 107 bpm`, `60-100` | `heart_rate_bpm = 107` | `stated`, position `above` (computed) |
+| `Hemoglobin A1c 6.89%`, `<5.7`, `**` | `hba1c_percent = 6.89`, `underResearch = true` | `stated`, position `above`, flag `under_research` |
+| `Hemoglobin 14.4 g/dL`, `M:14-18, F:12-16` | `hemoglobin_g_dl = 14.4` | sex-dependent range: position `indeterminate` unless `sexAtBirth` supplied (never guessed) |
+| `High Fasting Glucose Risk: High` | categorical finding, `sourceFlag = high` | flag `under_research`; context `fastedBeforeScan = null` -> flag `missing_data` (source says disregard if not fasted) |
+| value `null` | finding with `valueStatus = missing` | flag `missing_data`; never filled in |
+
+**PosturePulse adapter.** Built on the existing `src/integrations/posturepulse/` importer (contract validation against PosturePulse's real schemas, upstream / signed-bundle / unverified tiers): the adapter converts what that importer already accepted, and carries its verification tier into the findings' provenance so a report can say how trustworthy the source data is. `AssessmentReportBody.rows[]` map directly: `estimate + uncertainty` -> `value + uncertainty`, `reference` -> tenant-supplied reference, `tier` -> `underResearch` / `not_measurable` -> `missing`, `excluded` rows keep their reason and are honoured by the layman layer. `position` is *recomputed* by ANUClaw governance, not trusted.
+
+## 9. Clinical governance architecture
+
+Order of deterministic stages (all before the LLM):
+
+1. **Schema + semantic validation** — types, units, plausible physiological bounds (flag `implausible_value`; value is kept, never altered).
+2. **Missing / inconsistent data** — reuse the `unknown` vs `confirmed_none` distinction from `src/cds/safety/missing-data.ts`; required context absent -> flag.
+3. **Contradiction detection** — cross-finding rules (e.g. systolic below diastolic, source flag `normal` while value is outside its own stated range) -> flag `contradiction`.
+4. **Reference handling** — compute `position` only against a present reference; origin `tenant_supplied` or `anuclaw_released`; uncertainty interval straddling a bound -> `indeterminate`. No reference -> `no_reference`.
+5. **Confidence and quality** — source confidence is evidence only (`src/engines/types.ts` comment: "never decides"); low confidence -> flag.
+6. **Review flags** — `blocking` or `attention` flags route the job to the clinician queue.
+7. **Short-interval discrepancy (longitudinal)** — flagged when two scans disagree beyond what is biologically plausible within the interval (lesson from the earlier two-scan test).
+
+**Flag catalog:** `missing_data`, `contradiction`, `low_confidence`, `out_of_source_range`, `under_research`, `stale_capture`, `unit_mismatch`, `implausible_value`, `review_required`.
+
+**Automatic AI clinical review (no human).** After the guards pass, a separate review step re-checks the assembled report against the findings and records the outcome in `ai_review_json`: every statement traces to a finding, every position matches the deterministic one, no range or diagnosis wording was introduced, both layers agree, all flags are surfaced, and any required missing context is stated. It is deterministic code first, with an optional second Gemini pass in the style of `src/ai/engine-review-service.ts` (the model can only add or sharpen a limitation; it can never change a finding, a position or a flag). Passing sets `review_state = ai_reviewed`. This is the review ANUClaw performs by itself; it is never described as a clinician's review.
+
+**Human review (clinician).** Jobs with a `blocking` data-quality flag are set to `awaiting_clinician` and enter the clinician queue (dashboard Clinical module). High-risk clinical indicators do not block delivery; they trigger the referral advisory below and add a non-blocking follow-up item to the same queue. Sign-off uses the existing clinician-only path (password re-check, content hash, supersede-not-overwrite); the API and the AI can never sign. A clinician may also sign any `ai_reviewed` report on request. Rejection records a reason; the next report version supersedes. If no clinician is available the report stays visibly `awaiting_clinician` with the banner; it never silently becomes final.
+
+**Referral advisory (high-risk findings).** When any trigger below fires, both reports carry a prominent, non-removable advisory telling the patient to see a clinician or other qualified expert, and the delivery payload includes `referral: { level, reasons[], textId, textVersion }`.
+- **Deterministic triggers** (no model involved): (a) the source flags a *risk-category* indicator `high` or `review`; (b) a finding marked high-risk in the skill manifest sits outside its tenant-supplied reference; (c) a `blocking` flag; (d) two or more `attention` flags on high-risk indicators; (e) `under_research` markers that are themselves flagged high (the advisory says these are experimental estimates to be confirmed with validated tests).
+- **Wording is static and clinician-authored**, versioned and released through `docs/clinical-release-register.json`, with a layman variant and a clinical variant. The LLM never writes, shortens or softens it, and the guards reject any narrative that contradicts or omits it.
+- **Levels:** `see_clinician_soon` for any trigger. A symptom-based safety-net paragraph ("seek urgent care if you have chest pain, difficulty breathing, fainting, confusion…") accompanies it. A numeric *urgent-now* level is **not** offered, because it would need a released threshold; it can be added only after such ranges go through the register.
+
+**What governance will never do:** state a diagnosis, state a range that is not tenant-supplied or released, or change a source value.
+
+## 10. Gemini integration architecture
+
+- **Transport:** only `modelCall()` — hooks, restricted-content check, egress de-identification, spend reservation, retry, model-identity check. No raw HTTP.
+- **Roles:** new `report_clinical` and `report_layman` roles in `modelRoles()`; per-tenant `gemini_model` is passed as `args.model` **after** an admin allow-list check.
+- **Model identity:** each allowed id (`google/gemini-4-hydrogen`, `google/gemini-4-argon`, …) is added to `MODEL_IDENTITIES` with its dated-version rule; an id the provider refuses for the key stays off the allow-list (G12). The allow-list is verified per key with a cheap capability probe at admin-save time.
+- **Input to the model:** de-identified normalized findings, flags, references and units — **no** identity, **no** raw payload, **no** `sourceNarrative` (excluded by default; allowed only after the egress de-identification pass).
+- **Output contract:** strict JSON, e.g. `{"sections":[{"id","text","findingRefs":["hba1c_percent"],"statusLabel":"source_finding|interpretation"}], "nextSteps":[...], "limitations":"..."}` with `response_format: json_object`, low temperature, versioned prompts.
+- **Guards (generalising `fidelityProblems` in `src/ai/engine-review-service.ts`):**
+  - every number in text exists in the findings (with unit tolerance rules);
+  - every statement cites at least one valid `findingRef`;
+  - no reference range unless the finding carries one (and it is quoted from it);
+  - no diagnosis assertion — **negation-aware and context-aware** (lessons from the prototype: *"does not support a diagnosis"* and *"should be confirmed with a clinician"* are required safe wording, so words like *diagnosis* / *confirmed* are only flagged without a negation or clinician/lab/device context);
+  - clinical and layman layers agree on every position and flag (consistency check modelled on `src/cds/explanation/consistency-guard.ts`).
+- **Failure policy:** one bounded retry; then deterministic template text + a `review_required` flag. A budget of `0`, an invalid budget, an unavailable model or a model-identity mismatch all fail closed (no narrative), never to a different model silently.
+- **Cost:** per-tenant `llm_daily_budget_usd` via the existing spend ledger scope `kind: 'tenant'`; real cost recorded from the provider's `usage` field.
+- **Provenance recorded on every report:** model id returned by the provider, prompt version, findings hash, guard results.
+
+## 11. Report generation pipeline
+
+- **Single assembler, two layers.** Inputs: `normalized-findings/v1` + guard-passed narratives (or deterministic fallback) + tenant template.
+- **Clinical layer.** Clinical summary; source findings with units, uncertainty and source reference (labelled *supplied by <application>*); position vs reference; flags and data-quality notes; limitations; recommendation for professional review; full traceability block (tenant, source model/version, adapter, ruleset, LLM model + prompt version, findings hash, original payload hash). Any named clinical category appears only inside a *clinician-approved note* region.
+- **Layman layer.** Plain-language explanation, what each flagged value is compared against (the app's own range), why it may matter in general terms, when to see a professional, questions to ask. Written to a reading-level target; no jargon without a gloss; **no** reassurance wording ("healthy", "nothing to worry about", "all clear").
+- **Branding rule (owner requirement).** A tenant template may change the **product name / logo / colours**; the NexArch governance block and the "not a diagnosis" status banner are fixed and cannot be removed.
+- **Status banner on every page** showing the `review_state`: *AI-reviewed, not reviewed by a clinician*, *Awaiting clinician review*, or *Signed by <named clinician>, <date>*. The banner and the NexArch governance block are part of the fixed layout.
+- **Rendering.** HTML templates -> PDF with Playwright (already a dependency under `src/research-studio/browser`). The prototype templates in `posturepulse-report-template-build/` and `beaive-vitals-report/` are the starting visual design; they are ported, not extended in place.
+- **Versioning.** A re-run or a clinician edit creates a new report version that supersedes the old one; both layers share the same `findingsSha256` so a mismatch is detectable.
+
+## 12. API specification (v1, extends the existing `/v1` contract)
+
+All endpoints: `X-API-Key` or Bearer JWT; `X-Request-Id` returned on every response; errors are `{ "error": { "code", "message", "requestId" } }`. The OpenAPI document is generated through the existing builder (`src/api/openapi-v1.ts`) and covered by the existing contract test.
+
+| Method & path | Purpose | Notes |
+|---|---|---|
+| `POST /v1/interpretations` | Submit an analysis | body `interpretation-request/v1`; `Idempotency-Key` supported; returns **202** `{ jobId, status:"queued", statusUrl }`; sync-fast path optional later |
+| `GET /v1/interpretations/:id` | Status + summary | `queued/processing/completed/completed_with_flags/failed/cancelled`, flag counts |
+| `GET /v1/interpretations` | Processing history | paginated, tenant-scoped |
+| `GET /v1/interpretations/:id/findings` | Normalized findings | no identity |
+| `GET /v1/interpretations/:id/reports/{clinical\|layman}` | Report JSON; `.pdf`, `.html` exports | status `draft` until signed |
+| `GET /v1/patients/:ref/timeline` | Scans for a subject | `ref` = tenant's `externalRef` |
+| `GET /v1/patients/:ref/compare?from=&to=` | Old vs new | neutral wording; significance only when source gives uncertainty |
+| `GET /v1/skills` | Skills assigned to caller | |
+| `PUT /v1/account/webhook` | Set https URL | SSRF-guarded; returns signing secret once |
+| `GET /v1/webhook-deliveries` | Delivery log | |
+| `GET /v1/usage` | Requests, LLM spend | from usage log + spend ledger |
+| `POST /v1/reports/:id/review` | **Always 403** | clinician sign-off is dashboard-only (existing behaviour) |
+
+**Admin (dashboard auth, `admin`/`compliance`):** tenants CRUD + suspend/reactivate; keys create/rotate/revoke/expire; skills CRUD; `tenant_skills` assign; tenant config (model allow-list, budget, template, restrictions); usage; audit; flag queue; template CRUD.
+
+**Error codes:** `validation_failed`, `unauthorized`, `key_revoked`, `key_expired`, `tenant_suspended`, `skill_not_assigned`, `analysis_type_not_supported`, `rate_limited`, `quota_exceeded`, `payload_too_large`, `idempotency_conflict`, `governance_blocked`, `llm_unavailable` (report degraded to deterministic), `not_found` (also used for cross-tenant ids).
+
+**Async + webhooks.** Webhook events: `interpretation.completed`, `interpretation.completed_with_flags`, `interpretation.failed`, `report.signed`. Headers: `Anukla-Event-Id`, `Anukla-Signature: t=<unix>,v1=<hex HMAC-SHA256 over "t.body" with the tenant secret>`. Receivers reject timestamps older than 5 minutes. Retries with exponential backoff (1m, 5m, 30m, 2h, 12h), capped at 24h, then marked `dead` and visible in the delivery log. Destination rules: https only; DNS resolved and pinned; loopback / private / link-local / metadata ranges rejected; no redirects.
+
+**Versioning.** `/v1` additive-only; breaking change -> `/v2` with `Deprecation` and `Sunset` headers; tenants pin the request `schemaVersion`.
+
+## 13. Longitudinal comparison
+
+`patient_scans` indexes each job by `(tenant_id, subject_ref, captured_at)`. `compare` returns per-finding earlier / later values and a neutral judgement: `within_uncertainty`, `beyond_uncertainty`, `not_comparable` (unit change, missing value, no uncertainty from the source). Never "improved" / "worsened". Significance testing may use the minimal-detectable-change approach (PosturePulse repo: `services/ml-service/app/analysis/mdc.py`, currently unused there) only for a metric that has test–retest data; otherwise the neutral combined-uncertainty rule (as already used in the PosturePulse mobile app's `apps/mobile/src/lib/compare.ts`) applies. A short-interval large disagreement raises the discrepancy flag instead of being presented as a trend.
+
+## 14. Admin dashboard structure
+
+Built in the existing NexArch visual language, role-gated and audited. Mapping of the twelve requested modules to the current state:
+
+| Module | State today | Plan |
+|---|---|---|
+| Overview & analytics | exists (`Home`, NexArch `Overview`) | add tenant / job / flag tiles |
+| Tenant management | missing | new |
+| API integration management | partial (`ApiKeys`) | per-tenant keys, rotate/revoke, webhook + delivery log |
+| Skill registry | listing only (`Skills`) | manifests, enable/disable |
+| Skill-to-tenant assignment | missing | new matrix |
+| Gemini configuration | missing | allow-list with per-key capability probe, budgets |
+| Report template management | missing | tenant brand fields only; governance block locked |
+| Clinical governance | partial (`Clinical`, `CDS`) | flag queue, sign-off, supersede history |
+| Processing history | partial | job list, status, retry, error codes |
+| API usage & billing | backend only | usage + LLM spend views |
+| Audit logs | exists (`Audit`) | tenant filter, hash-chain verify |
+| System settings | exists (`Settings`) | unchanged |
+
+## 15. Security and privacy architecture
+
+- **Data minimisation.** Identity is optional in the contract and stored only in the encrypted vault; findings, prompts, reports and webhooks carry `subjectRef`.
+- **Encryption.** AES-256-GCM for the vault (key from environment, fail closed), TLS in transit, hashed keys and webhook secrets stored encrypted.
+- **LLM egress.** De-identified findings only; `sourceNarrative` excluded by default; existing egress policy and restricted-content check stay on; `ELAB_DEID_REQUIRED` remains on until DPAs are signed.
+- **Tenant isolation.** Every query is tenant-scoped; cross-tenant ids return 404; tests assert it for every new table.
+- **Abuse controls.** Rate limit, monthly quota, per-tenant LLM budget, payload size cap, idempotency; webhook SSRF guard.
+- **Audit.** Tenant-scoped hash-chained events for key, skill, config and processing changes; admin actions record actor and before/after.
+- **Regulatory posture.** No medical-device claim; every report states it is a draft decision-support document. Applicability of data-protection laws (for example Malaysia PDPA, India DPDP, HIPAA where US data is involved) and data-residency per tenant is a legal assessment this document does not make; `tenants.residency` already exists to carry the tenant's declared requirement.
+- **Open gap carried forward.** Consent withdrawal / deletion: tenants own consent; ANUClaw must provide a subject-erasure endpoint that removes vault, payloads, findings and reports for a `subjectRef` (hash-chained tombstone kept). Scheduled in P3.
+
+## 16. Error handling and monitoring
+
+- Stable error codes (section 12); `requestId` on every response and in every audit event.
+- Worker: bounded attempts per job with backoff; poison jobs end `failed` with `error_code`; every stage emits a timing/outcome event.
+- Metrics: queue depth and age, job success/flag/fail rates per tenant, LLM latency/cost/guard-reject rate, webhook success rate, key-auth failures, rate-limit hits. Alerts: queue starvation, guard-reject spike, spend near budget, webhook dead-letters, hash-chain verification failure.
+- Degradation order: LLM unavailable -> deterministic template report + flag (still delivered); worker down -> jobs stay `queued` (visible), never silently dropped.
+
+## 17. Deployment architecture
+
+Single Node control plane (existing) + Postgres (existing) + a worker role running the same codebase (`INTERPRETATION_WORKER=1`) so the API process never blocks; Playwright runs in the worker. Secrets via environment/secret manager. Staged: local synthetic -> internal pilot -> restricted tenant pilot, each gated by the production-readiness gates. Rollback = additive migrations only; new tables never alter existing ones in a breaking way.
+
+## 18. End-to-end workflow
+
+```mermaid
+sequenceDiagram
+    participant App as Tenant app
+    participant Edge as Edge
+    participant Wk as Worker
+    participant Gov as Governance
+    participant LLM as Gemini (via modelCall)
+    participant Clin as Clinician
+    participant Hook as Tenant webhook
+
+    App->>Edge: POST /v1/interpretations (key, idempotency)
+    Edge->>Edge: auth, status, quota, skill gate, schema validate
+    Edge-->>App: 202 {jobId}
+    Edge->>Wk: enqueue
+    Wk->>Wk: freeze payload+hash, move identity to vault
+    Wk->>Wk: adapter -> normalized findings
+    Wk->>Gov: validate, missing, contradictions, positions, flags
+    Gov-->>Wk: findings + flags (deterministic)
+    Wk->>LLM: de-identified findings -> structured narratives
+    LLM-->>Wk: JSON
+    Wk->>Wk: fidelity + consistency guards
+    alt guards pass
+        Wk->>Wk: assemble clinical + layman (same findings hash)
+    else guard fails
+        Wk->>Wk: deterministic text + review flag
+    end
+    opt flags or high risk
+        Wk->>Clin: review queue
+        Clin->>Wk: edit / approve note, sign (dashboard only)
+    end
+    Wk->>Hook: signed webhook (retry with backoff)
+    App->>Edge: GET report (clinical / layman / pdf)
+```
+
+## 19. Phasing and acceptance
+
+| Phase | Deliverable | Acceptance (all tests use synthetic data) |
+|---|---|---|
+| **P0** | This document + the two contracts + examples | Contracts compile in strict mode; both fixtures validate; negative cases reject; owner review |
+| **P1** | Admin tenant lifecycle, multi-key credentials (rotate/revoke/expire/last-used), **plan-escalation fix**, tenant-scoped hash-chained audit | Cross-tenant 404s; revoked/expired key 401; tenant cannot change own plan; audit chain verifies |
+| **P2** | Skill registry tables, admin routes, assignment, gate | Unassigned skill 403 on the new endpoint and on skill-run; manifest validation |
+| **P3** | Ingest endpoint, identity split, adapters (beAIve, PosturePulse), persistent jobs + worker, 202/status, signed webhooks with SSRF guard, subject erasure | Original payload immutable; no identifier in findings/prompt (asserted); webhook signature/retry/SSRF tests; idempotent replay |
+| **P4** | Governance, per-tenant Gemini model + budget, guards, two-layer HTML->PDF reports, review queue | Numbers absent from findings are rejected; false-positive wording cases pass; layers agree; fallback path works; budget 0 refuses; the AI review can set `ai_reviewed` but never `clinician_signed` (asserted at API, DB-constraint and UI-copy level); blocking data-quality jobs end `awaiting_clinician`; every high-risk job carries the referral advisory in both layers (asserted, with static text id + version) and a narrative that omits or contradicts it is rejected |
+| **P5** | Longitudinal timeline + compare | Neutral wording; `not_comparable` cases; discrepancy flag |
+| **P6** | Admin dashboard modules (can start per module alongside P1–P3) | Role gating; accessibility checks consistent with the NexArch QA suite |
+
+**Decisions already recorded by the owner:** build P0 docs then P1; new code in new modules, shared-file edits (`db/connection.ts`, `baas-v1.ts`, `openapi-v1.ts`, `shared-limits.ts`) wait until the owner confirms the AlphaFold session is done; HTML + Playwright for PDFs; tenants admin-created only. **Still open:** named clinical categories — clinician-approved note only (assumed) vs a reviewed reference-range pack through the release register; and whether synthetic-only data remains the rule until the readiness gates clear (assumed yes).
+
+## 19a. P1 as built (tenant lifecycle and credentials)
+
+Status: implemented and tested; **not committed**. Differences from the design above, and what changed for existing clients:
+
+| Area | As built |
+|---|---|
+| Code location | `src/interpretation/tenancy/{keys,audit,lifecycle,admin-routes}.ts` plus small edits to `src/api/tenant-store.ts`, `src/api/middleware/auth.ts`, `src/api/routes/tenants.ts`, `src/api/server.ts` and the startup migration in `src/db/connection.ts` (one new table, `tenant_api_keys`) |
+| Admin plane | Uses the existing fail-closed `X-Admin-Key` guard (503 if `ADMIN_API_KEY` is unset). It proves "an administrator", not which one, so an optional `X-Admin-Actor` is stored as an *unverified* label. Per-person admin identity and the role-gated dashboard plane remain P6. |
+| Tenant status | Values stay `active` / `suspended` (the extra `pending` / `revoked` states in section 5 were not needed yet). |
+| Keys | Many per tenant (max 10 active); create, rotate (default 24 h grace, `0` = revoke now, max 30 days), revoke (idempotent), expiry, last-used. `tenants.api_key_hash` is untouched, so a code rollback keeps the original key working; each tenant's legacy key is backfilled as a `legacy` row and a revoked row can never be revived. |
+| Tokens | A JWT now carries the id of the key that minted it, so revoking or expiring that key ends its tokens. `POST /token` requires an API key (a token cannot mint a token). Tokens issued before this change have no key claim and simply expire within the hour. |
+| Audit | Reuses `PostgresPerTenantAuditLog` (`cds_audit_log_mt`, append-only trigger). Each entry is written **in the same transaction** as the change, under a per-tenant advisory lock: a change and its record commit or roll back together, and concurrent actions keep the chain contiguous. Payloads never hold key material (enforced) and omit the tenant e-mail (domain only). |
+| Security fix (G2) | `PUT /account/plan` now returns `403 plan_change_requires_admin`; the unauthenticated `updatePlan` helper was removed; only `PUT /api/v1/admin/tenants/:id/plan` changes a plan. |
+| Registration | `POST /register` is **closed by default** (`403 registration_closed`); `ANUCLAW_SELF_REGISTRATION=open` re-enables it, always on the free plan (`plan_requires_admin` if another plan is sent). Duplicate-e-mail checks are now case-insensitive. |
+| Error codes | `unauthorized`, `key_revoked`, `key_expired`, `tenant_suspended`, `api_key_required`, `registration_closed`, `plan_change_requires_admin`, `plan_requires_admin`, plus the admin API's `{error:{code,message,requestId}}` family. |
+| Not yet done | Per-key **scope enforcement** (scopes are stored and exposed by `hasScope`, but no endpoint requires one until the skill gate in P2 / ingest in P3); `X-Admin-Key` comparison is a plain string compare inherited from the existing admin router (a constant-time comparison is a worthwhile follow-up there); the audit `entries` endpoint returns the whole chain (pagination when chains grow). |
+

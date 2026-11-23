@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { getTenantByApiKey, getTenantById, Tenant } from '../tenant-store';
+import { lookupTenantApiKey, isTenantKeyActive, getTenantById, Tenant } from '../tenant-store';
 import { getApiJwtSecret } from '../../security/jwt-secrets';
 
 // No fallback secret: getApiJwtSecret() throws AuthConfigError when
@@ -9,6 +9,10 @@ const JWT_EXPIRES_IN = '1h';
 
 export interface AuthRequest extends Request {
   tenant?: Tenant;
+  /** The API key this request (or the JWT it carries) was issued from. Absent for tokens minted before keys were tracked. */
+  apiKeyId?: string;
+  /** Scopes granted to that key (`*` = all). Set only on API-key authentication. */
+  apiKeyScopes?: string[];
 }
 
 // ── JWT helpers ───────────────────────────────────────────────────────────────
@@ -18,14 +22,16 @@ export function assertApiAuthConfigured(): void {
   getApiJwtSecret();
 }
 
-export function signToken(tenantId: string): string {
-  return jwt.sign({ sub: tenantId }, getApiJwtSecret(), { expiresIn: JWT_EXPIRES_IN, algorithm: 'HS256' });
+/** `keyId` binds the token to the API key that minted it, so revoking or expiring that key also ends its tokens. */
+export function signToken(tenantId: string, keyId?: string): string {
+  return jwt.sign(keyId ? { sub: tenantId, key: keyId } : { sub: tenantId }, getApiJwtSecret(), { expiresIn: JWT_EXPIRES_IN, algorithm: 'HS256' });
 }
 
-function verifyToken(token: string, secret: string): { sub: string } | null {
+function verifyToken(token: string, secret: string): { sub: string; key?: string } | null {
   try {
-    const payload = jwt.verify(token, secret, { algorithms: ['HS256'] }) as { sub?: unknown };
-    return typeof payload.sub === 'string' ? { sub: payload.sub } : null;
+    const payload = jwt.verify(token, secret, { algorithms: ['HS256'] }) as { sub?: unknown; key?: unknown };
+    if (typeof payload.sub !== 'string') return null;
+    return typeof payload.key === 'string' ? { sub: payload.sub, key: payload.key } : { sub: payload.sub };
   } catch {
     return null;
   }
@@ -59,8 +65,16 @@ export async function requireAuth(req: AuthRequest, res: Response, next: NextFun
     }
     const tenant = await getTenantById(payload.sub);
     if (!tenant || tenant.status !== 'active') {
-      res.status(401).json({ error: 'Tenant not found or suspended.' });
+      res.status(401).json({ error: 'Tenant not found or suspended.', code: 'tenant_suspended' });
       return;
+    }
+    if (payload.key) {
+      // A token minted from a key stops working the moment that key is revoked or expires.
+      if (!(await isTenantKeyActive(tenant.tenant_id, payload.key))) {
+        res.status(401).json({ error: 'The API key this token was issued from is no longer valid.', code: 'key_revoked' });
+        return;
+      }
+      req.apiKeyId = payload.key;
     }
     req.tenant = tenant;
     next();
@@ -70,12 +84,22 @@ export async function requireAuth(req: AuthRequest, res: Response, next: NextFun
   // 2. API key header
   const apiKey = req.headers['x-api-key'] as string | undefined;
   if (apiKey) {
-    const tenant = await getTenantByApiKey(apiKey);
-    if (!tenant || tenant.status !== 'active') {
-      res.status(401).json({ error: 'Invalid API key or account suspended.' });
+    const found = await lookupTenantApiKey(apiKey);
+    if (found.status === 'revoked' || found.status === 'expired') {
+      res.status(401).json({ error: `API key ${found.status}.`, code: found.status === 'revoked' ? 'key_revoked' : 'key_expired' });
       return;
     }
-    req.tenant = tenant;
+    if (found.status !== 'ok') {
+      res.status(401).json({ error: 'Invalid API key or account suspended.', code: 'unauthorized' });
+      return;
+    }
+    if (found.tenant.status !== 'active') {
+      res.status(401).json({ error: 'Invalid API key or account suspended.', code: 'tenant_suspended' });
+      return;
+    }
+    req.tenant = found.tenant;
+    req.apiKeyId = found.keyId;
+    req.apiKeyScopes = found.scopes;
     next();
     return;
   }

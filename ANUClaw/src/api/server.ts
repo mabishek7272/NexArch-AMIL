@@ -13,6 +13,7 @@ import { requireAuth, assertApiAuthConfigured } from './middleware/auth';
 import { createElabPlatformRouter } from './routes/elab-platform';
 import { createElabUiRouter } from './routes/elab-ui';
 import { createAdminRouter } from './routes/admin';
+import { createTenantAdminRouter } from '../interpretation/tenancy/admin-routes';
 import baasV1Router from './routes/baas-v1';
 import { enableSpendTracking } from '../ai/spend';
 import { corsOriginOption, runStartupChecks } from '../startup-checks';
@@ -107,6 +108,8 @@ export function createApiApp(env: NodeJS.ProcessEnv = process.env): ApiApp {
 
   // Admin API (tenant clinical-grant) — X-Admin-Key gated, fail-closed if unset.
   app.use(createAdminRouter());
+  // Tenant lifecycle + key management (create/suspend/plan/rotate/revoke/audit) — same admin-key guard.
+  app.use(createTenantAdminRouter());
 
   // Versioned BaaS API (plan §13): documents → observations → analyses → reports.
   app.use(baasV1Router);

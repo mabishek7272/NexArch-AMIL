@@ -3,9 +3,9 @@ import jwt from 'jsonwebtoken';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mocked tenant store — no real tenants or database.
-vi.mock('../tenant-store', () => ({ getTenantById: vi.fn(), getTenantByApiKey: vi.fn() }));
+vi.mock('../tenant-store', () => ({ getTenantById: vi.fn(), lookupTenantApiKey: vi.fn(), isTenantKeyActive: vi.fn() }));
 
-import { getTenantById, getTenantByApiKey } from '../tenant-store';
+import { getTenantById, lookupTenantApiKey, isTenantKeyActive } from '../tenant-store';
 import { AuthConfigError } from '../../security/jwt-secrets';
 import { assertApiAuthConfigured, requireAuth, signToken } from './auth';
 
@@ -34,7 +34,8 @@ beforeEach(() => {
   secret = crypto.randomBytes(32).toString('hex'); // synthetic, per-test
   process.env.ANUCLAW_JWT_SECRET = secret;
   vi.mocked(getTenantById).mockReset().mockImplementation(async (id: string) => (id === TENANT.tenant_id ? TENANT : undefined));
-  vi.mocked(getTenantByApiKey).mockReset().mockResolvedValue(undefined as any);
+  vi.mocked(lookupTenantApiKey).mockReset().mockResolvedValue({ status: 'unknown' });
+  vi.mocked(isTenantKeyActive).mockReset().mockResolvedValue(true);
 });
 
 afterEach(() => {
@@ -121,9 +122,64 @@ describe('requireAuth (API key path unchanged)', () => {
 
   it('still authenticates a valid API key without using the JWT secret', async () => {
     delete process.env.ANUCLAW_JWT_SECRET;
-    vi.mocked(getTenantByApiKey).mockResolvedValue(TENANT);
+    vi.mocked(lookupTenantApiKey).mockResolvedValue({ status: 'ok', tenant: TENANT, keyId: 'key-1', scopes: ['*'] });
     const { req, next } = await call({ 'x-api-key': 'synthetic-test-key' });
     expect(next).toHaveBeenCalledOnce();
     expect(req.tenant).toBe(TENANT);
+    expect(req.apiKeyId).toBe('key-1');
+    expect(req.apiKeyScopes).toEqual(['*']);
+  });
+
+  it.each([
+    ['revoked', 'key_revoked'],
+    ['expired', 'key_expired'],
+  ] as const)('answers precisely for a %s key', async (status, code) => {
+    vi.mocked(lookupTenantApiKey).mockResolvedValue({ status });
+    const { res, next } = await call({ 'x-api-key': 'synthetic-test-key' });
+    expect(next).not.toHaveBeenCalled();
+    expect(res.statusCode).toBe(401);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code }));
+  });
+
+  it('gives an unknown key the generic answer (no hint about whether the key ever existed)', async () => {
+    const { res, next } = await call({ 'x-api-key': 'synthetic-test-key' });
+    expect(next).not.toHaveBeenCalled();
+    expect(res.statusCode).toBe(401);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'unauthorized' }));
+  });
+
+  it('rejects a valid key whose tenant is suspended', async () => {
+    vi.mocked(lookupTenantApiKey).mockResolvedValue({ status: 'ok', tenant: { ...TENANT, status: 'suspended' }, keyId: 'key-1', scopes: ['*'] });
+    const { res, next } = await call({ 'x-api-key': 'synthetic-test-key' });
+    expect(next).not.toHaveBeenCalled();
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'tenant_suspended' }));
+  });
+});
+
+describe('requireAuth (tokens bound to the key that minted them)', () => {
+  it('accepts a key-bound token while its key is active and exposes the key id', async () => {
+    const { req, next } = await call(bearer(signToken(TENANT.tenant_id, 'key-1')));
+    expect(next).toHaveBeenCalledOnce();
+    expect(isTenantKeyActive).toHaveBeenCalledWith(TENANT.tenant_id, 'key-1');
+    expect(req.apiKeyId).toBe('key-1');
+  });
+
+  it('rejects a key-bound token as soon as its key is revoked or expired', async () => {
+    vi.mocked(isTenantKeyActive).mockResolvedValue(false);
+    const { res, next } = await call(bearer(signToken(TENANT.tenant_id, 'key-1')));
+    expect(next).not.toHaveBeenCalled();
+    expect(res.statusCode).toBe(401);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'key_revoked' }));
+  });
+
+  it('still accepts a token with no key claim (issued before keys were tracked) without asking about a key', async () => {
+    const { next } = await call(bearer(signToken(TENANT.tenant_id)));
+    expect(next).toHaveBeenCalledOnce();
+    expect(isTenantKeyActive).not.toHaveBeenCalled();
+  });
+
+  it('signToken embeds the key id only when one is given', () => {
+    expect((jwt.verify(signToken(TENANT.tenant_id, 'key-9'), secret) as any).key).toBe('key-9');
+    expect((jwt.verify(signToken(TENANT.tenant_id), secret) as any).key).toBeUndefined();
   });
 });

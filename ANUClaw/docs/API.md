@@ -24,17 +24,23 @@ Your application calls our API. ANUClaw runs the agent, executes the skill in an
 
 ## Quick Start (3 steps)
 
-### Step 1 — Register your company
+### Step 1 — Get your tenant and API key
+
+Tenants are **created by an administrator** (`POST /api/v1/admin/tenants`, see below); you receive your
+`tenant_id` and first `api_key` from them. Public self-service registration is closed unless the operator sets
+`ANUCLAW_SELF_REGISTRATION=open` (for example in a local sandbox). When it is open:
 
 ```bash
 curl -X POST https://api.anuclaw.amgi-research.com/api/v1/register \
   -H "Content-Type: application/json" \
   -d '{
     "company_name": "Acme Pharma",
-    "email": "dev@acmepharma.com",
-    "plan": "pro"
+    "email": "dev@acmepharma.com"
   }'
 ```
+
+Self-registered tenants are always on the `free` plan (sending any other `plan` is refused with
+`plan_requires_admin`); when registration is closed the call returns `403 registration_closed`.
 
 Response:
 ```json
@@ -42,14 +48,12 @@ Response:
   "message": "Registration successful. Store your API key securely — it will not be shown again.",
   "tenant_id": "3f2a1b4c-...",
   "company_name": "Acme Pharma",
-  "plan": "pro",
-  "api_key": "amgi_live_a1b2c3d4e5f6...",
-  "rate_limit_per_min": 60,
-  "monthly_quota": 5000
+  "plan": "free",
+  "api_key": "amgi_live_a1b2c3d4e5f6..."
 }
 ```
 
-> Store `api_key` immediately. It is shown only once.
+> Store `api_key` immediately. It is shown only once; if it is lost an administrator rotates it.
 
 ---
 
@@ -188,9 +192,55 @@ Get your account details, plan, and usage.
 ---
 
 #### `PUT /account/plan`
-Upgrade your plan.
+**Not available to tenants.** Always returns `403 plan_change_requires_admin`. A tenant cannot change its own plan
+or limits; an administrator does it with `PUT /api/v1/admin/tenants/:id/plan`.
 
-**Body:** `{ "plan": "pro" }`
+---
+
+#### Authentication errors
+
+Authentication failures return `401` with a `code`:
+
+| `code` | Meaning |
+|---|---|
+| `unauthorized` | Unknown or malformed key (deliberately generic) |
+| `key_revoked` | The key was revoked, or the key a token was issued from was revoked |
+| `key_expired` | The key's expiry time has passed |
+| `tenant_suspended` | The tenant is suspended |
+| `api_key_required` | `POST /token` must be called with an API key, not with another token |
+
+A token is bound to the API key that minted it: revoking or expiring that key ends its tokens too.
+
+---
+
+#### Administrator API (`X-Admin-Key`)
+
+Fail-closed: returns `503` unless the operator has set `ADMIN_API_KEY`. Errors are `{ "error": { "code", "message", "requestId" } }`.
+An optional `X-Admin-Actor` header is recorded in the audit entry as an unverified label.
+
+| Method & path | Purpose |
+|---|---|
+| `POST /api/v1/admin/tenants` | Create a tenant and its first key (`company_name`, `email`, `plan?`). The key is shown once. |
+| `GET /api/v1/admin/tenants?limit&offset` | List tenants with their active-key count |
+| `POST /api/v1/admin/tenants/:id/suspend` · `/reactivate` | Block or restore a tenant's keys and tokens |
+| `PUT /api/v1/admin/tenants/:id/plan` | Change a plan (`free`, `pro`, `enterprise`) |
+| `GET /api/v1/admin/tenants/:id/keys` | List keys (prefix, label, scopes, expiry, last use; never the key or its hash) |
+| `POST /api/v1/admin/tenants/:id/keys` | Create another key (`label?`, `scopes?`, `expires_at?` epoch ms). At most 10 active keys per tenant. |
+| `POST /api/v1/admin/tenants/:id/keys/:keyId/rotate` | New key now; the old key lapses after `grace_seconds` (default 86400, `0` = revoke now, max 30 days) |
+| `POST /api/v1/admin/tenants/:id/keys/:keyId/revoke` | Revoke immediately (idempotent); `reason?` |
+| `GET /api/v1/admin/tenants/:id/audit` | That tenant's hash-chained audit entries and a chain verification result |
+| `GET /api/v1/admin/skills` | Every skill (agent and interpretation) with how many tenants have it |
+| `POST /api/v1/admin/skills` | Register an interpretation skill: `{ "manifest": { id, version, title, acceptsAnalysisTypes, adapterId, inputSchema, prompts, riskTier, clinicalDomain?, requiresRelease } }`. Strict validation; the adapter must be a known, code-defined one. |
+| `PATCH /api/v1/admin/skills/:skillId` | `{ enabled? }` for any skill; `{ manifest? }` for an interpretation skill — a manifest change needs a **new version** of the same id |
+| `GET /api/v1/admin/adapters` | Declared adapters and whether each is implemented (a skill can only be assigned once its adapter is) |
+| `GET /api/v1/admin/tenants/:id/skills` | A tenant's assignments |
+| `PUT /api/v1/admin/tenants/:id/skills/:skillId` | Assign or update (`enabled?`, `config?` ≤ 4 KB); idempotent. Refused if the skill is disabled, its adapter is unavailable, or it is clinical-tier and the tenant lacks clinical access. |
+| `DELETE /api/v1/admin/tenants/:id/skills/:skillId` | Unassign |
+
+Skill assignments are audited on the tenant's chain; registry changes on the platform chain. Configuration **values**
+are never written to the audit chain, only the key names.
+
+Every change above is written to the tenant's audit chain in the same database transaction as the change itself.
 
 ---
 

@@ -1,20 +1,28 @@
+import * as crypto from 'crypto';
 import { Router, Request, Response } from 'express';
-import { registerTenant, Plan, setWebhook, updatePlan } from '../tenant-store';
+import { registerTenant, setWebhook } from '../tenant-store';
 import { requireAuth, signToken, AuthRequest } from '../middleware/auth';
 import { effectiveLimits } from '../middleware/rate-limit';
 import { FixedWindowLimiter } from '../../security/throttle';
+import { ensureTenantAuditReady, recordTenantEvent } from '../../interpretation/tenancy/audit';
 
 const router = Router();
 
 /**
  * POST /api/v1/register
- * Register a new company and receive an API key.
+ * Self-service registration. CLOSED by default: tenants are created by an administrator
+ * (POST /api/v1/admin/tenants). Set ANUCLAW_SELF_REGISTRATION=open to allow it, e.g. for a local sandbox.
+ * Self-registered tenants are always on the free plan; only an administrator can change a plan.
  *
- * Body: { company_name, email, plan? }
+ * Body: { company_name, email }
  */
 const registrations = new FixedWindowLimiter(60 * 60 * 1000);
 
 router.post('/register', async (req: Request, res: Response) => {
+  if (process.env.ANUCLAW_SELF_REGISTRATION !== 'open') {
+    res.status(403).json({ error: 'Tenant registration is by administrator only.', code: 'registration_closed' });
+    return;
+  }
   // Public endpoint: throttle per client address (in-process; see security/throttle.ts).
   const r = registrations.hit(`reg:${req.ip}`, Number(process.env.ANUCLAW_REGISTER_PER_HOUR ?? 5));
   if (!r.allowed) {
@@ -22,21 +30,28 @@ router.post('/register', async (req: Request, res: Response) => {
     res.status(429).json({ error: 'Too many registrations from this address. Try later.', code: 'rate_limited' });
     return;
   }
-  const { company_name, email, plan = 'free' } = req.body;
+  const { company_name, email, plan } = req.body ?? {};
 
   if (!company_name || !email) {
     res.status(400).json({ error: 'company_name and email are required.' });
     return;
   }
-
-  const validPlans: Plan[] = ['free', 'pro', 'enterprise'];
-  if (!validPlans.includes(plan)) {
-    res.status(400).json({ error: `plan must be one of: ${validPlans.join(', ')}` });
+  if (plan !== undefined && plan !== 'free') {
+    res.status(400).json({ error: 'Self-registered tenants start on the free plan; plan changes are made by an administrator.', code: 'plan_requires_admin' });
     return;
   }
 
   try {
-    const tenant = await registerTenant(company_name, email, plan as Plan);
+    await ensureTenantAuditReady();
+    const ctx = { actor: 'self_registration', declaredActor: null, requestId: crypto.randomUUID() };
+    const tenant = await registerTenant(String(company_name), String(email), 'free', {
+      createdBy: 'self_registration',
+      afterInsert: async (tx, tenantId) => {
+        await recordTenantEvent(tx, tenantId, ctx, 'tenant.created', {
+          company_name: String(company_name), email_domain: String(email).split('@')[1]?.toLowerCase() ?? null, plan: 'free', first_key_label: 'initial',
+        });
+      },
+    });
     res.status(201).json({
       message: 'Registration successful. Store your API key securely — it will not be shown again.',
       tenant_id:    tenant.tenant_id,
@@ -60,8 +75,14 @@ router.post('/register', async (req: Request, res: Response) => {
  * Header: X-API-Key: amgi_live_...
  */
 router.post('/token', requireAuth, (req: AuthRequest, res: Response) => {
+  // Only an API key can mint a token. If a token could mint another token, a revoked key's tokens could be
+  // renewed indefinitely; refusing here is what makes "revoke the key" actually end its access.
+  if (req.headers.authorization?.startsWith('Bearer ') || !req.apiKeyId) {
+    res.status(401).json({ error: 'Authenticate with an API key (X-API-Key) to obtain a token.', code: 'api_key_required' });
+    return;
+  }
   const tenant = req.tenant!;
-  const token = signToken(tenant.tenant_id);
+  const token = signToken(tenant.tenant_id, req.apiKeyId);
   res.json({
     access_token: token,
     token_type:   'Bearer',
@@ -111,19 +132,12 @@ router.put('/account/webhook', requireAuth, async (req: AuthRequest, res: Respon
 
 /**
  * PUT /api/v1/account/plan
- * Upgrade or change plan.
- *
- * Body: { plan }
+ * A tenant can NOT change its own plan (it would let any tenant raise its own limits). The route is kept so
+ * existing clients get an explicit answer instead of a 404; plans are changed by an administrator via
+ * PUT /api/v1/admin/tenants/:id/plan.
  */
-router.put('/account/plan', requireAuth, async (req: AuthRequest, res: Response) => {
-  const { plan } = req.body;
-  const validPlans: Plan[] = ['free', 'pro', 'enterprise'];
-  if (!validPlans.includes(plan)) {
-    res.status(400).json({ error: `plan must be one of: ${validPlans.join(', ')}` });
-    return;
-  }
-  await updatePlan(req.tenant!.tenant_id, plan as Plan);
-  res.json({ message: `Plan updated to ${plan}.` });
+router.put('/account/plan', requireAuth, (_req: AuthRequest, res: Response) => {
+  res.status(403).json({ error: 'Plan changes are made by an administrator.', code: 'plan_change_requires_admin' });
 });
 
 export default router;

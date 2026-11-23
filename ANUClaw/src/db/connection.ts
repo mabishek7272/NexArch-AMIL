@@ -897,6 +897,33 @@ export async function migrate(pool: Pool): Promise<void> {
              api_key = 'hashed:' || tenant_id
        WHERE api_key_hash IS NULL AND api_key NOT LIKE 'hashed:%'`);
 
+    // ── Tenant API keys, many per tenant (interpretation engine P1) ───────────
+    // Authentication reads ONLY this table (src/interpretation/tenancy/keys.ts), so a key can be revoked,
+    // expired or rotated. tenants.api_key_hash is no longer authoritative; it is left untouched so a code
+    // rollback keeps the original key working. Each tenant's legacy single key is copied in once;
+    // ON CONFLICT DO NOTHING means a legacy key that was later revoked (its row stays) is never revived.
+    await client.query(`CREATE TABLE IF NOT EXISTS tenant_api_keys (
+      key_id VARCHAR(64) PRIMARY KEY,
+      tenant_id VARCHAR(64) NOT NULL REFERENCES tenants(tenant_id) ON DELETE CASCADE,
+      key_hash CHAR(64) NOT NULL UNIQUE,
+      key_prefix VARCHAR(24) NOT NULL,
+      label VARCHAR(100) NOT NULL DEFAULT '',
+      scopes TEXT NOT NULL DEFAULT '["*"]',
+      created_at BIGINT NOT NULL,
+      created_by VARCHAR(100) NOT NULL,
+      expires_at BIGINT,
+      revoked_at BIGINT,
+      revoked_reason VARCHAR(100),
+      last_used_at BIGINT,
+      rotated_from VARCHAR(64))`);
+    await client.query('CREATE INDEX IF NOT EXISTS idx_tenant_api_keys_tenant ON tenant_api_keys(tenant_id, created_at)');
+    await client.query(`
+      INSERT INTO tenant_api_keys (key_id, tenant_id, key_hash, key_prefix, label, created_at, created_by)
+      SELECT 'legacy-' || tenant_id, tenant_id, api_key_hash, COALESCE(api_key_prefix, ''), 'legacy',
+             (EXTRACT(EPOCH FROM NOW()) * 1000)::BIGINT, 'migration'
+        FROM tenants WHERE api_key_hash IS NOT NULL
+      ON CONFLICT DO NOTHING`);
+
     // ── E-LAB platform tiering columns on tenants (additive, idempotent) ──────
     await client.query(`ALTER TABLE tenants ADD COLUMN IF NOT EXISTS scopes TEXT`);
     await client.query(`ALTER TABLE tenants ADD COLUMN IF NOT EXISTS baa_status VARCHAR(20) DEFAULT 'none'`);
