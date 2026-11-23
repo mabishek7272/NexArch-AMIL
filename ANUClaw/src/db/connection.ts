@@ -924,6 +924,34 @@ export async function migrate(pool: Pool): Promise<void> {
         FROM tenants WHERE api_key_hash IS NOT NULL
       ON CONFLICT DO NOTHING`);
 
+    // ── Skill registry + per-tenant assignment (interpretation engine P2) ─────
+    // `skills` holds both the file-based agent skills (kind 'agent', synced from container/skills) and
+    // manifest-defined interpretation skills. A tenant can use a skill only through a `tenant_skills` row.
+    // `registry_state` records one-time steps (the one-time grandfathering of existing tenants) so they never repeat.
+    await client.query(`CREATE TABLE IF NOT EXISTS skills (
+      skill_id VARCHAR(64) PRIMARY KEY,
+      kind VARCHAR(20) NOT NULL CHECK (kind IN ('agent','interpretation')),
+      version VARCHAR(40) NOT NULL,
+      title VARCHAR(200) NOT NULL DEFAULT '',
+      manifest_json TEXT NOT NULL DEFAULT '{}',
+      risk_tier VARCHAR(20) NOT NULL DEFAULT 'ruo' CHECK (risk_tier IN ('ruo','clinical')),
+      requires_release BOOLEAN NOT NULL DEFAULT FALSE,
+      enabled BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at BIGINT NOT NULL,
+      updated_at BIGINT NOT NULL,
+      updated_by VARCHAR(100) NOT NULL DEFAULT '')`);
+    await client.query(`CREATE TABLE IF NOT EXISTS tenant_skills (
+      tenant_id VARCHAR(64) NOT NULL REFERENCES tenants(tenant_id) ON DELETE CASCADE,
+      skill_id VARCHAR(64) NOT NULL REFERENCES skills(skill_id),
+      enabled BOOLEAN NOT NULL DEFAULT TRUE,
+      config_json TEXT NOT NULL DEFAULT '{}',
+      assigned_at BIGINT NOT NULL,
+      assigned_by VARCHAR(100) NOT NULL,
+      PRIMARY KEY (tenant_id, skill_id))`);
+    await client.query('CREATE INDEX IF NOT EXISTS idx_tenant_skills_skill ON tenant_skills(skill_id)');
+    await client.query(`CREATE TABLE IF NOT EXISTS registry_state (
+      key VARCHAR(100) PRIMARY KEY, value TEXT NOT NULL DEFAULT '', updated_at BIGINT NOT NULL)`);
+
     // ── E-LAB platform tiering columns on tenants (additive, idempotent) ──────
     await client.query(`ALTER TABLE tenants ADD COLUMN IF NOT EXISTS scopes TEXT`);
     await client.query(`ALTER TABLE tenants ADD COLUMN IF NOT EXISTS baa_status VARCHAR(20) DEFAULT 'none'`);

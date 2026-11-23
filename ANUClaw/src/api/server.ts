@@ -14,6 +14,7 @@ import { createElabPlatformRouter } from './routes/elab-platform';
 import { createElabUiRouter } from './routes/elab-ui';
 import { createAdminRouter } from './routes/admin';
 import { createTenantAdminRouter } from '../interpretation/tenancy/admin-routes';
+import { createSkillAdminRouter } from '../interpretation/skills/admin-routes';
 import baasV1Router from './routes/baas-v1';
 import { enableSpendTracking } from '../ai/spend';
 import { corsOriginOption, runStartupChecks } from '../startup-checks';
@@ -110,6 +111,8 @@ export function createApiApp(env: NodeJS.ProcessEnv = process.env): ApiApp {
   app.use(createAdminRouter());
   // Tenant lifecycle + key management (create/suspend/plan/rotate/revoke/audit) — same admin-key guard.
   app.use(createTenantAdminRouter());
+  // Skill registry + per-tenant skill assignment — same admin-key guard.
+  app.use(createSkillAdminRouter());
 
   // Versioned BaaS API (plan §13): documents → observations → analyses → reports.
   app.use(baasV1Router);

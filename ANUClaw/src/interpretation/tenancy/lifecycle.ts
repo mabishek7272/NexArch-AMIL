@@ -10,6 +10,7 @@ import { db } from '../../db';
 import { registerTenant, planLimits, Plan, Tenant } from '../../api/tenant-store';
 import { TenancyError } from './keys';
 import { AuditCtx, ensureTenantAuditReady, recordTenantEvent } from './audit';
+import { ensureSkillRegistry } from '../skills/registry';
 
 export const PLANS: Plan[] = ['free', 'pro', 'enterprise'];
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -34,6 +35,7 @@ export async function adminCreateTenant(
   await ensureTenantAuditReady();
   // The skill registry's one-time grandfathering must have run BEFORE this tenant exists, or the new tenant would
   // wrongly be treated as an existing one and be handed every agent skill.
+  await ensureSkillRegistry();
   try {
     return await registerTenant(name, email, plan, {
       createdBy: ctx.actor,

@@ -255,8 +255,25 @@ When a skill run completes, ANUClaw will `POST` the result to this URL.
 
 ### Skills
 
+A tenant can use only the skills **assigned to it by an administrator** (see the administrator API below). An
+unassigned, unknown or malformed skill id is refused identically, so the catalogue cannot be probed:
+
+| Status | `code` | Meaning |
+|---|---|---|
+| 403 | `skill_not_assigned` | Not assigned (or no such skill, or the assignment is switched off) |
+| 403 | `skill_disabled` | An administrator has disabled the skill |
+| 403 | `skill_not_released` | The skill requires a release that has not been granted |
+| 403 | `clinical_access_required` | A clinical-tier skill needs the clinical scope, an active BAA and the enabled domain |
+| 400 | `not_an_agent_skill` | The skill belongs to the interpretation API, not the agent runner |
+| 404 | `skill_unavailable` | Assigned, but its file is missing on this server |
+| 503 | `skill_unavailable` | An interpretation skill whose adapter is not implemented yet |
+
+A refused request is not counted against the monthly quota and does not hold an agent slot. Tenants that existed
+when the registry was introduced were assigned every agent skill once, so their access did not change; new tenants
+start with none.
+
 #### `GET /skills`
-List all available skills.
+List the skills **assigned to your account** (assigned, enabled and permitted).
 
 **Response:**
 ```json

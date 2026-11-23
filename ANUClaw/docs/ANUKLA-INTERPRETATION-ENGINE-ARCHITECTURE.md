@@ -375,3 +375,31 @@ Status: implemented and tested; **not committed**. Differences from the design a
 | Error codes | `unauthorized`, `key_revoked`, `key_expired`, `tenant_suspended`, `api_key_required`, `registration_closed`, `plan_change_requires_admin`, `plan_requires_admin`, plus the admin API's `{error:{code,message,requestId}}` family. |
 | Not yet done | Per-key **scope enforcement** (scopes are stored and exposed by `hasScope`, but no endpoint requires one until the skill gate in P2 / ingest in P3); `X-Admin-Key` comparison is a plain string compare inherited from the existing admin router (a constant-time comparison is a worthwhile follow-up there); the audit `entries` endpoint returns the whole chain (pagination when chains grow). |
 
+## 19b. P2 as built (skill registry and per-tenant assignment)
+
+Status: implemented and tested; **not committed**.
+
+| Area | As built |
+|---|---|
+| Code | `src/interpretation/skills/{manifest,adapters,registry,admin-routes}.ts`, shared admin plumbing in `src/interpretation/tenancy/admin-http.ts`; tables `skills`, `tenant_skills`, `registry_state` in the startup migration; the gate is wired into `src/api/routes/skills.ts` |
+| Two kinds, one table | `agent` skills (the files under `container/skills`, synced in as rows) and `interpretation` skills (manifest + code-defined adapter). Interpretation skills are registered by manifest only; agent skills can never be created through the API |
+| Gate | `checkSkillAccess` is the single decision. Unknown, malformed, unassigned and switched-off skills all get the same `403 skill_not_assigned`. Then: `skill_disabled`, `skill_not_released` (always, while `requiresRelease` is set — there is no release mechanism yet, so it fails closed), `clinical_access_required` (scope + active BAA + enabled domain, re-checked on every use, so a lapsed BAA stops access), and `skill_unavailable` (503) when the adapter is not implemented. It runs after the cheap per-tenant rate limit and **before** the monthly quota and the agent-concurrency lease, so a refused call costs the tenant nothing. |
+| Grandfathering (owner decision) | The first time the registry starts, every tenant that already exists is assigned every agent skill **once**, audited per tenant as `tenant.skills.grandfathered`. A marker in `registry_state` stops it ever repeating, so a skill an administrator removes stays removed. It is skipped, and retried next start, if no agent skills are found (a wrong working directory cannot burn the marker). Tenant creation initialises the registry first, so a brand-new tenant is never grandfathered by mistake. New tenants start with none. |
+| Adapters | Declared in code (`adapters.ts`) as `beaive-v1`, `posturepulse-v1`, `report-clinical-v1`, `report-layman-v1`, all `available: false`. A manifest must name a known adapter whose analysis types cover the manifest's. A skill can be registered against an unavailable adapter, but cannot be assigned or run until P3 registers the implementation (`declareAdapter`). |
+| Seeded skills | The four interpretation skills named in section 7. ECG, imaging and biosensor skills are **not** seeded: they need new adapter code first. |
+| Versioning | A manifest change must carry a new version of the same id; enabling/disabling is separate. Skills are never deleted (the table's foreign key enforces it) — disable instead. |
+| Audit | Assignments, unassignments and updates go on the tenant's chain; registrations and updates on the reserved `_platform` chain; same transaction as the change. Assignment *config values* are never audited, only their key names. |
+| Side fixes | The old run route built a file path straight from the caller's skill name; ids are now checked against the registry (and a strict id pattern) before the file system is touched. The old 404 listed every skill name; it no longer does. A body-style request with a non-string `skill` is a 400. |
+
+**Known limitations (not closed by P2):**
+
+1. **The agent container still mounts every skill read-only** (`src/container-runner.ts`, `/workspace/skills`). A tenant allowed one agent skill can ask the agent to read another skill's `SKILL.md`. The files are instructions and code snippets, not secrets, and the container is isolated, but the gate controls who may *run* a skill, not what an already-running agent can read. Closing it means mounting only the tenant's allowed skills per run (a change to the container launch path).
+2. **Per-key scopes** are still stored but not enforced (planned with the interpretation endpoint in P3).
+3. **Tenant-facing `GET /v1/skills` for interpretation skills** arrives with P3's endpoint; today only the agent-skill list exists, and it shows assigned skills only.
+4. **`requiresRelease`** denies unconditionally until a release mechanism (the clinical release register) can say otherwise.
+
+## 20. Relationship to other documents
+
+[`NEXARCH-UNIFICATION-AND-REPAIR-PLAN.md`](NEXARCH-UNIFICATION-AND-REPAIR-PLAN.md) step R1 (authorization and error truthfulness) overlaps P1; coordinate so the plan-escalation fix is made once. [`NEXARCH-SCIENTIFIC-PLATFORM-MASTER-PLAN.md`](NEXARCH-SCIENTIFIC-PLATFORM-MASTER-PLAN.md) covers research studios, not tenant interpretation; its tenant/artifact rules (owner scope, 404 on foreign ids) are followed here. This document supplements, and does not supersede, the clinical release and production-readiness rules.
+
+

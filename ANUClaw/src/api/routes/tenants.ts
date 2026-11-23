@@ -5,6 +5,7 @@ import { requireAuth, signToken, AuthRequest } from '../middleware/auth';
 import { effectiveLimits } from '../middleware/rate-limit';
 import { FixedWindowLimiter } from '../../security/throttle';
 import { ensureTenantAuditReady, recordTenantEvent } from '../../interpretation/tenancy/audit';
+import { ensureSkillRegistry } from '../../interpretation/skills/registry';
 
 const router = Router();
 
@@ -43,6 +44,7 @@ router.post('/register', async (req: Request, res: Response) => {
 
   try {
     await ensureTenantAuditReady();
+    await ensureSkillRegistry(); // grandfathering must run before this tenant exists (see tenancy/lifecycle.ts)
     const ctx = { actor: 'self_registration', declaredActor: null, requestId: crypto.randomUUID() };
     const tenant = await registerTenant(String(company_name), String(email), 'free', {
       createdBy: 'self_registration',
