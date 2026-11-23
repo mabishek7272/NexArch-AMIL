@@ -20,6 +20,7 @@ import { jsonBodyErrorStatus } from './json-errors';
 import interpretationRouter from '../interpretation/jobs/routes';
 import webhookRouter from '../interpretation/webhooks/routes';
 import reportRouter from '../interpretation/reports/routes';
+import longitudinalRouter from '../interpretation/longitudinal/routes';
 import { createBrandingAdminRouter } from '../interpretation/reports/admin-routes';
 import { createReviewQueueRouter } from '../interpretation/reports/review-routes';
 import { enableSpendTracking } from '../ai/spend';
@@ -128,6 +129,7 @@ export function createApiApp(env: NodeJS.ProcessEnv = process.env): ApiApp {
   // Asynchronous interpretation intake (tenant apps post their AI output; polled by id).
   app.use(interpretationRouter);
   app.use(reportRouter);
+  app.use(longitudinalRouter);
 
   // ── Root info ──────────────────────────────────────────────────────────────
   app.get(API_PREFIX, (_req, res) => {
