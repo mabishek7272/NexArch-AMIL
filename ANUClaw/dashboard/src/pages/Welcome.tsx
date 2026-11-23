@@ -236,9 +236,11 @@ export default function Welcome() {
                 transition={{ duration: 0.4 }}
                 className="glass p-5 space-y-5"
               >
-                <label className="flex items-start gap-3 cursor-pointer">
+                {/* The whole sentence is the click target (not just the 20px box), and the box is a real keyboard-operable checkbox. */}
+                <label className="flex items-start gap-3 cursor-pointer" onClick={() => scrolled && setChecked(v => !v)}>
                   <div
-                    onClick={() => scrolled && setChecked(v => !v)}
+                    role="checkbox" aria-checked={checked} aria-disabled={!scrolled} tabIndex={0}
+                    onKeyDown={e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); if (scrolled) setChecked(v => !v); } }}
                     className="w-5 h-5 rounded border-2 shrink-0 mt-0.5 flex items-center justify-center transition-all cursor-pointer"
                     style={{
                       borderColor: checked ? '#00B8CC' : 'rgba(255,255,255,0.2)',

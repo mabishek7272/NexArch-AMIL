@@ -2,6 +2,7 @@ import { Pool, types } from 'pg';
 import { config } from '../config';
 import { logger } from '../logger';
 import { bootstrapFirstAdmin, SCHEMA_ADVISORY_LOCK_KEY } from './admin-bootstrap';
+import { INTERPRETATION_SCHEMA_SQL } from '../interpretation/jobs/schema';
 
 // Parse PostgreSQL INT8 (BIGINT) as JavaScript integers to prevent Date parsing errors on frontend
 types.setTypeParser(20, parseInt);
@@ -896,6 +897,64 @@ export async function migrate(pool: Pool): Promise<void> {
              api_key_prefix = left(api_key, 14),
              api_key = 'hashed:' || tenant_id
        WHERE api_key_hash IS NULL AND api_key NOT LIKE 'hashed:%'`);
+
+    // ── Tenant API keys, many per tenant (interpretation engine P1) ───────────
+    // Authentication reads ONLY this table (src/interpretation/tenancy/keys.ts), so a key can be revoked,
+    // expired or rotated. tenants.api_key_hash is no longer authoritative; it is left untouched so a code
+    // rollback keeps the original key working. Each tenant's legacy single key is copied in once;
+    // ON CONFLICT DO NOTHING means a legacy key that was later revoked (its row stays) is never revived.
+    await client.query(`CREATE TABLE IF NOT EXISTS tenant_api_keys (
+      key_id VARCHAR(64) PRIMARY KEY,
+      tenant_id VARCHAR(64) NOT NULL REFERENCES tenants(tenant_id) ON DELETE CASCADE,
+      key_hash CHAR(64) NOT NULL UNIQUE,
+      key_prefix VARCHAR(24) NOT NULL,
+      label VARCHAR(100) NOT NULL DEFAULT '',
+      scopes TEXT NOT NULL DEFAULT '["*"]',
+      created_at BIGINT NOT NULL,
+      created_by VARCHAR(100) NOT NULL,
+      expires_at BIGINT,
+      revoked_at BIGINT,
+      revoked_reason VARCHAR(100),
+      last_used_at BIGINT,
+      rotated_from VARCHAR(64))`);
+    await client.query('CREATE INDEX IF NOT EXISTS idx_tenant_api_keys_tenant ON tenant_api_keys(tenant_id, created_at)');
+    await client.query(`
+      INSERT INTO tenant_api_keys (key_id, tenant_id, key_hash, key_prefix, label, created_at, created_by)
+      SELECT 'legacy-' || tenant_id, tenant_id, api_key_hash, COALESCE(api_key_prefix, ''), 'legacy',
+             (EXTRACT(EPOCH FROM NOW()) * 1000)::BIGINT, 'migration'
+        FROM tenants WHERE api_key_hash IS NOT NULL
+      ON CONFLICT DO NOTHING`);
+
+    // ── Skill registry + per-tenant assignment (interpretation engine P2) ─────
+    // `skills` holds both the file-based agent skills (kind 'agent', synced from container/skills) and
+    // manifest-defined interpretation skills. A tenant can use a skill only through a `tenant_skills` row.
+    // `registry_state` records one-time steps (the one-time grandfathering of existing tenants) so they never repeat.
+    await client.query(`CREATE TABLE IF NOT EXISTS skills (
+      skill_id VARCHAR(64) PRIMARY KEY,
+      kind VARCHAR(20) NOT NULL CHECK (kind IN ('agent','interpretation')),
+      version VARCHAR(40) NOT NULL,
+      title VARCHAR(200) NOT NULL DEFAULT '',
+      manifest_json TEXT NOT NULL DEFAULT '{}',
+      risk_tier VARCHAR(20) NOT NULL DEFAULT 'ruo' CHECK (risk_tier IN ('ruo','clinical')),
+      requires_release BOOLEAN NOT NULL DEFAULT FALSE,
+      enabled BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at BIGINT NOT NULL,
+      updated_at BIGINT NOT NULL,
+      updated_by VARCHAR(100) NOT NULL DEFAULT '')`);
+    await client.query(`CREATE TABLE IF NOT EXISTS tenant_skills (
+      tenant_id VARCHAR(64) NOT NULL REFERENCES tenants(tenant_id) ON DELETE CASCADE,
+      skill_id VARCHAR(64) NOT NULL REFERENCES skills(skill_id),
+      enabled BOOLEAN NOT NULL DEFAULT TRUE,
+      config_json TEXT NOT NULL DEFAULT '{}',
+      assigned_at BIGINT NOT NULL,
+      assigned_by VARCHAR(100) NOT NULL,
+      PRIMARY KEY (tenant_id, skill_id))`);
+    await client.query('CREATE INDEX IF NOT EXISTS idx_tenant_skills_skill ON tenant_skills(skill_id)');
+    await client.query(`CREATE TABLE IF NOT EXISTS registry_state (
+      key VARCHAR(100) PRIMARY KEY, value TEXT NOT NULL DEFAULT '', updated_at BIGINT NOT NULL)`);
+
+    // ── Asynchronous interpretation intake (interpretation engine P3a); SQL lives in the module ─────
+    for (const statement of INTERPRETATION_SCHEMA_SQL) await client.query(statement);
 
     // ── E-LAB platform tiering columns on tenants (additive, idempotent) ──────
     await client.query(`ALTER TABLE tenants ADD COLUMN IF NOT EXISTS scopes TEXT`);

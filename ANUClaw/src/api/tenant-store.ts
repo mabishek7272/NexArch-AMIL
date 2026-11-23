@@ -1,7 +1,15 @@
 import * as crypto from 'crypto';
-import { db } from '../db';
+import { db, TxClient } from '../db';
 import { logger } from '../logger';
 import { mapTenantRow } from './tenant-map';
+import { generateApiKey, hashApiKey, insertKeyRow, lookupApiKey, isKeyActive } from '../interpretation/tenancy/keys';
+
+// Key generation/hashing now live with the rest of key handling; re-exported so existing imports keep working.
+export { generateApiKey, hashApiKey };
+/** Resolve a presented key to a tenant, distinguishing revoked/expired/unknown (see tenancy/keys.ts). */
+export const lookupTenantApiKey = lookupApiKey;
+/** Is this key still valid (not revoked, not expired)? Binds JWTs to the key that minted them. */
+export const isTenantKeyActive = isKeyActive;
 
 export type Plan = 'free' | 'pro' | 'enterprise';
 
@@ -38,29 +46,44 @@ const PLAN_LIMITS: Record<Plan, { rate: number; quota: number | null }> = {
   enterprise: { rate: 0, quota: null },
 };
 
-export function generateApiKey(): string {
-  return 'amgi_live_' + crypto.randomBytes(24).toString('hex');
+export function planLimits(plan: Plan): { rate: number; quota: number | null } {
+  return PLAN_LIMITS[plan];
+}
+
+export interface RegisterTenantOptions {
+  /** Recorded on the first key (`created_by`). */
+  createdBy?: string;
+  label?: string;
+  /** Runs inside the same transaction as the insert; throwing rolls the tenant back (used for the audit entry). */
+  afterInsert?: (tx: TxClient, tenantId: string) => Promise<void>;
 }
 
 export async function registerTenant(
   companyName: string,
   email: string,
   plan: Plan = 'free',
+  opts: RegisterTenantOptions = {},
 ): Promise<Tenant> {
-  const existing = await db.queryOne('SELECT tenant_id FROM tenants WHERE email = $1', [email]);
-  if (existing) throw new Error(`Email '${email}' is already registered.`);
-
   const tenant_id = crypto.randomUUID();
   const api_key = generateApiKey();
   const limits = PLAN_LIMITS[plan];
   const now = new Date().toISOString();
 
-  // Only the SHA-256 hash and a short prefix are stored; the key is returned once.
-  await db.query(`
-    INSERT INTO tenants
-      (tenant_id, company_name, email, api_key, api_key_hash, api_key_prefix, plan, rate_limit_per_min, monthly_quota, created_at)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-  `, [tenant_id, companyName, email, `hashed:${tenant_id}`, hashApiKey(api_key), api_key.slice(0, 14), plan, limits.rate, limits.quota ?? null, now]);
+  await db.transaction(async (tx) => {
+    const existing = await tx.query('SELECT tenant_id FROM tenants WHERE lower(email) = lower($1)', [email]);
+    if (existing.rows.length) throw new Error(`Email '${email}' is already registered.`);
+
+    // Only the SHA-256 hash and a short prefix are stored; the key is returned once. tenants.api_key_hash is kept
+    // for rollback safety; authentication reads tenant_api_keys (tenancy/keys.ts), where the first key is created.
+    await tx.query(`
+      INSERT INTO tenants
+        (tenant_id, company_name, email, api_key, api_key_hash, api_key_prefix, plan, rate_limit_per_min, monthly_quota, created_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+    `, [tenant_id, companyName, email, `hashed:${tenant_id}`, hashApiKey(api_key), api_key.slice(0, 14), plan, limits.rate, limits.quota ?? null, now]);
+    await insertKeyRow(tx, tenant_id,
+      { label: opts.label ?? 'initial', createdBy: opts.createdBy ?? 'self_registration', scopes: ['*'], expiresAt: null }, Date.now(), api_key);
+    if (opts.afterInsert) await opts.afterInsert(tx, tenant_id);
+  });
 
   logger.info(`New tenant registered: ${tenant_id} (${plan})`);
   const tenant = await getTenantById(tenant_id);
@@ -68,15 +91,9 @@ export async function registerTenant(
   return { ...tenant, api_key };
 }
 
-/** API keys are 192-bit random values, so a fast SHA-256 is adequate (no password-style KDF needed). */
-export function hashApiKey(apiKey: string): string {
-  return crypto.createHash('sha256').update(apiKey, 'utf8').digest('hex');
-}
-
 export async function getTenantByApiKey(apiKey: string): Promise<Tenant | null> {
-  if (typeof apiKey !== 'string' || apiKey.length < 16 || apiKey.length > 200 || apiKey.startsWith('hashed:')) return null;
-  const row = await db.queryOne<Record<string, unknown>>('SELECT * FROM tenants WHERE api_key_hash = $1', [hashApiKey(apiKey)]);
-  return row ? mapTenantRow(row) : null;
+  const r = await lookupApiKey(apiKey);
+  return r.status === 'ok' ? r.tenant : null;
 }
 
 export async function getTenantById(tenantId: string): Promise<Tenant | null> {
@@ -175,11 +192,4 @@ export async function getUsageStats(tenantId: string): Promise<object> {
 
 export async function setWebhook(tenantId: string, url: string): Promise<void> {
   await db.query('UPDATE tenants SET webhook_url = $1 WHERE tenant_id = $2', [url, tenantId]);
-}
-
-export async function updatePlan(tenantId: string, plan: Plan): Promise<void> {
-  const limits = PLAN_LIMITS[plan];
-  await db.query(`
-    UPDATE tenants SET plan = $1, rate_limit_per_min = $2, monthly_quota = $3 WHERE tenant_id = $4
-  `, [plan, limits.rate, limits.quota ?? null, tenantId]);
 }

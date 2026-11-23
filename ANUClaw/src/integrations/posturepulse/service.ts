@@ -122,9 +122,18 @@ export async function importFromUpstream(args: { patientId: string; userId: stri
   return persist({ patientId: args.patientId, userId: args.userId, link, verification: 'upstream_verified', origin, digestStatus: 'recomputed_full_body', viewSha256: viewSha256(report), consentRecord, session, report });
 }
 
-/** Path (b): a bundle signed with the configured shared secret. */
-export async function importSignedBundle(args: { patientId: string; userId: string; bundle: any }, env: NodeJS.ProcessEnv = process.env) {
-  const v = verifyBundle(args.bundle, env.ANUCLAW_POSTUREPULSE_IMPORT_SECRET, new Date(), 3600, parseKeyring(env.ANUCLAW_POSTUREPULSE_IMPORT_KEYS));
+export interface VerifiedBundleEvidence {
+  consentRecord: any; session: any; report: any; symptomReports: any[] | undefined;
+  origin: string; digestStatus: DigestStatus; viewSha256: string;
+}
+
+/**
+ * Every check a signed bundle must pass BEFORE it is tied to a patient or a tenant: signature, contract, withheld-row
+ * refusal, exported-view digest, binding, consent and timestamps. Shared by the patient import below and by the
+ * tenant interpretation adapter, so there is one definition of "verified".
+ */
+export function verifyBundleEvidence(bundle: any, env: NodeJS.ProcessEnv = process.env): VerifiedBundleEvidence {
+  const v = verifyBundle(bundle, env.ANUCLAW_POSTUREPULSE_IMPORT_SECRET, new Date(), 3600, parseKeyring(env.ANUCLAW_POSTUREPULSE_IMPORT_KEYS));
   if (!v.ok) throw new WorkflowError(v.reason === 'import_secret_not_configured' ? 503 : 403, v.reason, 'Signed bundle verification failed.');
   const { consentRecord, session, report, symptomReports } = v.payload;
   const problems = [...validateContract('consent-record', consentRecord), ...validateContract('session', session)];
@@ -137,9 +146,24 @@ export async function importSignedBundle(args: { patientId: string; userId: stri
   const computedView = viewSha256(report);
   if (view?.viewSha256 !== undefined && view.viewSha256 !== computedView) throw new WorkflowError(403, 'view_digest_mismatch', 'The exported report does not match the digest of the view the exporter signed.');
   assertTrusted(consentRecord, session, report, symptomReports, undefined, { digestOnly: withheld });
-  const link = await requireLink(args.patientId, session, consentRecord);
   const origin = `signed:${v.payload.issuer}${v.payload.keyId ? `:${v.payload.keyId}` : ''}${v.payload.bundleId ? `:${v.payload.bundleId}` : ''}`;
-  return persist({ patientId: args.patientId, userId: args.userId, link, verification: 'signed_bundle_verified', origin, digestStatus: withheld ? 'upstream_signed_claim_not_recomputable' : 'recomputed_full_body', viewSha256: computedView, consentRecord, session, report, symptomReports });
+  return { consentRecord, session, report, symptomReports, origin, digestStatus: withheld ? 'upstream_signed_claim_not_recomputable' : 'recomputed_full_body', viewSha256: computedView };
+}
+
+/** Path (b): a bundle signed with the configured shared secret. */
+export async function importSignedBundle(args: { patientId: string; userId: string; bundle: any }, env: NodeJS.ProcessEnv = process.env) {
+  const e = verifyBundleEvidence(args.bundle, env);
+  const link = await requireLink(args.patientId, e.session, e.consentRecord);
+  return persist({ patientId: args.patientId, userId: args.userId, link, verification: 'signed_bundle_verified', origin: e.origin, digestStatus: e.digestStatus, viewSha256: e.viewSha256, consentRecord: e.consentRecord, session: e.session, report: e.report, symptomReports: e.symptomReports });
+}
+
+/** Schema-only checks for an UNVERIFIED payload (no release, consent or hash claim is made). Throws 422 on a contract violation. */
+export function validateUnverifiedEvidence(args: PostureImportInput): void {
+  const problems = [
+    ...validateContract('consent-record', args.consentRecord), ...validateContract('session', args.session),
+    ...validateContract('assessment-report', args.report), ...(args.symptomReports ?? []).flatMap((x) => validateContract('symptom-report', x)),
+  ];
+  if (problems.length) throw new WorkflowError(422, 'contract_violation', 'Payload does not match the PosturePulse contract.', problems);
 }
 
 /**
@@ -148,11 +172,7 @@ export async function importSignedBundle(args: { patientId: string; userId: stri
  * (no release, consent or hash claims are made).
  */
 export async function importUnverifiedPayload(args: { patientId: string; userId: string } & PostureImportInput) {
-  const problems = [
-    ...validateContract('consent-record', args.consentRecord), ...validateContract('session', args.session),
-    ...validateContract('assessment-report', args.report), ...(args.symptomReports ?? []).flatMap((x) => validateContract('symptom-report', x)),
-  ];
-  if (problems.length) throw new WorkflowError(422, 'contract_violation', 'Payload does not match the PosturePulse contract.', problems);
+  validateUnverifiedEvidence(args);
   const link = await requireLink(args.patientId, args.session, args.consentRecord);
   return persist({ ...args, link, verification: 'unverified_payload', origin: null });
 }

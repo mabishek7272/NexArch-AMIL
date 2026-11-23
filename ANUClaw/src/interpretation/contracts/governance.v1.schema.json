@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anuclaw.invalid/contracts/governance.v1.schema.json",
+  "title": "governance/v1",
+  "description": "Output of the deterministic governance stage: positions against the source's own references, the adapter's flags plus the flags governance added, the referral advisory decision and the review routing. Computed without any model, from normalized-findings/v1 alone.",
+  "type": "object",
+  "required": ["schemaVersion", "ruleset", "findingsSha256", "evaluatedAt", "positions", "flags", "referral", "route", "advisory"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": "governance/v1" },
+    "ruleset": { "type": "object", "required": ["id", "version"], "additionalProperties": false, "properties": { "id": { "type": "string" }, "version": { "type": "string" } } },
+    "findingsSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "evaluatedAt": { "type": "string", "format": "date-time" },
+    "positions": {
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["findingKey", "position", "basis"], "additionalProperties": false,
+        "properties": {
+          "findingKey": { "type": "string" },
+          "position": { "enum": ["below", "within", "above", "indeterminate", "no_reference", "not_applicable"] },
+          "basis": { "enum": ["numeric_reference", "uncertainty_straddles_bound", "boundary_inclusivity_unstated", "draft_reference", "text_only_reference", "no_reference", "non_numeric_value", "missing_value", "excluded"] }
+        }
+      }
+    },
+    "flags": {
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["type", "severity", "detail"], "additionalProperties": false,
+        "properties": {
+          "type": { "enum": ["missing_data", "contradiction", "low_confidence", "out_of_source_range", "under_research", "stale_capture", "unit_mismatch", "implausible_value", "review_required", "unmapped_key", "symptom_reported", "unverified_source", "draft_reference"] },
+          "severity": { "enum": ["info", "attention", "blocking"] },
+          "findingKeys": { "type": "array", "items": { "type": "string" } },
+          "detail": { "type": "string" },
+          "resolvedBy": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "referral": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object", "required": ["level", "reasons", "textId", "textVersion"], "additionalProperties": false,
+          "properties": {
+            "level": { "const": "see_clinician_soon" },
+            "reasons": { "type": "array", "minItems": 1, "items": { "type": "object", "required": ["code"], "additionalProperties": false, "properties": { "code": { "enum": ["risk_indicator_flagged", "high_risk_outside_reference", "blocking_flag", "multiple_attention_on_high_risk", "under_research_high"] }, "findingKeys": { "type": "array", "items": { "type": "string" } } } } },
+            "textId": { "type": "string" }, "textVersion": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "route": {
+      "type": "object", "required": ["state", "reasons", "followUp"], "additionalProperties": false,
+      "properties": { "state": { "enum": ["awaiting_clinician", "eligible_for_ai_review"] }, "reasons": { "type": "array", "items": { "type": "string" } }, "followUp": { "type": "boolean" } }
+    },
+    "advisory": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "object", "required": ["id", "version", "status"], "additionalProperties": false, "properties": { "id": { "type": "string" }, "version": { "type": "string" }, "status": { "type": "string" } } }
+      ]
+    }
+  }
+}

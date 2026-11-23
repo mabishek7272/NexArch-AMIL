@@ -13,7 +13,16 @@ import { requireAuth, assertApiAuthConfigured } from './middleware/auth';
 import { createElabPlatformRouter } from './routes/elab-platform';
 import { createElabUiRouter } from './routes/elab-ui';
 import { createAdminRouter } from './routes/admin';
+import { createTenantAdminRouter } from '../interpretation/tenancy/admin-routes';
+import { createSkillAdminRouter } from '../interpretation/skills/admin-routes';
 import baasV1Router from './routes/baas-v1';
+import { jsonBodyErrorStatus } from './json-errors';
+import interpretationRouter from '../interpretation/jobs/routes';
+import webhookRouter from '../interpretation/webhooks/routes';
+import reportRouter from '../interpretation/reports/routes';
+import longitudinalRouter from '../interpretation/longitudinal/routes';
+import { createBrandingAdminRouter } from '../interpretation/reports/admin-routes';
+import { createReviewQueueRouter } from '../interpretation/reports/review-routes';
 import { enableSpendTracking } from '../ai/spend';
 import { corsOriginOption, runStartupChecks } from '../startup-checks';
 import { createDefaultElabPlatform, resolveTenantContext } from './elab/platform';
@@ -77,6 +86,7 @@ export function createApiApp(env: NodeJS.ProcessEnv = process.env): ApiApp {
 
   // ── API routes ─────────────────────────────────────────────────────────────
   app.use(`${API_PREFIX}`,          tenantRoutes);
+  app.use(`${API_PREFIX}`,          webhookRouter);
   app.use(`${API_PREFIX}/skills`,   skillRoutes);
   app.use(`${API_PREFIX}/ehr`,      ehrRoutes);
   app.use(`${API_PREFIX}/usage`,    usageRoutes);
@@ -107,9 +117,19 @@ export function createApiApp(env: NodeJS.ProcessEnv = process.env): ApiApp {
 
   // Admin API (tenant clinical-grant) — X-Admin-Key gated, fail-closed if unset.
   app.use(createAdminRouter());
+  // Tenant lifecycle + key management (create/suspend/plan/rotate/revoke/audit) — same admin-key guard.
+  app.use(createTenantAdminRouter());
+  // Skill registry + per-tenant skill assignment — same admin-key guard.
+  app.use(createSkillAdminRouter());
+  app.use(createBrandingAdminRouter());
+  app.use(createReviewQueueRouter());
 
   // Versioned BaaS API (plan §13): documents → observations → analyses → reports.
   app.use(baasV1Router);
+  // Asynchronous interpretation intake (tenant apps post their AI output; polled by id).
+  app.use(interpretationRouter);
+  app.use(reportRouter);
+  app.use(longitudinalRouter);
 
   // ── Root info ──────────────────────────────────────────────────────────────
   app.get(API_PREFIX, (_req, res) => {
@@ -155,6 +175,8 @@ export function createApiApp(env: NodeJS.ProcessEnv = process.env): ApiApp {
 
   // ── Error handler ──────────────────────────────────────────────────────────
   app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    const bodyError = jsonBodyErrorStatus(err);
+    if (bodyError) { res.status(bodyError.status).json({ error: { code: bodyError.code, message: bodyError.message } }); return; }
     logger.error(`Unhandled API error: ${err.message}`);
     res.status(500).json({ error: 'Internal server error.' });
   });

@@ -28,6 +28,9 @@ import { isUtcDay, pgReport } from '../../ai/spend';
 import { alphaFold } from '../../sciencedata/alphafold-service';
 import { science, Scope as SciScope } from '../../sciencedata/service';
 import { PROVIDER_IDS, ProviderId } from '../../sciencedata/types';
+import { listInterpretationRoutes } from '../../interpretation/jobs/routes';
+import { listReportRoutes } from '../../interpretation/reports/routes';
+import { listLongitudinalRoutes } from '../../interpretation/longitudinal/routes';
 
 export const V1_VERSION = '1.0.0';
 const router = Router();
@@ -246,7 +249,8 @@ export function listV1Routes(): Array<{ method: string; path: string }> {
     if (!layer.route) continue;
     for (const m of Object.keys(layer.route.methods)) out.push({ method: m.toUpperCase(), path: layer.route.path });
   }
-  return out;
+  // Interpretation routes live in their own router; the one OpenAPI contract covers both.
+  return [...out, ...listInterpretationRoutes(), ...listReportRoutes(), ...listLongitudinalRoutes()];
 }
 
 export default router;

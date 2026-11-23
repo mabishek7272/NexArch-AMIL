@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anuclaw.invalid/contracts/longitudinal-comparison.v1.schema.json",
+  "title": "longitudinal-comparison/v1",
+  "description": "A neutral comparison of two scans of the same subject, computed without any model from two stored normalized-findings documents. It never says a change is an improvement or a deterioration, and is not a diagnosis. A difference is 'beyond_uncertainty' only when it exceeds the combined uncertainty the SOURCE reported for both values; without that uncertainty the finding is 'not_comparable'.",
+  "type": "object",
+  "required": ["schemaVersion", "ruleset", "earlier", "later", "intervalSeconds", "comparisons", "flags", "summary", "statement", "comparisonSha256"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": "longitudinal-comparison/v1" },
+    "ruleset": { "type": "object", "required": ["id", "version"], "additionalProperties": false, "properties": { "id": { "type": "string" }, "version": { "type": "string" } } },
+    "earlier": { "$ref": "#/$defs/scan" },
+    "later": { "$ref": "#/$defs/scan" },
+    "intervalSeconds": { "type": "integer", "minimum": 0 },
+    "comparisons": { "type": "array", "items": { "$ref": "#/$defs/comparison" } },
+    "flags": {
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["type", "severity", "detail"], "additionalProperties": false,
+        "properties": {
+          "type": { "enum": ["short_interval_discrepancy", "source_model_changed"] },
+          "severity": { "enum": ["info", "attention"] },
+          "findingKeys": { "type": "array", "items": { "type": "string" } },
+          "detail": { "type": "string" }
+        }
+      }
+    },
+    "summary": {
+      "type": "object", "required": ["within_uncertainty", "beyond_uncertainty", "not_comparable"], "additionalProperties": false,
+      "properties": { "within_uncertainty": { "type": "integer", "minimum": 0 }, "beyond_uncertainty": { "type": "integer", "minimum": 0 }, "not_comparable": { "type": "integer", "minimum": 0 } }
+    },
+    "statement": { "type": "string" },
+    "comparisonSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "$defs": {
+    "scan": {
+      "type": "object", "required": ["jobId", "capturedAt", "findingsSha256", "source"], "additionalProperties": false,
+      "properties": {
+        "jobId": { "type": "string" }, "capturedAt": { "type": "string", "format": "date-time" }, "findingsSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "source": { "type": "object", "additionalProperties": { "type": "string" } }
+      }
+    },
+    "point": {
+      "type": "object", "required": ["value"], "additionalProperties": false,
+      "properties": { "value": { "type": ["number", "string", "boolean", "null"] }, "uncertainty": { "type": "number", "minimum": 0 } }
+    },
+    "comparison": {
+      "type": "object", "required": ["findingKey", "label", "status"], "additionalProperties": false,
+      "properties": {
+        "findingKey": { "type": "string" }, "label": { "type": "string" }, "group": { "type": "string" }, "unit": { "type": "string" },
+        "status": { "enum": ["within_uncertainty", "beyond_uncertainty", "not_comparable"] },
+        "reason": { "enum": ["missing_in_earlier", "missing_in_later", "value_missing", "excluded", "non_numeric", "unit_changed", "no_uncertainty", "source_model_changed"] },
+        "earlier": { "$ref": "#/$defs/point" }, "later": { "$ref": "#/$defs/point" },
+        "delta": { "type": "number" }, "combinedUncertainty": { "type": "number", "minimum": 0 },
+        "laterIs": { "enum": ["higher", "lower"] },
+        "identical": { "type": "boolean" },
+        "shortInterval": { "type": "boolean" }
+      }
+    }
+  }
+}

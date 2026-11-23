@@ -164,6 +164,34 @@ async function main(): Promise<void> {
     startApiServer();
   }
 
+  // Interpretation worker (opt-in): normalises jobs queued by POST /v1/interpretations.
+  let interpretationWorker: { stop(): Promise<void> } | undefined;
+  if (process.env.ANUCLAW_INTERPRETATION_WORKER === 'true') {
+    const { registerBuiltinAdapters } = await import('./interpretation/adapters');
+    const { startInterpretationWorker } = await import('./interpretation/jobs/worker');
+    registerBuiltinAdapters();
+    interpretationWorker = startInterpretationWorker();
+    logger.info('Interpretation worker started.');
+  }
+
+  // Report worker (opt-in): governance, narrative and report assembly for completed interpretation jobs.
+  let reportWorker: { stop(): Promise<void> } | undefined;
+  if (process.env.ANUCLAW_REPORT_WORKER === 'true') {
+    const { registerBuiltinAdapters } = await import('./interpretation/adapters');
+    const { startReportWorker } = await import('./interpretation/reports/worker');
+    registerBuiltinAdapters();
+    reportWorker = startReportWorker();
+    logger.info('Report worker started.');
+  }
+
+  // Webhook delivery worker (opt-in): sends the signed events the interpretation worker queued.
+  let webhookWorker: { stop(): Promise<void> } | undefined;
+  if (process.env.ANUCLAW_WEBHOOK_WORKER === 'true') {
+    const { startWebhookWorker } = await import('./interpretation/webhooks/delivery');
+    webhookWorker = startWebhookWorker();
+    logger.info('Webhook delivery worker started.');
+  }
+
   // Start Dashboard if enabled (default: on)
   if (process.env.DASHBOARD_ENABLED !== 'false') {
     mountDashboard();
@@ -174,11 +202,17 @@ async function main(): Promise<void> {
   // Graceful shutdown
   process.on('SIGINT', async () => {
     logger.info('Shutting down...');
+    await interpretationWorker?.stop();
+    await webhookWorker?.stop();
+    await reportWorker?.stop();
     await stopAllChannels();
     process.exit(0);
   });
 
   process.on('SIGTERM', async () => {
+    await interpretationWorker?.stop();
+    await webhookWorker?.stop();
+    await reportWorker?.stop();
     await stopAllChannels();
     process.exit(0);
   });
