@@ -19,6 +19,7 @@ import { TenancyError } from '../tenancy/keys';
 import { adminHandler as handle, idParam, type AdminGuard } from '../tenancy/admin-http';
 import { SKILL_ID_RE } from './manifest';
 import { listAdapters } from './adapters';
+import { narrativeModelAllowList } from '../narrative/settings';
 import { assignSkill, ensureSkillRegistry, listSkills, listTenantSkills, registerInterpretationSkill, unassignSkill, updateSkill } from './registry';
 
 export function createSkillAdminRouter(opts: { adminKey?: string; guard?: AdminGuard } = {}): Router {
@@ -45,6 +46,10 @@ export function createSkillAdminRouter(opts: { adminKey?: string; guard?: AdminG
 
   router.patch('/api/v1/admin/skills/:skillId', guard, handle(async (req, res, ctx) => {
     res.json({ skill: await updateSkill(skillId(req), { enabled: req.body?.enabled, manifest: req.body?.manifest }, ctx) });
+  }));
+
+  router.get('/api/v1/admin/narrative-models', guard, handle(async (_req, res) => {
+    res.json({ models: narrativeModelAllowList() });
   }));
 
   router.get('/api/v1/admin/adapters', guard, handle(async (_req, res) => {

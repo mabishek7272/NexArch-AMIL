@@ -24,7 +24,9 @@ async function req<T>(path: string, options?: RequestInit): Promise<T> {
   }
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error((body as any)?.error ?? `HTTP ${res.status}`);
+    // The dashboard routes answer { error: "text" }; the administrator API answers { error: { code, message } }.
+    const e = (body as any)?.error;
+    throw new Error(typeof e === 'string' ? e : (e?.message ?? `HTTP ${res.status}`));
   }
   return res.json();
 }

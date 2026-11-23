@@ -271,3 +271,6 @@
   z-index: 80;
 }
 [data-nx-tooltip]:hover::after { opacity: 1; }
+
+/* Anukla review: stack the report and the review facts on narrow screens. */
+@media (max-width: 900px) { .nx-root .anukla-review-grid { grid-template-columns: 1fr !important; } }

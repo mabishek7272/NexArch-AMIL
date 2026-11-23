@@ -5,7 +5,7 @@
 // web-components runtime; React uses lucide-react imports instead).
 import {
   LayoutDashboard, Microscope, Library, FileText, Beaker, Dna, PersonStanding,
-  Activity, ShieldCheck, GitBranch, Plug, Scale, Settings, type LucideIcon,
+  Activity, ShieldCheck, GitBranch, Plug, Scale, Settings, ClipboardCheck, Building2, Cpu, Gauge, type LucideIcon,
 } from 'lucide-react';
 
 export type DashRole = 'admin' | 'operator' | 'clinician' | 'compliance' | 'auditor' | 'viewer';
@@ -44,6 +44,15 @@ export const NEXARCH_NAV: NavGroup[] = [
       { label: 'Bioinformatics', icon: Dna, to: '/nexarch/bioinformatics', roles: ['admin', 'operator'], status: 'live' },
       { label: 'Posture Analysis', icon: PersonStanding, to: '/nexarch/posture-analysis', roles: ['admin', 'operator', 'clinician'], status: 'preview' },
       { label: 'Monitoring', icon: Activity, to: '/nexarch/monitoring', roles: ['admin', 'operator', 'clinician'], status: 'preview' },
+    ],
+  },
+  {
+    group: 'Interpretation',
+    items: [
+      { label: 'Clinical review', icon: ClipboardCheck, to: '/nexarch/anukla/review', roles: ['admin', 'clinician'], status: 'live' },
+      { label: 'Tenants', icon: Building2, to: '/nexarch/anukla/tenants', roles: ['admin', 'auditor', 'compliance'], status: 'live' },
+      { label: 'Operations', icon: Gauge, to: '/nexarch/anukla/operations', roles: ['admin', 'operator', 'auditor', 'compliance'], status: 'live' },
+      { label: 'Skill registry', icon: Cpu, to: '/nexarch/anukla/skills', roles: ['admin', 'auditor', 'compliance'], status: 'live' },
     ],
   },
   {

@@ -28,6 +28,10 @@ import { registerAllResearchStudioAgents } from '../../research-studio/register-
 import { enableSpendTracking } from '../../ai/spend';
 import { runStartupChecks } from '../../startup-checks';
 import { mountDashboardCds } from './routes/cds';
+import anuklaReviewRouter from './routes/anukla-review';
+import { mountAnuklaAdmin } from './routes/anukla-admin';
+import anuklaOpsRouter from './routes/anukla-ops';
+import anuklaLongitudinalRouter from './routes/anukla-longitudinal';
 
 export function mountDashboard(): void {
   // Fail closed at startup if the dashboard signing secret is missing/unsafe (F02).
@@ -65,6 +69,11 @@ export function mountDashboard(): void {
   dash.use('/api/ocr-study',    ocrStudyRouter);    // OCR validation-study workspaces (study tooling only; synthetic data; storage fails closed)
   registerAllResearchStudioAgents();
   dash.use('/api/research-studio', researchStudioRouter);   // ANUClaw Research Studio (M1 foundation + M2 evidence graph: durable project/task graph, literature/evidence agents)
+
+  mountAnuklaAdmin(dash);                                  // tenants, keys, skills, branding: the administrator API behind the dashboard session (admin role)
+  dash.use('/api/anukla/longitudinal', anuklaLongitudinalRouter);   // clinicians: a subject's timeline and neutral comparison of two scans
+  dash.use('/api/anukla/ops', anuklaOpsRouter);             // processing history, webhook log, usage and spend, audit-chain check
+  dash.use('/api/anukla/review', anuklaReviewRouter);   // Anukla interpretation engine: clinician review queue, sign-off, rejection, regeneration
 
   // CDS v3 — clinician review console + endpoints (cookie-auth, shared audit log)
   mountDashboardCds(dash);

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Microscope, Play, Folders, ShieldCheck } from 'lucide-react';
 import { api } from '../../lib/api';
 import { Badge, NotAvailableYet, WorkspaceBar, SR_ONLY } from '../ui';
+import { InterpretationTiles } from './anukla/InterpretationTiles';
 
 /**
  * Overview — screen 01. Project portfolio, evidence-integrity split and sources/excerpts/claims
@@ -57,6 +58,7 @@ export default function Overview() {
           { label: 'EVIDENCE', value: unsupported == null ? <span style={{ color: 'var(--nx-text-dim)' }}>—</span> : <Badge tone={unsupported > 0 ? 'red' : 'green'}>{unsupported} UNSUPPORTED</Badge> },
         ]}
       />
+      <InterpretationTiles />
 
       <div style={{ padding: '18px 20px' }}>
         {projects === null && <div style={{ color: 'var(--nx-text-muted)', font: '400 12.5px Inter,sans-serif' }}>Loading projects…</div>}

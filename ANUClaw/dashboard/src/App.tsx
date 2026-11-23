@@ -45,6 +45,13 @@ const NexArchStudio     = lazy(() => import('./nexarch/pages/ResearchStudioPage'
 const NexArchConnections= lazy(() => import('./nexarch/pages/Connections'));
 const NexArchAlphaFold = lazy(() => import('./nexarch/pages/AlphaFoldPage'));
 const NexArchStyleGuide = lazy(() => import('./nexarch/pages/StyleGuide'));
+const AnuklaReviewQueue = lazy(() => import('./nexarch/pages/anukla/ReviewQueue'));
+const AnuklaReportReview = lazy(() => import('./nexarch/pages/anukla/ReportReview'));
+const AnuklaTenants = lazy(() => import('./nexarch/pages/anukla/Tenants'));
+const AnuklaTenantDetail = lazy(() => import('./nexarch/pages/anukla/TenantDetail'));
+const AnuklaSkillRegistry = lazy(() => import('./nexarch/pages/anukla/SkillRegistry'));
+const AnuklaOperations = lazy(() => import('./nexarch/pages/anukla/Operations'));
+const AnuklaTimeline = lazy(() => import('./nexarch/pages/anukla/Timeline'));
 
 const NAV = [
   { to: '/',              label: 'Dashboard',     Icon: LayoutDashboard, end: true },
@@ -335,6 +342,13 @@ export default function App() {
                 <Route path="dry-lab/alphafold" element={<NexArchAlphaFold />} />
                 <Route path="connections"     element={<NexArchConnections />} />
                 <Route path="style-guide"     element={<NexArchStyleGuide />} />
+                <Route path="anukla/review"     element={<AnuklaReviewQueue />} />
+                <Route path="anukla/review/:id" element={<AnuklaReportReview />} />
+                <Route path="anukla/tenants"     element={<AnuklaTenants />} />
+                <Route path="anukla/tenants/:id" element={<AnuklaTenantDetail />} />
+                <Route path="anukla/skills"      element={<AnuklaSkillRegistry />} />
+                <Route path="anukla/operations"  element={<AnuklaOperations />} />
+                <Route path="anukla/timeline/:jobId" element={<AnuklaTimeline />} />
                 <Route path="*"                element={<Navigate to="/nexarch" replace />} />
               </Route>
             </Routes>
