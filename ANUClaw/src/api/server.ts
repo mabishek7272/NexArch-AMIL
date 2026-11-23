@@ -19,6 +19,9 @@ import baasV1Router from './routes/baas-v1';
 import { jsonBodyErrorStatus } from './json-errors';
 import interpretationRouter from '../interpretation/jobs/routes';
 import webhookRouter from '../interpretation/webhooks/routes';
+import reportRouter from '../interpretation/reports/routes';
+import { createBrandingAdminRouter } from '../interpretation/reports/admin-routes';
+import { createReviewQueueRouter } from '../interpretation/reports/review-routes';
 import { enableSpendTracking } from '../ai/spend';
 import { corsOriginOption, runStartupChecks } from '../startup-checks';
 import { createDefaultElabPlatform, resolveTenantContext } from './elab/platform';
@@ -117,11 +120,14 @@ export function createApiApp(env: NodeJS.ProcessEnv = process.env): ApiApp {
   app.use(createTenantAdminRouter());
   // Skill registry + per-tenant skill assignment — same admin-key guard.
   app.use(createSkillAdminRouter());
+  app.use(createBrandingAdminRouter());
+  app.use(createReviewQueueRouter());
 
   // Versioned BaaS API (plan §13): documents → observations → analyses → reports.
   app.use(baasV1Router);
   // Asynchronous interpretation intake (tenant apps post their AI output; polled by id).
   app.use(interpretationRouter);
+  app.use(reportRouter);
 
   // ── Root info ──────────────────────────────────────────────────────────────
   app.get(API_PREFIX, (_req, res) => {

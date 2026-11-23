@@ -23,6 +23,7 @@ import { TenancyError } from '../tenancy/keys';
 import { AuditCtx, ensureTenantAuditReady, recordTenantEvent } from '../tenancy/audit';
 import { InterpretationManifest, RiskTier, SKILL_ID_RE, validateManifest } from './manifest';
 import { getAdapter, isAdapterAvailable } from './adapters';
+import { validateNarrativeConfig } from '../narrative/settings';
 
 /** Registry-wide events (skills registered/changed) are audited on this reserved chain; real tenant ids are UUIDs. */
 export const PLATFORM_AUDIT_ID = '_platform';
@@ -249,6 +250,8 @@ function cleanConfig(config: unknown): Record<string, unknown> {
   if (config === undefined || config === null) return {};
   if (typeof config !== 'object' || Array.isArray(config)) throw new TenancyError(400, 'validation_failed', 'config must be a JSON object.');
   if (Buffer.byteLength(JSON.stringify(config)) > MAX_CONFIG_BYTES) throw new TenancyError(400, 'validation_failed', `config must be at most ${MAX_CONFIG_BYTES} bytes.`);
+  const problem = validateNarrativeConfig((config as Record<string, unknown>).narrative);
+  if (problem) throw new TenancyError(400, 'validation_failed', problem);
   return config as Record<string, unknown>;
 }
 
