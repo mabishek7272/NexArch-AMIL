@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "interpretation-request/v1",
+  "tenantRequestId": "synthetic-beaive-0001",
+  "skillId": "physiological-signal-interpretation",
+  "analysisType": "face_scan_vitals",
+  "subject": {
+    "externalRef": "SYNTH-SUBJECT-0001",
+    "identity": { "name": "Synthetic Test Patient", "email": "synthetic@example.invalid", "phone": "+000000000" },
+    "demographics": { "ageYears": 40, "sexAtBirth": "unknown" }
+  },
+  "acquisition": {
+    "capturedAt": "2026-08-20T08:31:00Z",
+    "method": "face_scan_60s",
+    "sessionRef": "SYNTH-SESSION-0001",
+    "context": { "fastedBeforeScan": null }
+  },
+  "source": {
+    "application": "beAIve",
+    "modelName": "beaive-face-vitals",
+    "modelVersion": "synthetic-fixture",
+    "researchStatus": "under_research"
+  },
+  "findings": [
+    { "key": "bp", "label": "Blood Pressure", "group": "Basic Vital Signs", "value": "154/94", "unit": "mmHg", "sourceReference": { "text": "<129/90", "upper": 129, "upperInclusive": false } },
+    { "key": "hr", "label": "Heart Rate", "group": "Basic Vital Signs", "value": 107, "unit": "bpm", "sourceReference": { "text": "60-100", "lower": 60, "upper": 100, "lowerInclusive": true, "upperInclusive": true } },
+    { "key": "rr", "label": "Breathing Rate", "group": "Basic Vital Signs", "value": 16, "unit": "breaths/min", "sourceReference": { "text": "12-20", "lower": 12, "upper": 20, "lowerInclusive": true, "upperInclusive": true } },
+    { "key": "spo2", "label": "Oxygen Saturation", "group": "Basic Vital Signs", "value": 99, "unit": "%", "sourceReference": { "text": ">95", "lower": 95, "lowerInclusive": false } },
+    { "key": "wellness_score", "label": "Wellness Score", "group": "Basic Vital Signs", "value": 5, "sourceReference": { "text": ">6", "lower": 6, "lowerInclusive": false } },
+    { "key": "bp_risk", "label": "High Blood Pressure Risk", "group": "Risks", "value": "High", "sourceFlag": "high" },
+    { "key": "hba1c_risk", "label": "High Hemoglobin A1c Risk", "group": "Risks", "value": "High", "sourceFlag": "high", "underResearch": true },
+    { "key": "glucose_risk", "label": "High Fasting Glucose Risk", "group": "Risks", "value": "High", "sourceFlag": "high", "underResearch": true, "notes": "Source states: disregard if not fasted 8-12 hours." },
+    { "key": "ascvd", "label": "ASCVD Risk", "group": "Risks", "value": 2, "unit": "%" },
+    { "key": "hba1c", "label": "Hemoglobin A1c", "group": "Bloodless Blood Tests", "value": 6.89, "unit": "%", "underResearch": true, "sourceReference": { "text": "<5.7", "upper": 5.7, "upperInclusive": false } },
+    { "key": "hemoglobin", "label": "Hemoglobin", "group": "Bloodless Blood Tests", "value": 14.4, "unit": "g/dL", "underResearch": true, "sourceReference": { "text": "M:14-18, F:12-16" } },
+    { "key": "stress_index", "label": "Stress Index", "group": "Stress", "value": 120, "sourceReference": { "text": "<150", "upper": 150, "upperInclusive": false } },
+    { "key": "pns_zone", "label": "PNS Zone (Recovery)", "group": "Advanced Heart Rate Variability", "value": "Low", "sourceFlag": "low" },
+    { "key": "sns_zone", "label": "SNS Zone (Stress Response)", "group": "Advanced Heart Rate Variability", "value": "High", "sourceFlag": "high" },
+    { "key": "rmssd", "label": "RMSSD", "group": "Advanced Heart Rate Variability", "value": 43, "unit": "ms" },
+    { "key": "sdnn", "label": "SDNN", "group": "Advanced Heart Rate Variability", "value": 64, "unit": "ms" },
+    { "key": "lf_hf", "label": "LF/HF Ratio", "group": "Advanced Heart Rate Variability", "value": 3.271 },
+    { "key": "pnn_missing_example", "label": "Example of a value the source could not measure", "group": "Advanced Heart Rate Variability", "value": null }
+  ]
+}

@@ -403,3 +403,42 @@ Status: implemented and tested; **not committed**.
 [`NEXARCH-UNIFICATION-AND-REPAIR-PLAN.md`](NEXARCH-UNIFICATION-AND-REPAIR-PLAN.md) step R1 (authorization and error truthfulness) overlaps P1; coordinate so the plan-escalation fix is made once. [`NEXARCH-SCIENTIFIC-PLATFORM-MASTER-PLAN.md`](NEXARCH-SCIENTIFIC-PLATFORM-MASTER-PLAN.md) covers research studios, not tenant interpretation; its tenant/artifact rules (owner scope, 404 on foreign ids) are followed here. This document supplements, and does not supersede, the clinical release and production-readiness rules.
 
 
+## 19c. P3a as built (intake, queue, worker, beAIve adapter)
+
+- Tables (`src/interpretation/jobs/schema.ts`, run by the startup migration): `interpretation_jobs`, `source_payloads` (immutable by trigger; identity already removed), `identity_vault` (AES-256-GCM, AAD = tenant|job|kid), `normalized_findings`.
+- Idempotency is a database unique index on `(tenant_id, idempotency_key)` plus a stored request fingerprint; concurrent duplicates cannot both create a job.
+- Queue: atomic claim with `FOR UPDATE SKIP LOCKED`, fenced by `claim_token` on heartbeat, failure and the final commit; expired leases are reclaimed; backoff `min(30 min, 30 s * 2^(n-1))`; permanent failures (`AdapterError`, missing adapter) skip retries.
+- `source_payloads.payload_sha256` hashes the stored payload WITHOUT identity, so the hash cannot be used to test guesses about a person's name or email.
+- beAIve adapter `beaive-v1` 1.0.0: derives systolic/diastolic from "SYS/DIA", keeps nulls as `missing` with a flag, applies a sex-dependent range only when `sexAtBirth` is female or male, keeps unknown keys as `unmapped.*` with an `unmapped_key` flag. No value or range is invented.
+- Not yet built here: governance/LLM/reports (P4). PosturePulse is 19d, webhooks 19e, erasure 19f.
+
+
+## 19d. P3b as built (PosturePulse adapter)
+
+- Request contract: `findings` OR `nativePayload` (`posturepulse-assessment/v0`, with exactly one of `bundle` or `unsigned`); never both. Each adapter declares the one form it reads (`input: 'findings' | 'native'`).
+- Verification runs at intake in the adapter's `prepare` hook, so a tenant gets an immediate refusal and nothing is stored. It reuses `verifyBundleEvidence` / `validateUnverifiedEvidence`, extracted from `src/integrations/posturepulse/service.ts` so the patient importer and the interpretation path share one definition of "verified". `run` stays pure.
+- Verification level travels with the findings (`sourceVerification`) and is covered by `findingsSha256`, so a verified and an unverified copy of the same rows can never share a hash. Unsigned input is never upgraded and carries a blocking flag.
+- Normalized-findings v1 gained: `side`, `stepId`, `signConvention`, `tier`, `sourcePosition`, `unsupportedReasons`, reference `status/kind/value`, top-level `sourceVerification`, `notMeasurable`, `symptoms`, and flag types `unverified_source`, `draft_reference`, `symptom_reported`.
+- Deliberately not copied into findings: symptom free text and the clinician-assessment text (both stay only in the stored original payload; the assessment is noted by an info flag). A single-value reference is carried as a target, not a range, and no inclusivity is asserted where the source does not state one.
+
+
+## 19e. P3c as built (signed webhooks)
+
+- `src/security/ssrf-guard.ts`: https only, no credentials, port 443 or 1024-65535, internal-looking names refused, every DNS answer must be a public unicast address (a mixed public/private answer is refused), one validated address is returned and the connection is PINNED to it (`transport.ts` overrides the socket lookup; TLS verifies the real host name; redirects are never followed; responses are capped and discarded). The guard runs at registration and again on every delivery attempt.
+- Tables (SQL in `jobs/schema.ts`): `tenant_webhooks` (one endpoint per tenant; secret sealed with AES-256-GCM under `ANUCLAW_WEBHOOK_SECRET_KEY`, separate from the identity-vault key, AAD = tenant and key id) and `webhook_deliveries` (the outbox).
+- Outbox: the delivery row is written in the SAME transaction as the job's completion (`worker.ts`) or permanent failure (`queue.ts failAttempt`), so a state change and its notification both exist or neither does. It stores the exact bytes sent (ids, hashes, status; no PHI), unique per (job, event type).
+- Delivery: claim with SKIP LOCKED and a fenced token; schedule 1 min / 5 min / 30 min / 2 h / 12 h, six attempts, dead after that or when it would still be pending 24 h after the first attempt. Each attempt is signed at its own time over the same bytes and event id. A removed webhook makes pending deliveries dead without sending.
+- Signature: `Anukla-Signature: t=<unix>,v1=HMAC-SHA256(secret, "t.rawBody")`; the verifier tolerates several `v1` values for rotation overlap.
+- The existing `PUT /account/webhook` setter now registers through this path. It used to accept any `https://` string and nothing ever sent to it.
+
+
+## 19f. P3d as built (subject erasure)
+
+- `POST /v1/subject-erasures` (`src/interpretation/jobs/erasure.ts`) deletes, per (tenant, subject reference), the sealed identity, source payloads and normalized findings, blanks the stored bytes of webhook events and cancels pending ones, and turns each job into a tombstone (`erased`, subject reference replaced, idempotency key freed, fingerprint and hashes cleared). One transaction; explicit `confirm: true`; not quota-metered.
+- In-flight jobs: the transaction row-locks the subject's live jobs (`FOR UPDATE`) and clears their claim token, so the worker's fenced commit fails and cannot write findings back. A test that races erasure against the worker fails 4 times out of 4 when the lock is removed.
+- The audit chain is append-only and is NOT rewritten. It holds job ids, skill ids and hashes of identity-free payloads; erasure appends one `subject.erased` entry (counts, reason code, hash of job ids; no subject reference, no identifier). A receipt table (`subject_erasures`) carries the same, with no subject reference.
+- Completeness is tested by scanning EVERY table for the subject reference, the identity strings and markers planted in the stored payload, before and after erasure; identity strings must never appear in plaintext in any table at any time.
+- Found while building it: the 3a idempotency fingerprint was a plain hash of the whole request body, identity included, i.e. a stored value an attacker could test guesses against. With identity present it is now an HMAC under a key derived from the vault key; an identity-free body keeps the plain hash. Consequence: rotating the identity-vault key invalidates replay detection for older identity-bearing jobs (a same-key retry would then be 409, not a replay).
+- Known limits: a job accepted concurrently with an erasure of the same subject is not covered (it is new data); database backups and external logs are the operator's retention process.
+
+

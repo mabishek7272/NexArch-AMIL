@@ -1,6 +1,8 @@
 import * as crypto from 'crypto';
 import { Router, Request, Response } from 'express';
-import { registerTenant, setWebhook } from '../tenant-store';
+import { registerTenant } from '../tenant-store';
+import { registerWebhook } from '../../interpretation/webhooks/config';
+import { webhookHandler } from '../../interpretation/webhooks/routes';
 import { requireAuth, signToken, AuthRequest } from '../middleware/auth';
 import { effectiveLimits } from '../middleware/rate-limit';
 import { FixedWindowLimiter } from '../../security/throttle';
@@ -118,19 +120,23 @@ router.get('/account', requireAuth, (req: AuthRequest, res: Response) => {
 
 /**
  * PUT /api/v1/account/webhook
- * Register a webhook URL for async skill result delivery.
+ * Register (or change) the HTTPS endpoint that receives signed interpretation events.
+ *
+ * The URL is checked by the SSRF guard: https only, no credentials, public addresses only (private, loopback,
+ * link-local and cloud-metadata ranges are refused), and it is re-checked on every delivery. The first registration
+ * returns the signing secret ONCE (`signing_secret`); later changes keep the same secret. Use
+ * POST /account/webhook/secret/rotate for a new one. See docs/API.md for the signature format.
  *
  * Body: { url }
  */
-router.put('/account/webhook', requireAuth, async (req: AuthRequest, res: Response) => {
-  const { url } = req.body;
-  if (!url || !url.startsWith('https://')) {
-    res.status(400).json({ error: 'url must be an HTTPS URL.' });
-    return;
-  }
-  await setWebhook(req.tenant!.tenant_id, url);
-  res.json({ message: 'Webhook registered.', url });
-});
+router.put('/account/webhook', requireAuth, webhookHandler(async (req, res, ctx) => {
+  const out = await registerWebhook(req.tenant!.tenant_id, req.body?.url, ctx);
+  res.setHeader('Cache-Control', 'no-store');
+  res.json({
+    message: 'Webhook registered.', url: out.url,
+    ...(out.signingSecret ? { signing_secret: out.signingSecret, note: 'Store this now: it is shown once and cannot be retrieved again.' } : {}),
+  });
+}));
 
 /**
  * PUT /api/v1/account/plan

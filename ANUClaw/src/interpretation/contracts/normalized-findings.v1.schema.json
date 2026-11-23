@@ -1,0 +1,513 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anuclaw.invalid/contracts/normalized-findings.v1.schema.json",
+  "title": "normalized-findings/v1",
+  "description": "ANUClaw's internal, tenant-neutral findings structure, produced by a tenant adapter from interpretation-request/v1. It contains NO direct identifiers. It is the ONLY input to the governance layer, the LLM stage and both report layers, so the clinical and layman reports cannot disagree about what was found.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "jobId",
+    "tenantId",
+    "skillId",
+    "subjectRef",
+    "capturedAt",
+    "findings",
+    "flags",
+    "provenance",
+    "findingsSha256"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "normalized-findings/v1"
+    },
+    "jobId": {
+      "type": "string"
+    },
+    "tenantId": {
+      "type": "string"
+    },
+    "skillId": {
+      "type": "string"
+    },
+    "subjectRef": {
+      "type": "string",
+      "description": "Tenant's opaque externalRef. Never a direct identifier."
+    },
+    "capturedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/finding"
+      }
+    },
+    "flags": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/flag"
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": [
+        "adapter",
+        "sourceModel",
+        "ruleset",
+        "originalPayloadSha256"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "adapter": {
+          "type": "object",
+          "required": [
+            "id",
+            "version"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "version": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "sourceModel": {
+          "type": "object",
+          "required": [
+            "application",
+            "modelName",
+            "modelVersion"
+          ],
+          "properties": {
+            "application": {
+              "type": "string"
+            },
+            "modelName": {
+              "type": "string"
+            },
+            "modelVersion": {
+              "type": "string"
+            },
+            "calibrationVersion": {
+              "type": "string"
+            },
+            "researchStatus": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "ruleset": {
+          "type": "object",
+          "required": [
+            "id",
+            "version"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "version": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "originalPayloadSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "findingsSha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "Canonical hash of findings+flags. Both report layers stamp this value."
+    },
+    "sourceVerification": {
+      "type": "object",
+      "required": [
+        "level"
+      ],
+      "additionalProperties": false,
+      "description": "How far the source report's provenance was verified at intake. Relayed to every later stage and never upgraded.",
+      "properties": {
+        "level": {
+          "enum": [
+            "signed_bundle_verified",
+            "unverified_payload"
+          ]
+        },
+        "origin": {
+          "type": "string"
+        },
+        "digestStatus": {
+          "enum": [
+            "recomputed_full_body",
+            "upstream_signed_claim_not_recomputable"
+          ]
+        },
+        "viewSha256": {
+          "type": "string"
+        },
+        "reportId": {
+          "type": "string"
+        },
+        "reportVersion": {
+          "type": "integer"
+        },
+        "reportStatus": {
+          "enum": [
+            "draft",
+            "released",
+            "rejected"
+          ]
+        },
+        "supersedesReportId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "signedAt": {
+          "type": "string"
+        }
+      }
+    },
+    "notMeasurable": {
+      "type": "array",
+      "description": "The source's standing list of things it cannot measure.",
+      "items": {
+        "type": "object",
+        "required": [
+          "metricKey",
+          "label",
+          "reason",
+          "whatWouldBeNeeded"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "metricKey": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "whatWouldBeNeeded": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "symptoms": {
+      "type": "array",
+      "description": "Symptom reports from capture (free text omitted).",
+      "items": {
+        "type": "object",
+        "required": [
+          "severity",
+          "symptoms",
+          "triggeredAction"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "reportedAt": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "symptoms": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "triggeredAction": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "required": [
+        "findingKey",
+        "sourceKey",
+        "label",
+        "valueStatus",
+        "value"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "findingKey": {
+          "type": "string",
+          "pattern": "^[a-z0-9_.]{1,80}$",
+          "description": "Canonical key, stable across tenants where the quantity is the same (e.g. bp_systolic_mmhg)."
+        },
+        "sourceKey": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "valueStatus": {
+          "enum": [
+            "stated",
+            "derived",
+            "missing"
+          ],
+          "description": "stated = given by the source; derived = computed by a deterministic adapter rule from stated values; missing = source gave null/absent. The LLM may never create or change a value."
+        },
+        "value": {
+          "type": [
+            "number",
+            "string",
+            "boolean",
+            "null"
+          ]
+        },
+        "unit": {
+          "type": "string"
+        },
+        "derivation": {
+          "type": "object",
+          "required": [
+            "fromKeys",
+            "rule"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "fromKeys": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "rule": {
+              "type": "string"
+            }
+          }
+        },
+        "uncertainty": {
+          "type": "object",
+          "properties": {
+            "plusMinus": {
+              "type": "number"
+            },
+            "interval": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "additionalProperties": false
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "reference": {
+          "type": "object",
+          "required": [
+            "origin"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "origin": {
+              "enum": [
+                "tenant_supplied",
+                "anuclaw_released"
+              ],
+              "description": "tenant_supplied = the source app's own range, relayed. anuclaw_released = a range released through docs/clinical-release-register.json (none exist yet)."
+            },
+            "text": {
+              "type": "string"
+            },
+            "lower": {
+              "type": "number"
+            },
+            "upper": {
+              "type": "number"
+            },
+            "lowerInclusive": {
+              "type": "boolean"
+            },
+            "upperInclusive": {
+              "type": "boolean"
+            },
+            "citation": {
+              "type": "string"
+            },
+            "releaseId": {
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "draft",
+                "approved"
+              ],
+              "description": "The source's own status for its reference. A draft reference must not be used to call a value normal or abnormal."
+            },
+            "kind": {
+              "enum": [
+                "geometric",
+                "literature"
+              ]
+            },
+            "value": {
+              "type": "number",
+              "description": "A single-value reference (a target), not a range."
+            }
+          }
+        },
+        "position": {
+          "enum": [
+            "below",
+            "within",
+            "above",
+            "indeterminate",
+            "no_reference",
+            "not_applicable"
+          ],
+          "description": "Computed deterministically by governance, only when a reference exists. 'indeterminate' when the uncertainty interval straddles a bound."
+        },
+        "sourceFlag": {
+          "enum": [
+            "low",
+            "normal",
+            "high",
+            "review",
+            "not_applicable"
+          ]
+        },
+        "underResearch": {
+          "type": "boolean"
+        },
+        "excluded": {
+          "type": "object",
+          "required": [
+            "reason"
+          ],
+          "properties": {
+            "reason": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "side": {
+          "enum": [
+            "left",
+            "right",
+            "bilateral"
+          ],
+          "description": "Which side a posture row describes; absent when not applicable."
+        },
+        "stepId": {
+          "type": "string",
+          "description": "The source's battery step the row came from (distinguishes left/right rows of one metric)."
+        },
+        "signConvention": {
+          "type": "string",
+          "description": "What a positive value means for this row, as stated by the source."
+        },
+        "tier": {
+          "enum": [
+            "estimate",
+            "proxy",
+            "entered",
+            "annotated",
+            "not_measurable"
+          ],
+          "description": "The source's own measurement tier. A proxy is never to be read as a measurement of the clinical construct."
+        },
+        "sourcePosition": {
+          "enum": [
+            "below",
+            "within",
+            "above",
+            "indeterminate",
+            "no_reference",
+            "not_applicable"
+          ],
+          "description": "The position the SOURCE computed against its own reference; relayed, never recomputed or upgraded here."
+        },
+        "unsupportedReasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "The source's quality-gate reasons for having no value."
+        }
+      }
+    },
+    "flag": {
+      "type": "object",
+      "required": [
+        "type",
+        "severity",
+        "detail"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "missing_data",
+            "contradiction",
+            "low_confidence",
+            "out_of_source_range",
+            "under_research",
+            "stale_capture",
+            "unit_mismatch",
+            "implausible_value",
+            "review_required",
+            "unmapped_key",
+            "symptom_reported",
+            "unverified_source",
+            "draft_reference"
+          ]
+        },
+        "severity": {
+          "enum": [
+            "info",
+            "attention",
+            "blocking"
+          ]
+        },
+        "findingKeys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "detail": {
+          "type": "string"
+        },
+        "resolvedBy": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

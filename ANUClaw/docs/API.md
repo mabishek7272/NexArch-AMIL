@@ -245,11 +245,11 @@ Every change above is written to the tenant's audit chain in the same database t
 ---
 
 #### `PUT /account/webhook`
-Register a webhook URL for async skill results.
+Register (or change) the HTTPS endpoint that receives signed **interpretation events** (see [Webhooks](#webhooks)). Body: `{ "url": "https://your-app.com/webhook" }`.
 
-**Body:** `{ "url": "https://your-app.com/webhook" }`
+The URL must be `https`, carry no credentials, use port 443 or 1024-65535, and resolve only to public addresses (private, loopback, link-local and cloud-metadata ranges are refused with `400 webhook_url_rejected`). The first registration returns `signing_secret` **once**; later changes keep the secret. A server without `ANUCLAW_WEBHOOK_SECRET_KEY` answers `503 webhook_signing_unavailable`. Related: `GET /account/webhook`, `DELETE /account/webhook`, `POST /account/webhook/secret/rotate`, `GET /account/webhook/deliveries`.
 
-When a skill run completes, ANUClaw will `POST` the result to this URL.
+> Earlier versions of this document said a skill run would POST its result to this URL. That was never implemented; skill runs are synchronous and return their result in the response.
 
 ---
 
@@ -532,25 +532,37 @@ curl -s -X POST "$BASE/skills/anuclaw-genomics/run" \
 
 ## Webhooks
 
-Register a webhook URL to receive async results:
+ANUClaw notifies your endpoint when an interpretation job (`POST /v1/interpretations`) finishes. Events are `interpretation.completed` and `interpretation.failed`. They carry ids, status and hashes only, never a subject reference, a value or an identifier; fetch the findings with the link in the event.
 
 ```bash
-curl -X PUT /api/v1/account/webhook \
-  -H "X-API-Key: ..." \
+curl -X PUT $BASE/api/v1/account/webhook -H "X-API-Key: ..." -H "Content-Type: application/json" \
   -d '{ "url": "https://your-app.com/anuclaw-webhook" }'
+# -> { "message": "Webhook registered.", "url": "...", "signing_secret": "whsec_..." }   (shown once)
 ```
 
-ANUClaw will POST to your URL with:
+Delivery body:
 
 ```json
-{
-  "event":    "skill.completed",
-  "skill":    "anuclaw-genomics",
-  "group_id": "...",
-  "result":   "...",
-  "tenant_id": "..."
+{ "id": "evt_...", "type": "interpretation.completed", "createdAt": "2026-11-23T08:31:00.000Z",
+  "data": { "jobId": "job_...", "skillId": "physiological-signal-interpretation", "status": "completed",
+            "findingsSha256": "...", "links": { "self": "/v1/interpretations/job_...", "findings": "/v1/interpretations/job_.../findings" } } }
+```
+
+Headers: `Anukla-Signature: t=<unix seconds>,v1=<hex>`, `Anukla-Event-Id`, `Anukla-Event-Type`, `Anukla-Delivery-Attempt`.
+
+**Verify every request**, using the RAW body bytes before parsing: compute `HMAC-SHA256(signing_secret, "<t>.<raw body>")` as hex, compare with `v1` in constant time, and reject a `t` more than 5 minutes from your clock. The timestamp is inside the signed text, so a captured request cannot be replayed with a fresh timestamp. Deduplicate on `Anukla-Event-Id`: a retry re-sends the identical body and event id (with a fresh `t`).
+
+```js
+const crypto = require('crypto');
+function verify(secret, header, rawBody, toleranceSec = 300) {
+  const parts = Object.fromEntries(header.split(',').map((p) => p.split('=')));
+  const expected = crypto.createHmac('sha256', secret).update(`${parts.t}.${rawBody}`).digest('hex');
+  const ok = crypto.timingSafeEqual(Buffer.from(parts.v1, 'hex'), Buffer.from(expected, 'hex'));
+  return ok && Math.abs(Date.now() / 1000 - Number(parts.t)) <= toleranceSec;
 }
 ```
+
+**Delivery rules.** Only a `2xx` response counts as delivered; anything else, including a redirect (never followed), is a failure. The first attempt is immediate, then retries after 1 min, 5 min, 30 min, 2 h and 12 h (six attempts at most; nothing is pending past 24 h from the first attempt), after which the delivery is `dead`. `GET /account/webhook/deliveries` shows status, attempts and error codes (never response bodies). Responses are read up to a small cap and discarded. The destination address is re-validated and pinned on every attempt. Rotate the secret with `POST /account/webhook/secret/rotate`.
 
 ---
 
@@ -575,3 +587,69 @@ Enterprise plans, custom skill development, on-premise deployment: contact AMGI.
 ## AlphaFold DB update — 18 November 2026
 
 `POST /v1/science/alphafold/lookup`, `GET /v1/science/alphafold/lookups/{id}`, `POST /v1/science/alphafold/import`, and `GET /v1/science/alphafold/imports/{id}` use existing tenant authentication/quotas. Dashboard `/api/science/alphafold` adds owner-only project attachment/receptor operations. [Request formats, errors, limits and runbook](ALPHAFOLD-DB-INTEGRATION.md#application-api).
+
+## Interpretation intake (`/v1/interpretations`)
+
+A tenant app posts its own AI output (`interpretation-request/v1`, see `src/interpretation/contracts/`) and polls for the result. The skill in the body must be assigned to the tenant (`403 skill_not_assigned` otherwise). Errors use `{error:{code,message,requestId}}`.
+
+| Method & path | Result |
+|---|---|
+| `POST /v1/interpretations` | `202` + `Location`; job `queued`. Optional `Idempotency-Key` (8-200 chars): same key and body returns the original job (`200`, `Idempotent-Replayed: true`); same key, different body `409 idempotency_key_reused`. `400 validation_failed` (paths only, never values), `400 analysis_type_not_accepted`, `503 identity_storage_unavailable` if `subject.identity` is sent without a configured vault. |
+| `GET /v1/interpretations?limit&offset` | The caller's jobs, newest first. |
+| `GET /v1/interpretations/:id` | Status: `queued`, `processing`, `completed`, `failed`. Another tenant's job is `404`. |
+| `GET /v1/interpretations/:id/findings` | `normalized-findings/v1` once completed; `409 findings_not_ready` before. |
+
+Submitting counts against the monthly quota; polling is rate-limited but not counted. `subject.identity` is split off into an AES-256-GCM vault (`ANUCLAW_IDENTITY_VAULT_KEY`) and never appears in stored payloads, findings, audit entries or any later model input. Malformed JSON is `400 invalid_json`; an oversized body is `413 payload_too_large`. A worker (`ANUCLAW_INTERPRETATION_WORKER=true`) normalises queued jobs; P3a ships the beAIve adapter (`beaive-v1`).
+
+### Subject erasure (`/v1/subject-erasures`)
+
+`POST /v1/subject-erasures` with `{ "externalRef": "<subject reference>", "confirm": true, "reason"?: "subject_request" | "consent_withdrawn" | "tenant_request" | "other" }` permanently erases everything held about that subject of YOUR tenant, in one transaction. `confirm: true` is required (`400 confirmation_required` otherwise). It is not metered against your quota.
+
+- **Erased:** the sealed identity, the stored source payload, the normalized findings, and the stored bytes of every webhook event about those jobs (events not yet sent are cancelled).
+- **Kept as tombstones:** each job row stays, with status `erased`, `subjectRef` and `capturedAt` null, the idempotency key freed (replaying the old request creates a NEW job) and its hashes cleared. `GET /v1/interpretations/:id/findings` answers `410 subject_erased`.
+- **In-flight jobs** (queued or being processed) are stopped; a worker cannot write findings back afterwards.
+- **Receipt (200):** `{ erasureId, requestedAt, reason, jobsErased, identitiesDeleted, payloadsDeleted, findingsDeleted, deliveriesScrubbed, jobIds }`. Erasing again, or an unknown subject, erases nothing and returns a receipt of zeros. `GET /v1/subject-erasures` lists your receipts (counts and a hash of the erased job ids; never the subject reference).
+- **Audit:** one `subject.erased` entry is appended to your tamper-evident audit chain (counts, reason, a hash of the job ids; no subject reference or identifier). The chain is append-only by design, so its earlier entries remain; they hold job ids, skill ids and hashes of the identity-free stored payloads only.
+- **Not covered here:** database backups and logs outside the application tables follow the operator's own retention process.
+
+### PosturePulse input (`posture-analysis-interpretation`)
+
+This skill reads PosturePulse's own report in `nativePayload` instead of generic `findings` (a request carries one or the other, never both; the wrong form is `400 input_form_not_accepted`). Set `nativePayload` to `{ "format": "posturepulse-assessment/v0", "bundle": <signed bundle> }` or `{ "format": "posturepulse-assessment/v0", "unsigned": { consentRecord, session, report, symptomReports? } }`.
+
+- `bundle` is verified at intake with the configured shared secret by the same code as the patient importer: signature, contract, withheld-row refusal, view digest, session/subject/consent binding, consent state and timestamps. Refusals are immediate and store nothing: `403 bad_signature`, `409 report_not_released`, `503 import_secret_not_configured`, `422 contract_violation`. The signature itself is not stored.
+- `unsigned` is only schema-checked. It is accepted, labelled `sourceVerification.level = "unverified_payload"` and carries a **blocking** `unverified_source` flag. It is never upgraded.
+- `subject.externalRef` must equal the session's `subjectPseudoId` (`422 subject_mismatch`).
+- The findings keep each row's `side`, `stepId`, `signConvention`, `tier` (a proxy stays a proxy), the source's own `sourcePosition`, the reference's `status` (draft or approved), `unsupportedReasons` and any clinician exclusion, plus the standing `notMeasurable` list. Symptom reports raise a blocking `symptom_reported` flag; their free text is never carried into findings.
+
+
+### Reports (`/v1/interpretations/:id/report`)
+
+When a skill produces reports, a completed job gets a report that goes governed, narrated, then ready (poll `GET /v1/interpretations/:id/reports`, or use the `interpretation.report_ready` webhook).
+
+```
+GET /v1/interpretations/:id/report?layer=clinical|layman&format=json|html|pdf
+GET /v1/interpretations/:id/reports
+```
+
+- `layer` is required. `clinical` is for a professional; `layman` is plain language. Both layers come from the same findings.
+- `json` returns `{ reportId, version, layer, reviewState, statusBanner, contentSha256, report }`; `html` is a self-contained page; `pdf` repeats the status banner on every page.
+- `reviewState` is `ai_reviewed` (checked automatically, NOT by a clinician), `awaiting_clinician` (needs a clinician before it should be relied on), `clinician_signed` (a named clinician signed it; the banner names them) or `rejected`. Only a named, provisioned clinician can sign, and no API route signs. A signed report is a NEW version: `GET .../reports` lists both, and `.../report` serves the newest. Nothing here is a diagnosis.
+- Errors: 400 bad `layer` or `format`; 404 not found (also another tenant's job); 409 `report_not_ready`; 410 `subject_erased`; 503 `pdf_renderer_unavailable` (use `format=html`).
+- Branding (administrator): `PUT /api/v1/admin/tenants/:id/branding` with `{ "productName"?, "logoBase64"? }`. Only a product name and a PNG/JPEG logo (256 KB) can be set; the governance statement, banner and referral advisory cannot be changed.
+- Webhook events: `interpretation.report_ready` (sent again when a clinician signs a new version), `interpretation.report_rejected` and `interpretation.report_failed`: ids, hashes and review state only.
+- Administrator: `GET /api/v1/admin/review-queue?kind=all|awaiting|follow_up` lists what needs a clinician (identifiers, content hash and reason codes only; read-only).
+
+### Timeline and comparison (`/v1/interpretations/:id/timeline`, `/compare`)
+
+```
+GET /v1/interpretations/:id/timeline?skillId=&findingKey=&limit=
+GET /v1/interpretations/:id/compare?with=<jobId>
+```
+
+- Scans are addressed by job id; the subject reference is never in a URL or a response. The timeline lists the same subject's scans (same skill unless `skillId` is given), oldest first, with each scan's current report state. With `findingKey` it adds that finding's values over time and a step between neighbours.
+- `compare` returns `longitudinal-comparison/v1`: per finding `within_uncertainty`, `beyond_uncertainty` or `not_comparable` (with a reason), using only the uncertainty the source reported for both values. It states direction ("the later value is higher or lower") only beyond uncertainty and never says improved or worsened. Two scans less than 30 minutes apart that disagree raise `short_interval_discrepancy` instead of showing a change over time. A different source model, version or calibration makes numeric findings `not_comparable`.
+- Errors: 400 validation; 404 not found (also another tenant's job); 409 `findings_not_ready`, `different_subjects`, `different_skills` or `integrity_error`; 410 `subject_erased`.
+
+### Per-tenant narrative setting (administrator)
+
+`PUT /api/v1/admin/tenants/:id/skills/:skillId` accepts `config.narrative = { "enabled": true, "model": "google/gemini-4-hydrogen" }` for an interpretation skill. Narratives are **off** unless enabled; off means fixed-template explanations and no model call. `model` must be on the allow-list (`ANUCLAW_NARRATIVE_MODELS`, default `google/gemini-4-hydrogen,google/gemini-4-argon`); an unknown field, an unlisted model, or `enabled` without a model is `400 validation_failed`. The model's text is used only if it passes every automatic guard (no invented numbers or ranges, no diagnosis, no reassurance, every flagged finding covered); otherwise the fixed template is used and the report carries a review flag.

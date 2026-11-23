@@ -2,6 +2,7 @@ import { Pool, types } from 'pg';
 import { config } from '../config';
 import { logger } from '../logger';
 import { bootstrapFirstAdmin, SCHEMA_ADVISORY_LOCK_KEY } from './admin-bootstrap';
+import { INTERPRETATION_SCHEMA_SQL } from '../interpretation/jobs/schema';
 
 // Parse PostgreSQL INT8 (BIGINT) as JavaScript integers to prevent Date parsing errors on frontend
 types.setTypeParser(20, parseInt);
@@ -951,6 +952,9 @@ export async function migrate(pool: Pool): Promise<void> {
     await client.query('CREATE INDEX IF NOT EXISTS idx_tenant_skills_skill ON tenant_skills(skill_id)');
     await client.query(`CREATE TABLE IF NOT EXISTS registry_state (
       key VARCHAR(100) PRIMARY KEY, value TEXT NOT NULL DEFAULT '', updated_at BIGINT NOT NULL)`);
+
+    // ── Asynchronous interpretation intake (interpretation engine P3a); SQL lives in the module ─────
+    for (const statement of INTERPRETATION_SCHEMA_SQL) await client.query(statement);
 
     // ── E-LAB platform tiering columns on tenants (additive, idempotent) ──────
     await client.query(`ALTER TABLE tenants ADD COLUMN IF NOT EXISTS scopes TEXT`);

@@ -1,0 +1,134 @@
+{
+  "schemaVersion": "interpretation-request/v1",
+  "tenantRequestId": "synthetic-posturepulse-0001",
+  "skillId": "posture-analysis-interpretation",
+  "analysisType": "posture_landmark",
+  "subject": {
+    "externalRef": "subj-synthetic-001"
+  },
+  "acquisition": {
+    "capturedAt": "2026-08-20T08:31:00Z",
+    "method": "video_4view",
+    "sessionRef": "session-synthetic-001"
+  },
+  "source": {
+    "application": "PosturePulse",
+    "modelName": "synthetic-pose",
+    "modelVersion": "0",
+    "calibrationVersion": "synthetic-cal@0",
+    "researchStatus": "under_research"
+  },
+  "nativePayload": {
+    "format": "posturepulse-assessment/v0",
+    "unsigned": {
+      "consentRecord": {
+        "consentRecordId": "consent-synthetic-001",
+        "subjectPseudoId": "subj-synthetic-001",
+        "scopes": [
+          "derived_events"
+        ],
+        "grantedAt": "2026-08-20T08:00:00.000Z",
+        "revokedAt": null,
+        "withdrawalRequestedAt": null
+      },
+      "session": {
+        "sessionId": "session-synthetic-001",
+        "subjectPseudoId": "subj-synthetic-001",
+        "protocolId": "protocol-synthetic",
+        "protocolVersion": "0.1.0",
+        "deploymentContext": "clinic_supervised",
+        "consentRecordId": "consent-synthetic-001",
+        "retentionPolicy": {
+          "rawVideo": {
+            "optIn": false,
+            "retentionDays": null
+          },
+          "derivedEvents": {
+            "retentionDays": 30
+          }
+        },
+        "calibrationRef": null,
+        "state": "ClinicianReview",
+        "createdAt": "2026-08-20T08:00:00.000Z"
+      },
+      "report": {
+        "reportId": "report-synthetic-001",
+        "sessionId": "session-synthetic-001",
+        "reportVersion": 1,
+        "supersedesReportId": null,
+        "status": "released",
+        "rows": [
+          {
+            "metricKey": "shoulder_height_difference",
+            "resultId": "r1",
+            "label": "Shoulder height difference",
+            "module": "static",
+            "tier": "proxy",
+            "unit": "cm",
+            "side": "bilateral",
+            "position": "indeterminate",
+            "analysis": {
+              "text": "Synthetic template text.",
+              "source": "fixed_template"
+            },
+            "excluded": null,
+            "estimate": {
+              "value": 1.2,
+              "uncertainty": 0.8
+            },
+            "unsupportedReasons": [],
+            "reference": {
+              "kind": "geometric",
+              "label": "0 cm",
+              "sourceCitation": "geometric symmetry",
+              "status": "draft",
+              "value": 0
+            }
+          },
+          {
+            "metricKey": "head_forward_offset",
+            "resultId": "r2",
+            "label": "Head forward offset",
+            "module": "static",
+            "tier": "estimate",
+            "unit": "deg",
+            "side": null,
+            "position": "not_applicable",
+            "analysis": {
+              "text": "No estimate: capture quality insufficient.",
+              "source": "fixed_template"
+            },
+            "excluded": {
+              "reason": "synthetic exclusion",
+              "clinicianId": "clin-synthetic"
+            },
+            "estimate": null,
+            "unsupportedReasons": [],
+            "reference": null
+          }
+        ],
+        "notMeasurable": [
+          {
+            "metricKey": "spinal_curvature",
+            "label": "Spinal curvature",
+            "reason": "Requires imaging or palpation",
+            "whatWouldBeNeeded": "Clinical examination or radiograph"
+          }
+        ],
+        "clinicianAssessment": null,
+        "signOff": {
+          "clinicianId": "clin-synthetic",
+          "signedAt": "2026-08-20T08:30:00.000Z",
+          "contentSha256": "7c9e4f57799675e749c72b766f8d73d88a3ad92b84f1a79d21fc5930a8d3a444"
+        },
+        "provenance": {
+          "schemaVersion": "assessment-report/v0",
+          "modelVersion": "synthetic-pose@0",
+          "calibrationVersion": "synthetic-cal@0",
+          "producedAt": "2026-08-20T08:00:00.000Z"
+        }
+      },
+      "symptomReports": []
+    }
+  }
+}

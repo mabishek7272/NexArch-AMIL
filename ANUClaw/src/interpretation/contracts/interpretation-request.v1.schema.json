@@ -1,0 +1,416 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anuclaw.invalid/contracts/interpretation-request.v1.schema.json",
+  "title": "interpretation-request/v1",
+  "description": "What a tenant application (e.g. beAIve, PosturePulse) POSTs to /v1/interpretations. The tenant's own AI has already produced the findings; ANUClaw never re-detects. Everything outside `findings` and `source` is context. Unknown tenant-specific data goes under `extensions` and is preserved but never interpreted. A request carries EITHER generic `findings` (the tenant mapped its own output) OR a `nativePayload` (the tenant's own signed report format, read by that skill's adapter), never both.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "skillId",
+    "analysisType",
+    "subject",
+    "acquisition",
+    "source"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "interpretation-request/v1"
+    },
+    "tenantRequestId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Tenant-unique id for this analysis. Combined with the Idempotency-Key header for safe retries."
+    },
+    "skillId": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{1,63}$",
+      "description": "Registry id of the skill to run. Refused with 403 skill_not_assigned unless assigned to the calling tenant."
+    },
+    "analysisType": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]{2,64}$",
+      "description": "Tenant-declared analysis kind, e.g. face_scan_vitals, posture_landmark. Must be one the skill's manifest accepts."
+    },
+    "subject": {
+      "type": "object",
+      "required": [
+        "externalRef"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "externalRef": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "Opaque tenant-side patient/subject reference. This is the longitudinal key (tenant_id + externalRef). Must not itself be a name, email or phone number."
+        },
+        "identity": {
+          "type": "object",
+          "description": "OPTIONAL direct identifiers. Split off at intake into the encrypted identity vault and NEVER passed to the LLM or stored with findings.",
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "email": {
+              "type": "string",
+              "maxLength": 254
+            },
+            "phone": {
+              "type": "string",
+              "maxLength": 40
+            },
+            "dateOfBirth": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        },
+        "demographics": {
+          "type": "object",
+          "description": "Coarse, non-identifying context a rule or reference may depend on.",
+          "additionalProperties": false,
+          "properties": {
+            "ageYears": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 130
+            },
+            "sexAtBirth": {
+              "enum": [
+                "female",
+                "male",
+                "intersex",
+                "unknown"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "acquisition": {
+      "type": "object",
+      "required": [
+        "capturedAt"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "capturedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "method": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "e.g. face_scan_60s, video_4view"
+        },
+        "sessionRef": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "context": {
+          "type": "object",
+          "description": "Conditions the tenant knows about that change how values may be read (e.g. fasting). Never inferred by ANUClaw.",
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number",
+              "boolean",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "application",
+        "modelName",
+        "modelVersion"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "application": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "applicationVersion": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "modelName": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "modelVersion": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "calibrationVersion": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "researchStatus": {
+          "enum": [
+            "under_research",
+            "validated_for_stated_use",
+            "unspecified"
+          ],
+          "description": "The tenant's own statement. ANUClaw relays it and never upgrades it."
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 500,
+      "items": {
+        "$ref": "#/$defs/sourceFinding"
+      },
+      "description": "Generic findings, for skills whose adapter reads generic input (e.g. beAIve). Absent when `nativePayload` is used."
+    },
+    "sourceNarrative": {
+      "type": "string",
+      "maxLength": 20000,
+      "description": "Optional original free text from the source AI. Preserved verbatim as untrusted DATA. Excluded from LLM input by default (may contain identifiers)."
+    },
+    "extensions": {
+      "type": "object",
+      "description": "Tenant-specific extra data. Preserved with the original payload, never interpreted.",
+      "additionalProperties": true
+    },
+    "nativePayload": {
+      "type": "object",
+      "required": [
+        "format"
+      ],
+      "additionalProperties": false,
+      "description": "The tenant's native report, for skills whose adapter reads it (PosturePulse). Exactly one of `bundle` (signed import bundle: verified with the configured shared secret) or `unsigned` (schema-checked only and labelled unverified, never upgraded).",
+      "properties": {
+        "format": {
+          "const": "posturepulse-assessment/v0"
+        },
+        "bundle": {
+          "type": "object",
+          "description": "A bundle signed per src/integrations/posturepulse/upstream.ts."
+        },
+        "unsigned": {
+          "type": "object",
+          "required": [
+            "consentRecord",
+            "session",
+            "report"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "consentRecord": {
+              "type": "object"
+            },
+            "session": {
+              "type": "object"
+            },
+            "report": {
+              "type": "object"
+            },
+            "symptomReports": {
+              "type": "array",
+              "maxItems": 50,
+              "items": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "bundle"
+          ],
+          "properties": {
+            "bundle": {}
+          }
+        },
+        {
+          "required": [
+            "unsigned"
+          ],
+          "properties": {
+            "unsigned": {}
+          }
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "sourceFinding": {
+      "type": "object",
+      "required": [
+        "key",
+        "label",
+        "value"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_.-]{1,80}$",
+          "description": "Tenant's own stable key; mapped to a canonical key by the adapter."
+        },
+        "label": {
+          "type": "string",
+          "maxLength": 160
+        },
+        "group": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "value": {
+          "type": [
+            "number",
+            "string",
+            "boolean",
+            "null"
+          ],
+          "description": "null means the source could not measure it (kept as missing, never filled in)."
+        },
+        "unit": {
+          "type": "string",
+          "maxLength": 24
+        },
+        "uncertainty": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "plusMinus"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "plusMinus": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "interval"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "interval": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              }
+            }
+          ]
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "The source model's own confidence. Evidence only; never decides anything."
+        },
+        "sourceReference": {
+          "type": "object",
+          "description": "The range/threshold THE TENANT states for this value (e.g. beAIve 'Desired'). Relayed and labelled as tenant-supplied; ANUClaw does not endorse it.",
+          "additionalProperties": false,
+          "properties": {
+            "text": {
+              "type": "string",
+              "maxLength": 80,
+              "description": "As displayed by the source, e.g. '<129/90', '60-100'."
+            },
+            "lower": {
+              "type": "number"
+            },
+            "upper": {
+              "type": "number"
+            },
+            "lowerInclusive": {
+              "type": "boolean"
+            },
+            "upperInclusive": {
+              "type": "boolean"
+            },
+            "citation": {
+              "type": "string",
+              "maxLength": 300
+            }
+          }
+        },
+        "sourceFlag": {
+          "enum": [
+            "low",
+            "normal",
+            "high",
+            "review",
+            "not_applicable"
+          ],
+          "description": "The source app's own categorical flag, if it gave one."
+        },
+        "underResearch": {
+          "type": "boolean",
+          "description": "The source marks this indicator as experimental."
+        },
+        "excluded": {
+          "type": "object",
+          "required": [
+            "reason"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "reason": {
+              "type": "string",
+              "maxLength": 300
+            }
+          },
+          "description": "The source or its clinician excluded this row from patient-facing output; honoured by the layman layer."
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 500
+        }
+      }
+    }
+  },
+  "anyOf": [
+    {
+      "required": [
+        "findings"
+      ],
+      "properties": {
+        "findings": {}
+      }
+    },
+    {
+      "required": [
+        "nativePayload"
+      ],
+      "properties": {
+        "nativePayload": {}
+      }
+    }
+  ],
+  "not": {
+    "required": [
+      "findings",
+      "nativePayload"
+    ],
+    "properties": {
+      "findings": {},
+      "nativePayload": {}
+    }
+  }
+}
